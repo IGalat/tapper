@@ -1,0 +1,48 @@
+[build-system]
+requires = ["setuptools>=42.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+
+[project]
+name = "tapper"
+version = "0.1.0"
+description = "Modern hotkey automation tool"
+authors = [{ name = "IGalat", email = "author_email@example.com" }]
+license = { file = "LICENSE" }
+readme = "README.md"
+requires-python = ">=3.10"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.10",
+]
+
+
+[project.urls]
+"Homepage" = "https://github.com/IGalat/tapper"
+
+
+[tool.pytest.ini_options]
+addopts = "--cov=tapper"
+pythonpath = [
+    "src",
+]
+testpaths = [
+    "tests",
+]
+
+
+[tool.mypy]
+mypy_path = "src"
+check_untyped_defs = true
+disallow_untyped_defs = true
+disallow_any_generics = true
+ignore_missing_imports = true
+no_implicit_optional = true
+show_error_codes = true
+strict_equality = true
+warn_redundant_casts = true
+warn_return_any = true
+warn_unreachable = true
+warn_unused_configs = true
+no_implicit_reexport = true
