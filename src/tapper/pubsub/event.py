@@ -2,8 +2,9 @@
 
     Typical usage example:
 
-    In subscriber:
+    To subscribe:
         event.subscribe(PREDEFINED_TOPIC_NAME, function_that_will_receive_messages)
+    (can be done in a different place than the subscriber)
 
     In publisher:
         event.publish(PREDEFINED_TOPIC_NAME, message_of_any_type)
