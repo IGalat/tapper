@@ -16,11 +16,11 @@ repos:
       - id: black
         args: [ --safe ]
 
-  - repo: https://github.com/pycqa/isort
-    rev: 5.10.1
+  - repo: https://github.com/hadialqattan/pycln
+    rev: v2.1.1
     hooks:
-      - id: isort
-        name: isort (python)
+      - id: pycln
+        args: [ --config=pyproject.toml ]
 
   - repo: https://github.com/asottile/reorder_python_imports
     rev: v2.6.0
