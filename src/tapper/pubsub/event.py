@@ -11,6 +11,7 @@
 """
 from typing import Any
 from typing import Callable
+from typing import Protocol
 
 SubscribedFunction = Callable[[Any], None]
 
@@ -41,3 +42,9 @@ def publish(topic: str, message: Any) -> None:
         return
     for subscribed_function in _subscribers[topic]:
         subscribed_function(message)
+
+
+class EventDatatype(Protocol):
+    """Couples data type and topic name"""
+
+    topic: str
