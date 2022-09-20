@@ -1,1 +1,3 @@
 typing_extensions==4.3.0
+
+winput==1.5.0; sys_platform == 'win32'
