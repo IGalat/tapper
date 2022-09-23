@@ -11,6 +11,7 @@
 """
 from typing import Any
 from typing import Callable
+from typing import ClassVar
 from typing import Protocol
 
 SubscribedFunction = Callable[[Any], None]
@@ -47,4 +48,4 @@ def publish(topic: str, message: Any) -> None:
 class EventDatatype(Protocol):
     """Couples data type and topic name"""
 
-    topic: str
+    topic: ClassVar[str]
