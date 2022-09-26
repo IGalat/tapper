@@ -21,9 +21,9 @@ By having user configure triggers and corresponding actions, and running a loop 
 "hotkeys" provide the ability to trigger "automation", or remapping
 
 
-## Developmental milestones in order
+## Development milestones
 
-1. Parent classes for SignalListener and Commander
+1. DONE. Parent classes for SignalListener and Commander
 2. keyboard and mouse dataclasses
 3. One keyboard variation(ua) to make sure it's multi-lang
 4. Parent SignalListener+Commander for kb and mouse; factories; Windows impl and good fake for tests
@@ -32,18 +32,18 @@ By having user configure triggers and corresponding actions, and running a loop 
 7. SendCommandProcessor
 8. Input parser
 9. Tap and group model
-10. SignalProcessor. DONE phase 1!
+10. SignalProcessor. ENDS phase 1. irst release!
 
 
-10. trigger_if - free-style conditions
-11. kwargs map, to make conditions for Taps much easier. How to split Tap into pretty face and actionable?
-12. WindowTriggerConditionsTracker
-13. hotkey on hold/release for time (up20ms / down - 500ms)
-14. hotstring support
-15. (input/output multi-lang) ehhh, just hepler function here
-16. Tray icon
-17. Validation with tkinter warnings
-18. Moar trackers: process, device connect/disconnect, service/daemon, file, resource(cpu/gpu/network) load
+11. trigger_if - free-style conditions
+12. kwargs map, to make conditions for Taps much easier. How to split Tap into pretty face and actionable?
+13. WindowTriggerConditionsTracker
+14. hotkey on hold/release for time (up20ms / down - 500ms)
+15. hotstring support
+16. (input/output multi-lang) ehhh, just hepler function here
+17. Tray icon
+18. Validation with tkinter warnings
+19. Moar trackers: process, device connect/disconnect, service/daemon, file, resource(cpu/gpu/network) load
 
 
 ## Limitations of the current design
