@@ -1,4 +1,6 @@
-# todo ignore absence of typing?
+import sys
 
 signal_listeners = []
 commanders = []
+
+platform = sys.platform
