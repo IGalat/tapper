@@ -24,7 +24,7 @@ By having user configure triggers and corresponding actions, and running a loop 
 ## Development milestones
 
 1. DONE. Parent classes for SignalListener and Commander
-2. keyboard and mouse dataclasses
+2. DONE. keyboard and mouse dataclasses
 3. One keyboard variation(ua) to make sure it's multi-lang
 4. Parent SignalListener+Commander for kb and mouse; factories; Windows impl and good fake for tests
 5. Action runner
