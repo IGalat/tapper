@@ -2,7 +2,7 @@ from typing import Any
 
 import hypothesis
 from hypothesis import strategies as st
-from tapper.pubsub import event
+from tapper.util import event
 
 
 class Subscriber:
