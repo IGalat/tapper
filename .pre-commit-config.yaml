@@ -34,12 +34,6 @@ repos:
       - id: pyupgrade
         args: [ --py36-plus ]
 
-  - repo: https://github.com/PyCQA/flake8
-    rev: 5.0.4
-    hooks:
-      - id: flake8
-        args: [ --ignore=E1,E2,E3,E401,E5,E70,W1,W2,W3,W5 ]
-
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v3.2.0
     hooks:
