@@ -1,3 +1,4 @@
+from tapper import config
 from tapper.model import keyboard
 from tapper.model import mouse
 
@@ -20,6 +21,16 @@ def test_keyboard_alias() -> None:
 def test_keyboard_lang_chars_len() -> None:
     assert kb_lang_dependent_characters == len(keyboard.chars_en)
     assert len(keyboard.chars_en_lower) == len(keyboard.chars_en_upper)
+
+
+def test_win32_vk_code_symbol_map() -> None:
+    config.platform = "win32"
+    assert len(keyboard.win32_vk_code_to_symbol_map) == len(
+        keyboard.get_key_list()
+    ) - len(keyboard.chars_en_upper)
+    reverse_map = [key for (code, key) in keyboard.win32_vk_code_to_symbol_map.items()]
+    for symbol in keyboard.get_key_list():
+        assert symbol in reverse_map or symbol in keyboard.chars_en_upper
 
 
 def test_mouse_alias() -> None:
