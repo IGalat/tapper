@@ -148,7 +148,10 @@ chars_en_upper = chars_en[len(chars_en) // 2 :]
 @cache
 def get_key_list() -> list[str]:
     """All keys on en-US keyboard, including platform specific, BUT not aliases."""
-    return [*special_chars, *chars_en, *platform_specific_keys[config.platform]]
+    plat_keys = []
+    if config.platform in platform_specific_keys:
+        plat_keys = platform_specific_keys[config.platform]
+    return [*special_chars, *chars_en, *plat_keys]
 
 
 @cache
@@ -157,9 +160,7 @@ def get_keys() -> dict[str, list[str] | None]:
 
     Only aliases value is not None but a list of non-alias keys.
     """
-    all_keys = dict.fromkeys(
-        [*special_chars, *chars_en, *platform_specific_keys[config.platform]], None
-    )
+    all_keys = dict.fromkeys(get_key_list(), None)
     all_keys.update(aliases)
     return all_keys
 
