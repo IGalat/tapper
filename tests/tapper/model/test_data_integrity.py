@@ -1,7 +1,6 @@
 import sys
 
 import pytest
-from tapper import config
 from tapper.model import keyboard
 from tapper.model import mouse
 

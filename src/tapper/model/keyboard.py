@@ -2,7 +2,6 @@
 import sys
 from functools import cache
 
-from tapper import config
 
 fn_keys = ["f" + str(i + 1) for i in range(24)]
 
