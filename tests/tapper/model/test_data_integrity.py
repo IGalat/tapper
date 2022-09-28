@@ -1,3 +1,6 @@
+import sys
+
+import pytest
 from tapper import config
 from tapper.model import keyboard
 from tapper.model import mouse
@@ -23,8 +26,8 @@ def test_keyboard_lang_chars_len() -> None:
     assert len(keyboard.chars_en_lower) == len(keyboard.chars_en_upper)
 
 
+@pytest.mark.skipif(sys.platform != "win32", reason="")
 def test_win32_vk_code_symbol_map() -> None:
-    config.platform = "win32"
     assert len(keyboard.win32_vk_code_to_symbol_map) == len(
         keyboard.get_key_list()
     ) - len(keyboard.chars_en_upper)
