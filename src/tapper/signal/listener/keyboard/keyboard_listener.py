@@ -10,8 +10,8 @@ class KeyboardSignalListener(base_signal_listener.SignalListener, ABC):
     See SignalListener for listener documentation."""
 
     def get_possible_signal_symbols(self) -> list[str]:
-        temp_mypy_chill_pls: list[str] = keyboard.get_key_list()
-        return temp_mypy_chill_pls
+        temp: list[str] = keyboard.get_key_list()  # pls mypy chill
+        return temp
 
 
 @cache

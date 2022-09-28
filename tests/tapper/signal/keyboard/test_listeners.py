@@ -2,6 +2,7 @@ import functools
 import sys
 
 import pytest
+from tapper.model import keyboard
 from tapper.signal.listener.keyboard import keyboard_listener
 
 
@@ -14,4 +15,27 @@ class TestWin32Listener:
     def test_factory_is_singleton(self) -> None:
         assert self.get_listener() is self.get_listener()
 
-    # def test_all_keys_with_suppression(self) -> None:
+    def test_all_keys_with_suppression(self) -> None:
+        from tapper.signal.listener.keyboard import win32_kb_listener
+        from winput import KeyboardEvent
+
+        press = list(win32_kb_listener.EVENT_PRESS)[0]
+        release = list(win32_kb_listener.EVENT_RELEASE)[0]
+        listener: win32_kb_listener.Win32KeyboardSignalListener = self.get_listener()
+
+        last_signal: tuple[str, bool]
+
+        def on_signal(symbol: str, down: bool) -> bool:
+            nonlocal last_signal
+            last_signal = (symbol, down)
+            return False
+
+        listener.on_signal = on_signal
+
+        for c, symbol_ in keyboard.win32_vk_code_to_symbol_map.items():
+            listener._keyboard_callback(KeyboardEvent(vkCode=c, action=press, time=0))
+            assert last_signal == (symbol_, True)
+            listener._keyboard_callback(KeyboardEvent(vkCode=c, action=release, time=0))
+            assert last_signal == (symbol_, False)
+
+        listener._keyboard_callback(KeyboardEvent(vkCode=c, action=12345, time=0))

@@ -1,6 +1,8 @@
 from abc import ABC
 from abc import abstractmethod
 
+from tapper.model import errors
+
 
 class SignalListener(ABC):
     """Listens to signals that may trigger actions.
@@ -15,7 +17,7 @@ class SignalListener(ABC):
     def on_signal(self, symbol: str, down: bool) -> bool:
         """This function is substituted with actual signal processing.
 
-        Do not override.
+        Do not implement.
 
         :param symbol: Must be a symbol from get_possible_signal_symbols.
         :param down: Is key pressed down? False if it is released.
@@ -24,6 +26,7 @@ class SignalListener(ABC):
                  If False: signal must be suppressed, so that other apps don't
                     receive it. This means an action has been triggered.
         """
+        raise errors.NotSubstitutedError
 
     @abstractmethod
     def start(self) -> None:
