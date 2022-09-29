@@ -33,9 +33,9 @@ class TestWin32Listener:
         listener.on_signal = on_signal
 
         for c, symbol_ in keyboard.win32_vk_code_to_symbol_map.items():
-            listener._keyboard_callback(KeyboardEvent(vkCode=c, action=press, time=0))
+            listener.keyboard_callback(KeyboardEvent(vkCode=c, action=press, time=0))
             assert last_signal == (symbol_, True)
-            listener._keyboard_callback(KeyboardEvent(vkCode=c, action=release, time=0))
+            listener.keyboard_callback(KeyboardEvent(vkCode=c, action=release, time=0))
             assert last_signal == (symbol_, False)
 
-        listener._keyboard_callback(KeyboardEvent(vkCode=c, action=12345, time=0))
+        listener.keyboard_callback(KeyboardEvent(vkCode=c, action=12345, time=0))

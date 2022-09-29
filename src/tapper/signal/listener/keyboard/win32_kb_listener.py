@@ -21,14 +21,14 @@ def to_callback_result(inner_func_result: bool) -> int:
 class Win32KeyboardSignalListener(KeyboardSignalListener):
     def start(self) -> None:
         winput.set_DPI_aware(True)
-        winput.hook_keyboard(self._keyboard_callback)
+        winput.hook_keyboard(self.keyboard_callback)
         winput.wait_messages()
 
     def stop(self) -> None:
         winput.stop()
         winput.unhook_keyboard()
 
-    def _keyboard_callback(self, event: winput.KeyboardEvent) -> int:
+    def keyboard_callback(self, event: winput.KeyboardEvent) -> int:
         key = keyboard.win32_vk_code_to_symbol_map[event.key]
         if event.action in EVENT_PRESS:
             return to_callback_result(self.on_signal((key, True)))

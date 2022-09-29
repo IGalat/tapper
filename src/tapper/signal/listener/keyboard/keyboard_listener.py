@@ -12,7 +12,7 @@ class KeyboardSignalListener(base_signal_listener.SignalListener, ABC):
     See SignalListener for listener documentation."""
 
     def get_possible_signal_symbols(self) -> list[str]:
-        temp: list[str] = keyboard.get_key_list(sys.platform)  # pls mypy chill
+        temp: list[str] = keyboard.get_key_list(sys.platform)
         return temp
 
 
