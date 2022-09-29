@@ -23,7 +23,7 @@ class TestWin32Listener:
         release = list(win32_kb_listener.EVENT_RELEASE)[0]
         listener: win32_kb_listener.Win32KeyboardSignalListener = self.get_listener()
 
-        last_signal: tuple[str, bool]
+        last_signal: types_.Signal
 
         def on_signal(signal: types_.Signal) -> bool:
             nonlocal last_signal

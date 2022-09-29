@@ -49,7 +49,8 @@ Stage 2, we're live baby:
 
 ## Limitations of the current design
 
-unable to terminate/pause/unpause actions
+Unable to terminate/pause/unpause actions.
+Would probably need multiprocessing for that.
 
 ## Possible extensions to think about for the future
 
@@ -62,3 +63,5 @@ window adapers and such for controlling (open or focus a window)
 powerwash example action: move left-right, up, repeat - until mouse is moved
 
 an executable with no python dependency for windows dummies
+
+### Limitations of implementation / Backlog

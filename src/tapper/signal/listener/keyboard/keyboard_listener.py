@@ -12,8 +12,7 @@ class KeyboardSignalListener(base_signal_listener.SignalListener, ABC):
     See SignalListener for listener documentation."""
 
     def get_possible_signal_symbols(self) -> list[str]:
-        temp: list[str] = keyboard.get_key_list(sys.platform)
-        return temp
+        return keyboard.get_key_list(sys.platform)
 
 
 @cache
@@ -25,7 +24,6 @@ def get_for_os(os: str) -> KeyboardSignalListener:
     if os == constants.os.win32:
         from tapper.signal.listener.keyboard import win32_kb_listener
 
-        temp: KeyboardSignalListener = win32_kb_listener.Win32KeyboardSignalListener()
-        return temp
+        return win32_kb_listener.Win32KeyboardSignalListener()
     else:
         raise NotImplementedError
