@@ -1,5 +1,4 @@
 """Keyboard keys, including lang-specific, and OS-specific."""
-import sys
 from functools import cache
 
 from tapper.model import constants
@@ -154,7 +153,7 @@ def get_key_list(os: str | None = None) -> list[str]:
     """All keys on en-US keyboard, including platform specific, BUT not aliases."""
     plat_keys = []
     if os in platform_specific_keys:
-        plat_keys = platform_specific_keys[sys.platform]
+        plat_keys = platform_specific_keys[os]
     return [*special_chars, *chars_en, *plat_keys]
 
 
