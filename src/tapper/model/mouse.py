@@ -33,13 +33,11 @@ aliases = {
     "scroll_right": ["scroll_wheel_right"],
 }
 
-mouse_move = "mouse_move"
-
 
 @cache
 def get_key_list() -> list[str]:
     """All mouse buttons, BUT no aliases"""
-    return [*regular_buttons, *wheel_buttons, mouse_move]
+    return [*regular_buttons, *wheel_buttons]
 
 
 @cache
