@@ -2,6 +2,7 @@ from abc import ABC
 from abc import abstractmethod
 
 from tapper.model import errors
+from tapper.model import types_
 
 
 class SignalListener(ABC):
@@ -14,13 +15,10 @@ class SignalListener(ABC):
     def get_possible_signal_symbols(self) -> list[str]:
         """All symbols that this listener may send to on_signal."""
 
-    def on_signal(self, symbol: str, down: bool) -> bool:
+    def on_signal(self, signal: types_.Signal) -> bool:
         """This function is substituted with actual signal processing.
 
         Do not implement.
-
-        :param symbol: Must be a symbol from get_possible_signal_symbols.
-        :param down: Is key pressed down? False if it is released.
 
         :return: If True: signal must be propagated further to system as normal.
                  If False: signal must be suppressed, so that other apps don't

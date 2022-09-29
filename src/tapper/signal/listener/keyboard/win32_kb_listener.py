@@ -31,8 +31,8 @@ class Win32KeyboardSignalListener(KeyboardSignalListener):
     def _keyboard_callback(self, event: winput.KeyboardEvent) -> int:
         key = keyboard.win32_vk_code_to_symbol_map[event.key]
         if event.action in EVENT_PRESS:
-            return to_callback_result(self.on_signal(key, True))
+            return to_callback_result(self.on_signal((key, True)))
         elif event.action in EVENT_RELEASE:
-            return to_callback_result(self.on_signal(key, False))
+            return to_callback_result(self.on_signal((key, False)))
         else:
             return WINPUT_PROPAGATE

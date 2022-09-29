@@ -4,14 +4,13 @@ import sys
 import pytest
 from tapper.model import constants
 from tapper.model import keyboard
+from tapper.model import types_
 from tapper.signal.listener.keyboard import keyboard_listener
 
 
 @pytest.mark.skipif(sys.platform != constants.os.win32, reason="")
 class TestWin32Listener:
-    get_listener = functools.partial(
-        keyboard_listener.get_os_keyboard_signal_listener, constants.os.win32
-    )
+    get_listener = functools.partial(keyboard_listener.get_for_os, constants.os.win32)
 
     def test_factory_is_singleton(self) -> None:
         assert self.get_listener() is self.get_listener()
@@ -26,9 +25,9 @@ class TestWin32Listener:
 
         last_signal: tuple[str, bool]
 
-        def on_signal(symbol: str, down: bool) -> bool:
+        def on_signal(signal: types_.Signal) -> bool:
             nonlocal last_signal
-            last_signal = (symbol, down)
+            last_signal = signal
             return False
 
         listener.on_signal = on_signal

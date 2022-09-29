@@ -17,7 +17,7 @@ class KeyboardSignalListener(base_signal_listener.SignalListener, ABC):
 
 
 @cache
-def get_os_keyboard_signal_listener(os: str) -> KeyboardSignalListener:
+def get_for_os(os: str) -> KeyboardSignalListener:
     """
     :param os: Result of sys.platform() call.
     :return: Per-OS implementation of KeyboardSignalListener. Singleton.
