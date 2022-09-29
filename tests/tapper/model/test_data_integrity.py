@@ -1,6 +1,5 @@
-import sys
-
 import pytest
+from tapper.model import constants
 from tapper.model import keyboard
 from tapper.model import mouse
 
@@ -9,9 +8,10 @@ kb_lang_dependent_characters = (
 ) * 2  # lower, upper
 
 
-def test_keyboard_alias() -> None:
-    all_keys = keyboard.get_keys()
-    keys_no_alias = keyboard.get_key_list()
+@pytest.mark.parametrize("os", [constants.os.dummy, constants.os.win32])
+def test_keyboard_alias(os: str) -> None:
+    all_keys = keyboard.get_keys(os)
+    keys_no_alias = keyboard.get_key_list(os)
     assert len(keys_no_alias) + len(keyboard.aliases) == len(all_keys)
     for ref_keys in all_keys.values():
         if not ref_keys:
@@ -25,13 +25,12 @@ def test_keyboard_lang_chars_len() -> None:
     assert len(keyboard.chars_en_lower) == len(keyboard.chars_en_upper)
 
 
-@pytest.mark.skipif(sys.platform != "win32", reason="")
 def test_win32_vk_code_symbol_map() -> None:
     assert len(keyboard.win32_vk_code_to_symbol_map) == len(
-        keyboard.get_key_list()
+        keyboard.get_key_list(constants.os.win32)
     ) - len(keyboard.chars_en_upper)
     reverse_map = [key for (code, key) in keyboard.win32_vk_code_to_symbol_map.items()]
-    for symbol in keyboard.get_key_list():
+    for symbol in keyboard.get_key_list(constants.os.win32):
         assert symbol in reverse_map or symbol in keyboard.chars_en_upper
 
 

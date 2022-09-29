@@ -1,6 +1,8 @@
+import sys
 from abc import ABC
 from functools import cache
 
+from tapper.model import constants
 from tapper.model import keyboard
 from tapper.signal.listener import base_signal_listener
 
@@ -10,7 +12,7 @@ class KeyboardSignalListener(base_signal_listener.SignalListener, ABC):
     See SignalListener for listener documentation."""
 
     def get_possible_signal_symbols(self) -> list[str]:
-        temp: list[str] = keyboard.get_key_list()  # pls mypy chill
+        temp: list[str] = keyboard.get_key_list(sys.platform)  # pls mypy chill
         return temp
 
 
@@ -20,7 +22,7 @@ def get_os_keyboard_signal_listener(os: str) -> KeyboardSignalListener:
     :param os: Result of sys.platform() call.
     :return: Per-OS implementation of KeyboardSignalListener. Singleton.
     """
-    if os == "win32":
+    if os == constants.os.win32:
         from tapper.signal.listener.keyboard import win32_kb_listener
 
         temp: KeyboardSignalListener = win32_kb_listener.Win32KeyboardSignalListener()

@@ -2,6 +2,7 @@
 import sys
 from functools import cache
 
+from tapper.model import constants
 
 fn_keys = ["f" + str(i + 1) for i in range(24)]
 
@@ -102,7 +103,7 @@ aliases = {
 }
 
 platform_specific_keys = {
-    "win32": [
+    constants.os.win32: [
         "browser_back",
         "browser_forward",
         "browser_refresh",
@@ -149,21 +150,21 @@ chars_en_upper = chars_en[len(chars_en) // 2 :]
 
 
 @cache
-def get_key_list() -> list[str]:
+def get_key_list(os: str | None = None) -> list[str]:
     """All keys on en-US keyboard, including platform specific, BUT not aliases."""
     plat_keys = []
-    if sys.platform in platform_specific_keys:
+    if os in platform_specific_keys:
         plat_keys = platform_specific_keys[sys.platform]
     return [*special_chars, *chars_en, *plat_keys]
 
 
 @cache
-def get_keys() -> dict[str, list[str] | None]:
+def get_keys(os: str | None = None) -> dict[str, list[str] | None]:
     """All keys on en-US keyboard, including platform specific and aliases.
 
     Only aliases value is not None but a list of non-alias keys.
     """
-    all_keys = dict.fromkeys(get_key_list(), None)
+    all_keys = dict.fromkeys(get_key_list(os), None)
     all_keys.update(aliases)
     return all_keys
 

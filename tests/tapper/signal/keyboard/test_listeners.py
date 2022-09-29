@@ -2,14 +2,15 @@ import functools
 import sys
 
 import pytest
+from tapper.model import constants
 from tapper.model import keyboard
 from tapper.signal.listener.keyboard import keyboard_listener
 
 
-@pytest.mark.skipif(sys.platform != "win32", reason="")
+@pytest.mark.skipif(sys.platform != constants.os.win32, reason="")
 class TestWin32Listener:
     get_listener = functools.partial(
-        keyboard_listener.get_os_keyboard_signal_listener, "win32"
+        keyboard_listener.get_os_keyboard_signal_listener, constants.os.win32
     )
 
     def test_factory_is_singleton(self) -> None:
