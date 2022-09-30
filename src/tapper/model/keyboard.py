@@ -2,6 +2,7 @@
 from functools import cache
 
 from tapper.model import constants
+from tapper.model import types_
 
 fn_keys = ["f" + str(i + 1) for i in range(24)]
 
@@ -158,7 +159,7 @@ def get_key_list(os: str | None = None) -> list[str]:
 
 
 @cache
-def get_keys(os: str | None = None) -> dict[str, list[str] | None]:
+def get_keys(os: str | None = None) -> types_.SymbolsWithAliases:
     """All keys on en-US keyboard, including platform specific and aliases.
 
     Only aliases value is not None but a list of non-alias keys.

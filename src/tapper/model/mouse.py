@@ -1,6 +1,8 @@
 """All mouse buttons"""
 from functools import cache
 
+from tapper.model import types_
+
 regular_buttons = [
     "left_mouse_button",
     "right_mouse_button",
@@ -41,7 +43,7 @@ def get_key_list() -> list[str]:
 
 
 @cache
-def get_keys() -> dict[str, list[str] | None]:
+def get_keys() -> types_.SymbolsWithAliases:
     """All mouse buttons and aliases.
 
     Only aliases value is not None but a list of non-alias keys."""
