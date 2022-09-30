@@ -179,7 +179,7 @@ Use cases:
 """
 
 """All VK codes that Windows keyboard may output or take and corresponding symbols."""
-win32_vk_code_to_symbol_map = {
+win32_vk_code_to_symbol_map: dict[int, str] = {
     # chars_en
     192: "`",
     49: "1",
