@@ -1,6 +1,4 @@
-import sys
 from abc import ABC
-from functools import cache
 
 from tapper.model import constants
 from tapper.model import keyboard
@@ -11,19 +9,19 @@ class KeyboardSignalListener(base_signal_listener.SignalListener, ABC):
     """Listens to keyboard key presses and releases.
     See SignalListener for listener documentation."""
 
-    def get_possible_signal_symbols(self) -> list[str]:
-        return keyboard.get_key_list(sys.platform)
 
-
-@cache
 def get_for_os(os: str) -> KeyboardSignalListener:
     """
-    :param os: Result of sys.platform() call.
-    :return: Per-OS implementation of KeyboardSignalListener. Singleton.
+    :param os: Result of sys.platform() call, or see model/constants.
+    :return: Per-OS implementation of KeyboardSignalListener.
     """
-    if os == constants.os.win32:
-        from tapper.signal.keyboard import win32_kb_listener
+    return _os_impl_list[os]()()
 
-        return win32_kb_listener.Win32KeyboardSignalListener()
-    else:
-        raise NotImplementedError
+
+def _get_win32_impl() -> type[KeyboardSignalListener]:
+    from tapper.signal.keyboard import win32_kb_listener
+
+    return win32_kb_listener.Win32KeyboardSignalListener
+
+
+_os_impl_list = {constants.os.win32: _get_win32_impl}

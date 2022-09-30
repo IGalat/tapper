@@ -6,14 +6,14 @@ from tapper.model import constants
 from tapper.model import keyboard
 from tapper.model import types_
 from tapper.signal.keyboard import keyboard_listener
+from tapper.signal.keyboard.keyboard_listener import KeyboardSignalListener
 
 
 @pytest.mark.skipif(sys.platform != constants.os.win32, reason="")
 class TestWin32Listener:
-    get_listener = functools.partial(keyboard_listener.get_for_os, constants.os.win32)
-
-    def test_factory_is_singleton(self) -> None:
-        assert self.get_listener() is self.get_listener()
+    get_listener: KeyboardSignalListener = functools.partial(
+        keyboard_listener.get_for_os, constants.os.win32
+    )
 
     def test_all_keys(self) -> None:
         from tapper.signal.keyboard import win32_kb_listener

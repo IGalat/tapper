@@ -1,5 +1,6 @@
 from typing import Final
 
+from tapper.model import constants
 from tapper.model import keyboard
 from tapper.signal.keyboard.keyboard_listener import KeyboardSignalListener
 from winput import winput
@@ -19,6 +20,10 @@ def to_callback_result(inner_func_result: bool) -> int:
 
 
 class Win32KeyboardSignalListener(KeyboardSignalListener):
+    @classmethod
+    def get_possible_signal_symbols(cls) -> list[str]:
+        return keyboard.get_key_list(constants.os.win32)
+
     def start(self) -> None:
         winput.set_DPI_aware(True)
         winput.hook_keyboard(self.keyboard_callback)

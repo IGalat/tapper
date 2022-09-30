@@ -13,7 +13,7 @@ class MouseSignalListener(base_signal_listener.SignalListener, ABC):
     Mouse move and wheel scroll are on_signal(symbol, down=True)
     """
 
-    def get_possible_signal_symbols(self) -> list[str]:
+    def get_possible_signal_symbols(self, os: str) -> list[str]:
         temp: list[str] = mouse.get_key_list()
         return temp
 
@@ -22,10 +22,10 @@ class MouseSignalListener(base_signal_listener.SignalListener, ABC):
 def get_for_os(os: str) -> MouseSignalListener:
     """
     :param os: Result of sys.platform() call.
-    :return: Per-OS implementation of KeyboardSignalListener. Singleton.
+    :return: Per-OS implementation of MouseSignalListener.
     """
     if os == constants.os.win32:
-        from tapper.signal.listener.mouse import win32_mouse_listener
+        from tapper.signal.mouse import win32_mouse_listener
 
         temp: MouseSignalListener = win32_mouse_listener.Win32MouseSignalListener()
         return temp

@@ -11,8 +11,9 @@ class SignalListener(ABC):
     When an implementation receives the signal, it must call on_signal fn.
     """
 
+    @classmethod
     @abstractmethod
-    def get_possible_signal_symbols(self) -> list[str]:
+    def get_possible_signal_symbols(cls) -> list[str]:
         """All symbols that this listener may send to on_signal."""
 
     def on_signal(self, signal: types_.Signal) -> bool:
