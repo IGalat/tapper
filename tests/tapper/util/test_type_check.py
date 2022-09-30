@@ -3,6 +3,7 @@ from typing import Any
 import hypothesis.strategies as st
 from hypothesis import example
 from hypothesis import given
+from hypothesis import settings
 from hypothesis.strategies import lists
 from tapper.util.type_check import is_list_of
 from tapper.util.type_check import is_tuple_of
@@ -12,6 +13,7 @@ from tapper.util.type_check import is_tuple_of
 @example(["mixed list", 2])
 @example((123, "what about tuple?"))
 @example({"some dict too": 456})
+@settings(max_examples=20)
 def test_data_structures__is_list_of(input_: Any) -> None:
     if type(input_) == list:
         if not input_:
@@ -34,6 +36,7 @@ def test_primitives__is_list_of(input_: Any) -> None:
 @example(("mixed tuple", 2))
 @example([123, "what about list?"])
 @example({"some dict too": 456})
+@settings(max_examples=20)
 def test_data_structures__is_tuple_of(input_: Any) -> None:
     if type(input_) == tuple:
         if not input_:

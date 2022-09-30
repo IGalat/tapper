@@ -15,7 +15,7 @@ class TestWin32Listener:
     def test_factory_is_singleton(self) -> None:
         assert self.get_listener() is self.get_listener()
 
-    def test_all_keys_with_suppression(self) -> None:
+    def test_all_keys(self) -> None:
         from tapper.signal.keyboard import win32_kb_listener
         from winput import KeyboardEvent
 
