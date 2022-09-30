@@ -4,7 +4,7 @@ import sys
 import pytest
 from tapper.model import constants
 from tapper.model import keyboard
-from tapper.model import types_
+from tapper.model.types_ import Signal
 from tapper.signal.keyboard import keyboard_listener
 from tapper.signal.keyboard.keyboard_listener import KeyboardSignalListener
 
@@ -23,9 +23,10 @@ class TestWin32Listener:
         release = list(win32_kb_listener.EVENT_RELEASE)[0]
         listener: win32_kb_listener.Win32KeyboardSignalListener = self.get_listener()
 
-        last_signal: types_.Signal
+        last_signal: Signal | None = None
+        c: int | None = None
 
-        def on_signal(signal: types_.Signal) -> bool:
+        def on_signal(signal: Signal) -> bool:
             nonlocal last_signal
             last_signal = signal
             return False
