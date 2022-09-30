@@ -1,7 +1,6 @@
 from abc import ABC
 
 from tapper.model import constants
-from tapper.model import keyboard
 from tapper.signal import base_signal_listener
 
 
