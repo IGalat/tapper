@@ -5,7 +5,7 @@ import pytest
 from tapper.model import constants
 from tapper.model import keyboard
 from tapper.model import types_
-from tapper.signal.listener.keyboard import keyboard_listener
+from tapper.signal.keyboard import keyboard_listener
 
 
 @pytest.mark.skipif(sys.platform != constants.os.win32, reason="")
@@ -16,7 +16,7 @@ class TestWin32Listener:
         assert self.get_listener() is self.get_listener()
 
     def test_all_keys_with_suppression(self) -> None:
-        from tapper.signal.listener.keyboard import win32_kb_listener
+        from tapper.signal.keyboard import win32_kb_listener
         from winput import KeyboardEvent
 
         press = list(win32_kb_listener.EVENT_PRESS)[0]

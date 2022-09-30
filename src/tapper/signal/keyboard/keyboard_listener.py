@@ -4,7 +4,7 @@ from functools import cache
 
 from tapper.model import constants
 from tapper.model import keyboard
-from tapper.signal.listener import base_signal_listener
+from tapper.signal import base_signal_listener
 
 
 class KeyboardSignalListener(base_signal_listener.SignalListener, ABC):
@@ -22,7 +22,7 @@ def get_for_os(os: str) -> KeyboardSignalListener:
     :return: Per-OS implementation of KeyboardSignalListener. Singleton.
     """
     if os == constants.os.win32:
-        from tapper.signal.listener.keyboard import win32_kb_listener
+        from tapper.signal.keyboard import win32_kb_listener
 
         return win32_kb_listener.Win32KeyboardSignalListener()
     else:

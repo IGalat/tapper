@@ -28,8 +28,7 @@ Stage 1, embryo:
 1. DONE. keyboard and mouse dataclasses
 1. Parent SignalListener+Commander for kb and mouse; factories; Windows impl
 1. Action runner
-1. Output parser
-1. SendCommandProcessor
+1. Command parser, SendCommandProcessor
 1. Input parser
 1. Tap and group model
 1. SignalProcessor. ENDS phase 1. First release!

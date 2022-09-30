@@ -3,7 +3,7 @@ from functools import cache
 
 from tapper.model import constants
 from tapper.model import mouse
-from tapper.signal.listener import base_signal_listener
+from tapper.signal import base_signal_listener
 
 
 class MouseSignalListener(base_signal_listener.SignalListener, ABC):

@@ -1,7 +1,7 @@
 from typing import Final
 
 from tapper.model import keyboard
-from tapper.signal.listener.keyboard.keyboard_listener import KeyboardSignalListener
+from tapper.signal.keyboard.keyboard_listener import KeyboardSignalListener
 from winput import winput
 
 WINPUT_PROPAGATE: Final[int] = 0
