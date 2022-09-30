@@ -13,7 +13,8 @@ class MouseSignalListener(base_signal_listener.SignalListener, ABC):
     Mouse move and wheel scroll are on_signal(symbol, down=True)
     """
 
-    def get_possible_signal_symbols(self) -> list[str]:
+    @classmethod
+    def get_possible_signal_symbols(cls) -> list[str]:
         temp: list[str] = mouse.get_key_list()
         return temp
 
