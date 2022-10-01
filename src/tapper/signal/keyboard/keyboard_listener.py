@@ -8,13 +8,13 @@ class KeyboardSignalListener(base_signal_listener.SignalListener, ABC):
     """Listens to keyboard key presses and releases.
     See SignalListener for listener documentation."""
 
-
-def get_for_os(os: str) -> KeyboardSignalListener:
-    """
-    :param os: Result of sys.platform() call, or see model/constants.
-    :return: Per-OS implementation of KeyboardSignalListener.
-    """
-    return _os_impl_list[os]()()
+    @staticmethod
+    def get_for_os(os: str) -> "KeyboardSignalListener":
+        """
+        :param os: Result of sys.platform() call, or see model/constants.
+        :return: Per-OS implementation of KeyboardSignalListener.
+        """
+        return _os_impl_list[os]()()
 
 
 def _get_win32_impl() -> type[KeyboardSignalListener]:

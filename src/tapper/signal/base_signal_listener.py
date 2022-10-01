@@ -37,3 +37,11 @@ class SignalListener(ABC):
     @abstractmethod
     def stop(self) -> None:
         """And clean resources, this is terminal."""
+
+    @staticmethod
+    @abstractmethod
+    def get_for_os(os: str) -> "SignalListener":
+        """
+        :param os: Result of sys.platform() call, or see model/constants.
+        :return: Per-OS implementation of a specific SignalListener.
+        """

@@ -1,5 +1,4 @@
 from abc import ABC
-from functools import cache
 
 from tapper.model import constants
 from tapper.model import mouse
@@ -18,17 +17,19 @@ class MouseSignalListener(base_signal_listener.SignalListener, ABC):
         temp: list[str] = mouse.get_key_list()
         return temp
 
+    @staticmethod
+    def get_for_os(os: str) -> "MouseSignalListener":
+        """
+        :param os: Result of sys.platform() call, or see model/constants.
+        :return: Per-OS implementation of MouseSignalListener.
+        """
+        return _os_impl_list[os]()()
 
-@cache
-def get_for_os(os: str) -> MouseSignalListener:
-    """
-    :param os: Result of sys.platform() call.
-    :return: Per-OS implementation of MouseSignalListener.
-    """
-    if os == constants.os.win32:
-        from tapper.signal.mouse import win32_mouse_listener
 
-        temp: MouseSignalListener = win32_mouse_listener.Win32MouseSignalListener()
-        return temp
-    else:
-        raise NotImplementedError
+def _get_win32_impl() -> type[MouseSignalListener]:
+    from tapper.signal.mouse import win32_mouse_listener
+
+    return win32_mouse_listener.Win32MouseSignalListener
+
+
+_os_impl_list = {constants.os.win32: _get_win32_impl}

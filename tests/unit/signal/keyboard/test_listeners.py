@@ -5,14 +5,13 @@ import pytest
 from tapper.model import constants
 from tapper.model import keyboard
 from tapper.model.types_ import Signal
-from tapper.signal.keyboard import keyboard_listener
 from tapper.signal.keyboard.keyboard_listener import KeyboardSignalListener
 
 
 @pytest.mark.skipif(sys.platform != constants.os.win32, reason="")
 class TestWin32Listener:
     get_listener: KeyboardSignalListener = functools.partial(
-        keyboard_listener.get_for_os, constants.os.win32
+        KeyboardSignalListener.get_for_os, constants.os.win32
     )
 
     def test_all_keys(self) -> None:

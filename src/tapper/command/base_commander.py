@@ -1,4 +1,5 @@
 from abc import ABC
+from abc import abstractmethod
 
 
 class Commander(ABC):
@@ -6,3 +7,11 @@ class Commander(ABC):
 
     Inheritors focus on one aspect, such as keyboard.
     """
+
+    @staticmethod
+    @abstractmethod
+    def get_for_os(os: str) -> "Commander":
+        """
+        :param os: Result of sys.platform() call, or see model/constants.
+        :return: Per-OS implementation of a specific Commander.
+        """

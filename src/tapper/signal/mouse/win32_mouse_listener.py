@@ -1,7 +1,7 @@
 from typing import Final
 
 import winput
-from tapper.signal.listener.mouse.mouse_listener import MouseSignalListener
+from tapper.signal.mouse.mouse_listener import MouseSignalListener
 from winput import MouseEvent
 
 WINPUT_PROPAGATE: Final[int] = 0
