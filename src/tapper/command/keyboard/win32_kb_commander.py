@@ -10,7 +10,7 @@ symbol_code_map = datastructs.symbols_to_codes(
     keyboard.win32_vk_code_to_symbol_map, keyboard.get_keys()
 )
 
-user32 = ctypes.windll.user32
+user32 = ctypes.windll.user32  # type: ignore  # for mypy on non-win32 platform checks
 
 
 class KeyboardCommander(keyboard_commander.KeyboardCommander):
