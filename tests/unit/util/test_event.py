@@ -1,7 +1,7 @@
 from typing import Any
 
 import hypothesis
-from hypothesis import strategies as st
+import strategies
 from tapper.util import event
 
 
@@ -12,11 +12,14 @@ class Subscriber:
         self.received_message = sub_message
 
 
-@hypothesis.given(st.integers() | st.text() | st.datetimes())
+subscriber = Subscriber()
+
+
+@hypothesis.given(strategies.primitives)
 @hypothesis.settings(max_examples=20)
 def test_pubsub(message: Any) -> None:
-    subscriber = Subscriber()
+    event.publish("non-existing topic doesn't break anything", 123)
     event.subscribe("topic_name", subscriber.receive_message)
     event.publish("topic_name", message)
 
-    assert subscriber.received_message == message
+    assert subscriber.received_message is message
