@@ -1,5 +1,3 @@
-import ctypes
-
 from tapper.command.keyboard import keyboard_commander
 from tapper.model import keyboard
 from tapper.util import datastructs
@@ -9,7 +7,7 @@ symbol_code_map = datastructs.symbols_to_codes(
     keyboard.win32_vk_code_to_symbol_map, keyboard.get_keys()
 )
 
-user32 = ctypes.windll.user32  # type: ignore  # for mypy on non-win32 platform checks
+user32 = winput.user32
 
 
 class Win32KeyboardCommander(keyboard_commander.KeyboardCommander):
