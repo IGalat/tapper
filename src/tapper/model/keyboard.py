@@ -100,6 +100,10 @@ aliases = {
     "ins": ["insert"],
     "caps": ["caps_lock"],
     "break": ["control_break"],
+    # control chars
+    "\n": ["enter"],
+    "\t": ["tab"],
+    "\r": ["return"],
 }
 
 platform_specific_keys = {
