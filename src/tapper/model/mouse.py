@@ -18,13 +18,15 @@ wheel_buttons = [
     "scroll_wheel_right",
 ]
 
-aliases = {
+button_aliases: SymbolsWithAliases = {
     "lmb": ["left_mouse_button"],
     "rmb": ["right_mouse_button"],
     "mmb": ["middle_mouse_button"],
     "x1m": ["x1_mouse_button"],
     "x2mb": ["x2_mouse_button"],
-    # wheel
+}
+
+wheel_aliases: SymbolsWithAliases = {
     "wheel_up": ["scroll_wheel_up"],
     "wheel_down": ["scroll_wheel_down"],
     "wheel_left": ["scroll_wheel_left"],
@@ -34,6 +36,8 @@ aliases = {
     "scroll_left": ["scroll_wheel_left"],
     "scroll_right": ["scroll_wheel_right"],
 }
+
+aliases: SymbolsWithAliases = {**button_aliases, **wheel_aliases}
 
 
 @cache

@@ -72,7 +72,7 @@ special_chars = [
 ]
 
 """If alias is to many keys, first is preferred."""
-aliases = {
+aliases: SymbolsWithAliases = {
     # modifiers
     "lshift": ["left_shift"],
     "rshift": ["right_shift"],

@@ -5,6 +5,8 @@ from typing import Sequence
 
 from tapper.model.types_ import SymbolsWithAliases
 
+SymbolCode = int | tuple[Any, ...]
+
 
 def to_flat_list(data_structure: Sequence[Any] | Any) -> list[Any]:
     """Transforms single values to list; flattens to list any (nested too) Sequence."""
@@ -23,8 +25,8 @@ def _flatten(xs: Sequence[Any]) -> Iterable[Any]:
 
 
 def symbols_to_codes(
-    code_symbol_map: dict[int, str], symbols: SymbolsWithAliases
-) -> dict[str, int]:
+    code_symbol_map: dict[SymbolCode, str], symbols: SymbolsWithAliases
+) -> dict[str, SymbolCode]:
     """Maps all symbols, including aliases, to codes. In case of alias, it's the first reference.
 
     Assumes every symbol except aliases is in code_symbol_map.
