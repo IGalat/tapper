@@ -54,3 +54,13 @@ def get_keys() -> SymbolsWithAliases:
     all_keys = dict.fromkeys(get_key_list(), None)
     all_keys.update(aliases)
     return all_keys
+
+
+"""Win codes of button codes (not mouse wheel), and corresponding symbols."""
+win32_button_code_symbol_map: dict[int, str] = {
+    1: "left_mouse_button",
+    2: "right_mouse_button",
+    4: "middle_mouse_button",
+    8: "x1_mouse_button",
+    16: "x2_mouse_button",
+}
