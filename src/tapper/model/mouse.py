@@ -22,7 +22,7 @@ button_aliases: SymbolsWithAliases = {
     "lmb": ["left_mouse_button"],
     "rmb": ["right_mouse_button"],
     "mmb": ["middle_mouse_button"],
-    "x1m": ["x1_mouse_button"],
+    "x1mb": ["x1_mouse_button"],
     "x2mb": ["x2_mouse_button"],
 }
 
