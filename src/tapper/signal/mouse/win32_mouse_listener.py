@@ -17,7 +17,7 @@ def to_callback_result(inner_func_result: bool) -> int:
 
 class Win32MouseSignalListener(MouseSignalListener):
     def start(self) -> None:
-        winput.set_DPI_aware(True)
+        winput.set_DPI_aware(per_monitor=True)
         winput.hook_mouse(self.mouse_callback)
         winput.wait_messages()
 
