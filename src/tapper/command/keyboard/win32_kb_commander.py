@@ -2,7 +2,6 @@ import ctypes
 
 from tapper.command.keyboard import keyboard_commander
 from tapper.model import keyboard
-from tapper.model.types_ import SymbolsWithAliases
 from tapper.util import datastructs
 from winput import winput
 
@@ -13,11 +12,7 @@ symbol_code_map = datastructs.symbols_to_codes(
 user32 = ctypes.windll.user32  # type: ignore  # for mypy on non-win32 platform checks
 
 
-class KeyboardCommander(keyboard_commander.KeyboardCommander):
-    @classmethod
-    def get_possible_command_symbols(cls) -> SymbolsWithAliases:
-        return keyboard.get_keys()
-
+class Win32KeyboardCommander(keyboard_commander.KeyboardCommander):
     def press(self, symbol: str) -> None:
         winput.press_key(symbol_code_map[symbol])
 
