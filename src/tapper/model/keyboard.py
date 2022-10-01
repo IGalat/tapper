@@ -30,7 +30,10 @@ lock_keys = ["caps_lock", "scroll_lock", "num_lock"]
 modifiers = [
     "left_shift",
     "right_shift",
-    "virtual_shift",  # windows defines them as separate VKs(16 here), so might be something
+    # windows defines separate shift, control, alt as separate VKs(16 here). Their purpose is
+    # tracking the state: if any of two shifts is pressed, this will be pressed. Not is
+    # not very useful in tapper, as users can inquire .pressed("shift") to get the same result.
+    "virtual_shift",
     "left_control",
     "right_control",
     "virtual_control",
