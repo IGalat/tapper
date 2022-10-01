@@ -2,8 +2,8 @@
 
 
 def warn(message: str) -> None:
-    pass
+    print(f"WARN reported: {message}")
 
 
 def error(message: str) -> None:
-    pass
+    print(f"ERROR reported: {message}")
