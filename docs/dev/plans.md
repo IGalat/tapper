@@ -43,7 +43,7 @@ Stage 2, we're live baby:
 1. One keyboard variation(ua) to make sure it's multi-lang
 1. (input/output multi-lang) ehhh, just hepler function here
 1. Tray icon
-1. Validation with tkinter warnings
+1. Logging, error handling, Validationvwith tkinter warnings
 1. Moar trackers: process, device connect/disconnect, service/daemon, file, resource(cpu/gpu/network) load
 
 ## Limitations of the current design
