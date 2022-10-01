@@ -8,6 +8,12 @@ class Commander(ABC):
     Inheritors focus on one aspect, such as keyboard.
     """
 
+    def start(self) -> None:
+        """Initialize resources."""
+
+    def stop(self) -> None:
+        """And clean resources, this is terminal."""
+
     @staticmethod
     @abstractmethod
     def get_for_os(os: str) -> "Commander":
