@@ -4,7 +4,7 @@ from tapper.util import datastructs
 from winput import winput
 
 symbol_code_map = datastructs.symbols_to_codes(
-    keyboard.win32_vk_code_to_symbol_map, keyboard.get_keys()
+    keyboard.win32_vk_code_to_symbol_map, keyboard.aliases
 )
 
 user32 = winput.user32
