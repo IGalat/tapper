@@ -13,6 +13,24 @@ words = st.text(word_chars, min_size=1)
 
 word_lists = st.lists(words, max_size=100)
 
+primitives = (
+    st.none()
+    | st.booleans()
+    | st.integers()
+    | st.floats()
+    | st.decimals()
+    | st.fractions()
+    | st.complex_numbers()
+    | st.text()
+    | st.characters()
+    | st.times()
+    | st.datetimes()
+    | st.dates()
+    | st.timedeltas()
+    | st.timezone_keys()
+    | st.binary()
+)
+
 
 @st.composite
 def code_symbol_maps(draw: st.DrawFn) -> dict[int, str]:
