@@ -38,6 +38,7 @@ Stage 2, we're live baby:
 1. trigger_if - free-style conditions
 1. kwargs map, to make conditions for Taps much easier. How to split Tap into pretty face and actionable?
 1. WindowTriggerConditionsTracker
+1. Linux impl
 1. hotkey on hold/release for time (up20ms / down - 500ms)
 1. hotstring support
 1. One keyboard variation(ua) to make sure it's multi-lang
