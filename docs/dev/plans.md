@@ -27,7 +27,7 @@ Stage 1, embryo:
 1. DONE. Parent classes for SignalListener and Commander
 1. DONE. keyboard and mouse dataclasses
 1. DONE. Parent SignalListener+Commander for kb and mouse; factories; Windows impl
-1. Action runner
+1. DONE. Action runner
 1. Command parser, SendCommandProcessor
 1. Input parser
 1. Tap and group model

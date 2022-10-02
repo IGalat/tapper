@@ -1,3 +1,6 @@
+from typing import Any
+from typing import Callable
+
 Signal = tuple[str, bool]
 """        (symbol, down)
 Signal emitted by SignalListener. Is not alias to other symbol.
@@ -30,3 +33,7 @@ Example:
 
     Trigger for "ctrl" will work when signal is received for any of the references.
 """
+
+Action = Callable[[], Any]
+"""An action to run in ActionRunner.
+It must require no arguments. Use `functools.partial` to provide arguments beforehand."""
