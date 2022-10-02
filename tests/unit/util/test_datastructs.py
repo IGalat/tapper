@@ -1,15 +1,16 @@
 import random
 from typing import Any
 
+import hypothesis
 import hypothesis.strategies as st
 import strategies
 from hypothesis import given
-from hypothesis.strategies import lists
 from tapper.model.types_ import SymbolsWithAliases
 from tapper.util import datastructs
 
 
-@given(st.dates() | lists(st.dates() | lists(st.dates() | lists(st.dates()))))
+@given(strategies.primitives)
+@hypothesis.settings(max_examples=20)
 def test_to_flat_list(input_: Any | list[Any]) -> None:
     flat = datastructs.to_flat_list(input_)
     assert isinstance(flat, list)
@@ -38,6 +39,7 @@ def tuple_for_sym_to_codes(
 
 # noinspection PyTypeChecker
 @given(tuple_for_sym_to_codes())
+@hypothesis.settings(max_examples=20)
 def test_symbols_to_codes(in_tuple: tuple[dict[int, str], SymbolsWithAliases]) -> None:
     code_symbol_map, symbols = in_tuple
     symbol_code_map = datastructs.symbols_to_codes(code_symbol_map, symbols)
