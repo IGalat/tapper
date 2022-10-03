@@ -1,0 +1,63 @@
+trigger parsing
+    :param combo: One combo, to be pressed in one go.
+    :param last symbol?: If true, trigger also "up" on "up". No, not in parser.
+-> tuple(list[list[symbol]], tuple(list[symbol], Direction) )
+    list[combos of each auxiliary symbol], combos of trigger symbol
+        examples from above:
+            a -> [], ([a], DOWN)
+            lmb -> [], ([left_mouse_button], DOWN)
+            alt+f1 -> [[left_alt, right_alt, virtual_alt]], ([f1], DOWN)
+            ctrl+alt+shift+scroll_up -> [[left,right,virt_control], [left,right,virt_alt], [left,right,virt_shift]], ([scroll_wheel_up], DOWN)
+            clear+ctrl -> [[clear]], ([left,right,virt_control], DOWN)
+            \t+r up -> [tab], ([r], UP)
+
+
+
+
+
+
+
+command parsing
+    :param command: Text consisting of keyboard one-character inputs, and combos
+        inside a pattern(specified in constructor, like "$( )" ). For example, "Hello,$(enter)world!"
+    Combo is stuff inside $(HERE) . Syntax( input -> result ):
+      - Any registered symbols, such as "a", "backspace", "lmb", "ctrl", "scroll_left"
+        Note that unlike outside of combos, characters are not recognised individually:
+            "Hello" -> ERROR, symbol "Hello" not recognised
+            "p" -> p down, up. As usual
+      - Property chaining via space " ":
+        - "up"/"down" only press key in one direction:
+            a -> a down,up; "a down" -> a down
+            Any key that does not have an appropriate function will be ignored, such as wheel_up that cannot go up.
+        - "<FLOAT>s"/"<INT>ms" sleep for specified seconds/milliseconds:
+            When without direction, will sleep after "down":
+                a 0.1s -> a down, sleep 0.1 second, a up
+            Otherwise, after direction:
+                home down 200ms -> home down, sleep 0.2 seconds
+            Sleep is not precise, execution may sleep for slightly longer than you specify.
+            Minimum duration is about 10ms (OS limitation).
+        - "x<INT>" repeat the action:
+            lmb x2 -> left_mouse_button down, left mouse button up, left_mouse_button down, left mouse button up
+            This can be chained with other properties:
+                \t 50ms x5 -> tab down, sleep 50 millis, tab up   - repeat 4 times
+                i down 10ms x200 -> i down, sleep 10ms   - repeat 200 times.
+                    "i" will remain down after this, which may lead to bad keyboard state until you manually press "i", watch out.
+      - Chaining symbols via plus "+":
+        - ctrl+esc+a -> left_control down, escape down, a down,up, escape up, left_control up
+        - Properties apply only to the symbol they are after:
+            q 50ms+m x2 -> q down, sleep 50ms, m down, m down,up, m up, q up
+            lmb x2+enter 1s -> lmb(left_mouse_button) down, lmb down, enter down, sleep 1s, enter up, lmb up, lmb up
+        - Direction properties are not allowed, unless it's the last symbol in chain:
+            ctrl down+b -> ERROR
+            ctrl+b down -> left_control down, b down, left_control up
+      - Separate chaining with ";"
+            alt+tab;enter ->  alt down, tab down,up, alt up, enter down,up
+                Same result as using different combos, but "$(alt+tab;enter)" is more convenient than "$(alt+tab)$(enter)"
+      - In-row chaining with ",":
+            ctrl+c,v -> left_control down, c down,up, v down,up, left_control up
+            a+b,c+d down,e -> a down, b down,up, c down, d down, e down,up, c up, a up
+      - Free(not bound to symbol) commands:
+        - "<FLOAT>s"/"<INT>ms" - sleep for specified time:
+            enter;300ms;tab -> enter down,up, sleep 0.3s, tab down,up
+                This is different from symbol property:
+                    enter 300ms; tab -> enter down, sleep 0.3s, enter up, tab down,up
