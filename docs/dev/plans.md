@@ -28,16 +28,19 @@ Stage 1, embryo:
 1. DONE. keyboard and mouse dataclasses
 1. DONE. Parent SignalListener+Commander for kb and mouse; factories; Windows impl
 1. DONE. Action runner
-1. Command parser, SendCommandProcessor
-1. Input parser
-1. Tap and group model
+1. Command parser
+1. Trigger parser
+1. State(logger/keeper/whatever);
+1. Layer above commanders and listeners(state keeper calls, publish event, bounce fake signal)
+1. SendCommandProcessor
+1. Tap and group model. How to split Tap into pretty face and actionable?
 1. SignalProcessor. ENDS phase 1. First release!
 
 Stage 2, we're live baby:
 
 1. trigger_if - free-style conditions
-1. kwargs map, to make conditions for Taps much easier. How to split Tap into pretty face and actionable?
-1. WindowTriggerConditionsTracker
+1. kwargs map, to make conditions for Taps much easier
+1. TriggerConditions system, WindowTriggerConditionsTracker
 1. Linux impl
 1. hotkey on hold/release for time (up20ms / down - 500ms)
 1. hotstring support
