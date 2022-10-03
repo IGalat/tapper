@@ -98,8 +98,11 @@ aliases: SymbolsWithAliases = {
     # other special chars
     "esc": ["escape"],
     "lwin": ["left_windows"],
+    "los": ["left_windows"],
     "rwin": ["right_windows"],
+    "ros": ["right_windows"],
     "win": ["left_windows", "right_windows"],
+    "os": ["left_windows", "right_windows"],
     "del": ["delete"],
     "ins": ["insert"],
     "caps": ["caps_lock"],
