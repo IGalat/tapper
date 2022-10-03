@@ -57,11 +57,14 @@ Would probably need multiprocessing for that.
 
 ## Possible extensions to think about for the future
 
-tap additional keys allowed - white/blacklist
+send command arg "key_cleanup" - to lift keys that remain pressed.
 
-window adapers and such for controlling (open or focus a window)
 
 "lift" on send: lift modificators, un-caps, then back
+
+tap additional keys allowed - white/blacklist
+
+window commanders and such for controlling (open or focus a window)
 
 powerwash example action: move left-right, up, repeat - until mouse is moved
 
