@@ -59,7 +59,6 @@ Would probably need multiprocessing for that.
 
 send command arg "key_cleanup" - to lift keys that remain pressed.
 
-
 "lift" on send: lift modificators, un-caps, then back
 
 tap additional keys allowed - white/blacklist
