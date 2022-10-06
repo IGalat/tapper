@@ -2,21 +2,21 @@ trigger parsing
     :param combo: One combo, to be pressed in one go.
 -> tuple(list[list[symbol]], tuple(list[symbol], Direction) )
     list[combos of each auxiliary symbol], combos of trigger symbol
-        examples from above:
-            a -> [], ([a], DOWN)
-            lmb -> [], ([left_mouse_button], DOWN)
-            alt+f1 -> [[left_alt, right_alt, virtual_alt]], ([f1], DOWN)
-            ctrl+alt+shift+scroll_up -> [[left,right,virt_control], [left,right,virt_alt], [left,right,virt_shift]], ([scroll_wheel_up], DOWN)
-            clear+ctrl -> [[clear]], ([left,right,virt_control], DOWN)
-            \t+r up -> [tab], ([r], UP)
-            ctrl 400ms+q -> ??? need to convey: ctrl pressed for at least 0.4s when q is pressed
-            Triggers based on time:
-                q         > q pressed
-                q up      > q released
-                q up 0.5s > q released after 0.5s <= time < 1s
-                q 1s      > q held for 1 sec (trigger when held and time is 1s, not on release after it)
-                                This is hardest to implement I think, can be left for post-release
-                                    because requires suppressing kb repeat, and what to do with just press trigger?
+        a -> [], ([a], DOWN)
+        lmb -> [], ([left_mouse_button], DOWN)
+        alt+f1 -> [[left_alt, right_alt, virtual_alt]], ([f1], DOWN)
+        ctrl+alt+shift+scroll_up -> [[left,right,virt_control], [left,right,virt_alt], [left,right,virt_shift]], ([scroll_wheel_up], DOWN)
+        clear+ctrl -> [[clear]], ([left,right,virt_control], DOWN)
+        \t+r up -> [tab], ([r], UP)
+        ctrl 400ms+q -> [([left,right,virt_control], 0.4)], ([q], DOWN)
+    Triggers based on time:
+        q         > q pressed   [], ([q], DOWN)
+        q up      > q released  [], ([q], UP)
+        q up 0.5s > q released after 0.5s <= time < 1s      [], ([q], UP, 0.5)
+        q 1s      > q held for 1 sec                        [], ([q], DOWN, 1)
+                        (trigger when held and time is 1s, not on release after it)
+                        This is hardest to implement I think, can be left for post-release
+                            because requires suppressing kb repeat, and what to do with just press trigger?
 
 
 
