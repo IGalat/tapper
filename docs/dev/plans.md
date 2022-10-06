@@ -69,4 +69,6 @@ powerwash example action: move left-right, up, repeat - until mouse is moved
 
 an executable with no python dependency for windows dummies
 
+action on press 2s, not on release after 2s (see parser spec)
+
 ### Limitations of implementation / Backlog

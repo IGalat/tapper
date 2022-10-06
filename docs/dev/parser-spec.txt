@@ -1,6 +1,5 @@
 trigger parsing
     :param combo: One combo, to be pressed in one go.
-    :param last symbol?: If true, trigger also "up" on "up". No, not in parser.
 -> tuple(list[list[symbol]], tuple(list[symbol], Direction) )
     list[combos of each auxiliary symbol], combos of trigger symbol
         examples from above:
@@ -10,10 +9,14 @@ trigger parsing
             ctrl+alt+shift+scroll_up -> [[left,right,virt_control], [left,right,virt_alt], [left,right,virt_shift]], ([scroll_wheel_up], DOWN)
             clear+ctrl -> [[clear]], ([left,right,virt_control], DOWN)
             \t+r up -> [tab], ([r], UP)
-
-
-
-
+            ctrl 400ms+q -> ??? need to convey: ctrl pressed for at least 0.4s when q is pressed
+            Triggers based on time:
+                q         > q pressed
+                q up      > q released
+                q up 0.5s > q released after 0.5s <= time < 1s
+                q 1s      > q held for 1 sec (trigger when held and time is 1s, not on release after it)
+                                This is hardest to implement I think, can be left for post-release
+                                    because requires suppressing kb repeat, and what to do with just press trigger?
 
 
 
