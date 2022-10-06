@@ -71,4 +71,6 @@ an executable with no python dependency for windows dummies
 
 action on press 2s, not on release after 2s (see parser spec)
 
+TAPs without triggers, used for un- suspended state
+
 ### Limitations of implementation / Backlog
