@@ -7,3 +7,12 @@ class _OS:
 
 
 os = _OS
+
+
+class KEY_DIR:
+    UP: Final[bool] = False
+    """Key released."""
+    DOWN: Final[bool] = True
+    """Key pressed."""
+    CLICK: Final[None] = None
+    """Key pressed, the released."""
