@@ -33,7 +33,6 @@ def symbols_to_codes(
     """
     symbol_code_map = {v: k for (k, v) in code_symbol_map.items()}
     for maybe_alias, references in symbols.items():
-        if references:  # then maybe_alias is alias
-            code = symbol_code_map[references[0]]
-            symbol_code_map[maybe_alias] = code
+        code = symbol_code_map[references[0]]
+        symbol_code_map[maybe_alias] = code
     return symbol_code_map

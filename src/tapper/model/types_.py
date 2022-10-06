@@ -12,7 +12,7 @@ Signal emitted by SignalListener. Is not alias to other symbol.
 :param down: Is key pressed down? False if it is released.
 """
 
-SymbolsWithAliases = dict[str, list[str] | None]
+SymbolsWithAliases = dict[str, list[str]]
 """              symbol/alias, reference
 A collection of symbols that may be aliases to other symbols, or not.
 

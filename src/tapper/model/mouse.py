@@ -50,8 +50,10 @@ def get_key_list() -> list[str]:
 def get_keys() -> SymbolsWithAliases:
     """All mouse buttons and aliases.
 
-    Only aliases value is not None but a list of non-alias keys."""
-    all_keys = dict.fromkeys(get_key_list(), None)
+    Non-aliases value is list of one item: themselves.
+    Aliases value is a list of non-alias keys.
+    """
+    all_keys = {key: [key] for key in get_key_list()}
     all_keys.update(aliases)
     return all_keys
 

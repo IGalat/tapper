@@ -173,9 +173,10 @@ def get_key_list(os: str | None = None) -> list[str]:
 def get_keys(os: str | None = None) -> SymbolsWithAliases:
     """All keys on en-US keyboard, including platform specific and aliases.
 
-    Only aliases value is not None but a list of non-alias keys.
+    Non-aliases value is list of one item: themselves.
+    Aliases value is a list of non-alias keys.
     """
-    all_keys = dict.fromkeys(get_key_list(os), None)
+    all_keys = {key: [key] for key in get_key_list(os)}
     all_keys.update(aliases)
     return all_keys
 

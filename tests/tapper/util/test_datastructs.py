@@ -24,7 +24,7 @@ def tuple_for_sym_to_codes(
     _codes = draw(st.lists(st.integers(), unique=True))
     _symbols = draw(st.lists(strategies.words, unique=True))
     code_symbol_map = dict(zip(_codes, _symbols))
-    symbols = {v: None for v in code_symbol_map.values()}
+    symbols = {v: [v] for v in code_symbol_map.values()}
     if symbols:
         references = list(symbols.keys())
         aliases = draw(
