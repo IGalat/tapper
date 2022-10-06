@@ -114,7 +114,7 @@ aliases: SymbolsWithAliases = {
 }
 
 platform_specific_keys = {
-    constants.os.win32: [
+    constants.OS.win32: [
         "browser_back",
         "browser_forward",
         "browser_refresh",

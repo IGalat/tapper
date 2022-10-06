@@ -43,4 +43,4 @@ def _get_win32_impl() -> type[KeyboardCommander]:
     return win32_kb_commander.Win32KeyboardCommander
 
 
-_os_impl_list = {constants.os.win32: _get_win32_impl}
+_os_impl_list = {constants.OS.win32: _get_win32_impl}

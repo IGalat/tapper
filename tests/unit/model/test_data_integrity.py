@@ -8,7 +8,7 @@ kb_lang_dependent_characters = (
 ) * 2  # lower, upper
 
 
-@pytest.mark.parametrize("os", [constants.os.dummy, constants.os.win32])
+@pytest.mark.parametrize("os", [constants.OS.dummy, constants.OS.win32])
 def test_keyboard_alias(os: str) -> None:
     all_keys = keyboard.get_keys(os)
     keys_no_alias = keyboard.get_key_list(os)
@@ -27,10 +27,10 @@ def test_keyboard_lang_chars_len() -> None:
 
 def test_win32_vk_code_symbol_map() -> None:
     assert len(keyboard.win32_vk_code_to_symbol_map) == len(
-        keyboard.get_key_list(constants.os.win32)
+        keyboard.get_key_list(constants.OS.win32)
     ) - len(keyboard.chars_en_upper)
     reverse_map = [key for (code, key) in keyboard.win32_vk_code_to_symbol_map.items()]
-    for symbol in keyboard.get_key_list(constants.os.win32):
+    for symbol in keyboard.get_key_list(constants.OS.win32):
         assert symbol in reverse_map or symbol in keyboard.chars_en_upper
 
 

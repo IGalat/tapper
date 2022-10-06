@@ -61,4 +61,4 @@ def _get_win32_impl() -> type[MouseCommander]:
     return win32_mouse_commander.Win32MouseCommander
 
 
-_os_impl_list = {constants.os.win32: _get_win32_impl}
+_os_impl_list = {constants.OS.win32: _get_win32_impl}

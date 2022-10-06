@@ -8,10 +8,10 @@ from tapper.model.types_ import Signal
 from tapper.signal.keyboard.keyboard_listener import KeyboardSignalListener
 
 
-@pytest.mark.skipif(sys.platform != constants.os.win32, reason="")
+@pytest.mark.skipif(sys.platform != constants.OS.win32, reason="")
 class TestWin32Listener:
     get_listener: KeyboardSignalListener = functools.partial(
-        KeyboardSignalListener.get_for_os, constants.os.win32
+        KeyboardSignalListener.get_for_os, constants.OS.win32
     )
 
     def test_all_keys(self) -> None:

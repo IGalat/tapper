@@ -23,4 +23,4 @@ def _get_win32_impl() -> type[KeyboardSignalListener]:
     return win32_kb_listener.Win32KeyboardSignalListener
 
 
-_os_impl_list = {constants.os.win32: _get_win32_impl}
+_os_impl_list = {constants.OS.win32: _get_win32_impl}
