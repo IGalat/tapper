@@ -5,6 +5,7 @@ from tapper import parser
 from tapper.model import constants
 from tapper.model import keyboard
 from tapper.model import mouse
+from tapper.model.errors import TriggerParseError
 from tapper.model.trigger import Trigger
 from tapper.model.trigger import TriggerKey
 
@@ -29,7 +30,7 @@ class TestTriggerParser:
         assert parse("a") == Trigger.from_simple(main=["a"])
 
     def test_non_registered_symbol(self, parse: ParseFn) -> None:
-        with pytest.raises(ValueError):
+        with pytest.raises(TriggerParseError):
             parse("qwerasdf")
 
     def test_with_alias(self, parse: ParseFn) -> None:
@@ -41,9 +42,9 @@ class TestTriggerParser:
         )
 
     def test_combo_with_nothing(self, parse: ParseFn) -> None:
-        with pytest.raises(ValueError):
+        with pytest.raises(TriggerParseError):
             parse("1+")
-        with pytest.raises(ValueError):
+        with pytest.raises(TriggerParseError):
             parse("+home")
 
     def test_alias_points_to_many(self, parse: ParseFn) -> None:
@@ -93,12 +94,28 @@ class TestTriggerParser:
         )
 
     def test_same_symbol(self, parse: ParseFn) -> None:
-        with pytest.raises(ValueError):
+        with pytest.raises(TriggerParseError):
             parse("+++")
-        with pytest.raises(ValueError):
+        with pytest.raises(TriggerParseError):
             parse("lshift+A")
-        with pytest.raises(ValueError):
+        with pytest.raises(TriggerParseError):
             parse(" +space")
+
+    def test_two_capital_letters(self, parse: ParseFn) -> None:
+        assert parse("A+B") == Trigger(
+            main=TriggerKey(["b"]),
+            auxiliary=[TriggerKey(["a"]), TriggerKey(shift_list)],
+        )
+
+    def test_space_and_plus(self, parse: ParseFn) -> None:
+        assert parse("++ ") == Trigger(
+            main=TriggerKey(["space"]),
+            auxiliary=[TriggerKey(["="]), TriggerKey(shift_list)],
+        )
+        assert parse(" ++") == Trigger(
+            main=TriggerKey(["="]),
+            auxiliary=[TriggerKey(["space"]), TriggerKey(shift_list)],
+        )
 
     def test_up_simplest(self, parse: ParseFn) -> None:
         assert parse("num0 up") == Trigger(
