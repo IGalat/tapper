@@ -163,10 +163,8 @@ chars_en_upper = chars_en[len(chars_en) // 2 :]
 @cache
 def get_key_list(os: str | None = None) -> list[str]:
     """All keys on en-US keyboard, including platform specific, BUT not aliases."""
-    plat_keys = []
-    if os in platform_specific_keys:
-        plat_keys = platform_specific_keys[os]
-    return [*special_chars, *chars_en, *plat_keys]
+    platform_keys = platform_specific_keys.get(os, [])
+    return [*special_chars, *chars_en, *platform_keys]
 
 
 @cache
