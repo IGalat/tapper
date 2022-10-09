@@ -15,7 +15,6 @@ alt_list = keyboard.aliases["alt"]
 ctrl_list = keyboard.aliases["ctrl"]
 
 
-@pytest.mark.xfail
 class TestTriggerParser:
     ParseFn = Callable[[str], Trigger]
 
