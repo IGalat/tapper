@@ -111,6 +111,7 @@ aliases: SymbolsWithAliases = {
     "\n": ["enter"],
     "\t": ["tab"],
     "\r": ["return"],
+    " ": ["space"],
 }
 
 platform_specific_keys = {
