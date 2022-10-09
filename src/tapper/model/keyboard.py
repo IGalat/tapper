@@ -159,6 +159,10 @@ chars_en = [
 chars_en_lower = chars_en[: len(chars_en) // 2]
 chars_en_upper = chars_en[len(chars_en) // 2 :]
 
+chars_en_upper_to_lower = {
+    upper: lower for (upper, lower) in zip(chars_en_upper, chars_en_lower)
+}
+
 
 @cache
 def get_key_list(os: str | None = None) -> list[str]:
