@@ -1,7 +1,6 @@
 from typing import Callable
 
 import pytest
-from tapper import parser
 from tapper.model import constants
 from tapper.model import keyboard
 from tapper.model import mouse
@@ -9,6 +8,7 @@ from tapper.model.errors import TriggerParseError
 from tapper.model.trigger import AuxiliaryKey
 from tapper.model.trigger import MainKey
 from tapper.model.trigger import Trigger
+from tapper.parser import trigger_parser
 
 shift_list = keyboard.aliases["shift"]
 alt_list = keyboard.aliases["alt"]
@@ -20,11 +20,13 @@ class TestTriggerParser:
 
     @pytest.fixture(scope="class")
     def parse(self) -> ParseFn:
-        return parser.TriggerParser([keyboard.get_keys(), mouse.get_keys()]).parse
+        return trigger_parser.TriggerParser(
+            [keyboard.get_keys(), mouse.get_keys()]
+        ).parse
 
     def test_register_existing_symbol(self) -> None:
         with pytest.raises(ValueError):
-            parser.TriggerParser([keyboard.get_keys(), {"a": ["a"]}])
+            trigger_parser.TriggerParser([keyboard.get_keys(), {"a": ["a"]}])
 
     def test_one_symbol_simplest(self, parse: ParseFn) -> None:
         assert parse("a") == Trigger(MainKey(["a"]))
