@@ -78,7 +78,7 @@ class TestTriggerParser:
 
     def test_one_aux_many_main(self, parse: ParseFn) -> None:
         assert parse("clear+ctrl") == Trigger(
-            MainKey(shift_list), [AuxiliaryKey(["clear"])]
+            MainKey(ctrl_list), [AuxiliaryKey(["clear"])]
         )
 
     def test_control_symbols(self, parse: ParseFn) -> None:
