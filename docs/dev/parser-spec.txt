@@ -27,10 +27,10 @@ command parsing
       - Any registered symbols, such as "a", "backspace", "lmb", "ctrl", "scroll_left"
         Note that unlike outside of combos, characters are not recognised individually:
             "Hello" -> ERROR, symbol "Hello" not recognised
-            "p" -> p down, up. As usual
+            "p" -> p down,up. As usual
       - Property chaining via space " ":
         - "up"/"down" only press key in one direction:
-            a -> a down,up; "a down" -> a down
+            "a" -> a down,up; "a down" -> a down
             Any key that does not have an appropriate function will be ignored, such as wheel_up that cannot go up.
         - "<FLOAT>s"/"<INT>ms" sleep for specified seconds/milliseconds:
             When without direction, will sleep after "down":
@@ -63,4 +63,4 @@ command parsing
         - "<FLOAT>s"/"<INT>ms" - sleep for specified time:
             enter;300ms;tab -> enter down,up, sleep 0.3s, tab down,up
                 This is different from symbol property:
-                    enter 300ms; tab -> enter down, sleep 0.3s, enter up, tab down,up
+                    enter 300ms;tab -> enter down, sleep 0.3s, enter up, tab down,up
