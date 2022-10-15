@@ -1,3 +1,7 @@
+SECONDS_REGEX = r"\d*\.?\d+s"
+MILLIS_REGEX = r"\d+ms"
+
+
 def split(text: str, delimiter: str, min_len: int = 1) -> list[str]:
     """Split str, with minimum length of tokens.
 

@@ -17,7 +17,7 @@ class KeyInstruction(SendInstruction):
 
 
 @dataclass
-class MouseWheelInstruction(SendInstruction):
+class WheelInstruction(SendInstruction):
     """Single mouse wheel scroll."""
 
     wheel_symbol: str

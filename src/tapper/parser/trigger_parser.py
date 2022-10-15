@@ -11,7 +11,7 @@ from tapper.model.trigger import AuxiliaryKey
 from tapper.model.trigger import MainKey
 from tapper.model.trigger import Trigger
 from tapper.model.types_ import SymbolsWithAliases
-from tapper.parser import util
+from tapper.parser import common
 from tapper.util import datastructs
 
 SYMBOL_DELIMITER = "+"
@@ -27,8 +27,12 @@ class _TriggerProp:
 
 
 _COMMON_PROPS = {
-    "Time in seconds": _TriggerProp(r"\d*\.?\d+s", "time", lambda s: float(s[:-1])),
-    "Time in millis": _TriggerProp(r"\d+ms", "time", lambda ms: float(ms[:-2]) / 1000),
+    "Time in seconds": _TriggerProp(
+        common.SECONDS_REGEX, "time", lambda s: float(s[:-1])
+    ),
+    "Time in millis": _TriggerProp(
+        common.MILLIS_REGEX, "time", lambda ms: float(ms[:-2]) / 1000
+    ),
 }
 _MAIN_PROPS = {
     **_COMMON_PROPS,
@@ -123,8 +127,8 @@ class TriggerParser:
 
     def _parse_keys(self, trigger_text: str) -> Iterator[_Key]:
         """Parses whole combo to keys."""
-        for symbols_props in util.split(trigger_text, SYMBOL_DELIMITER):
-            sym_props = util.split(symbols_props, PROPERTY_DELIMITER)
+        for symbols_props in common.split(trigger_text, SYMBOL_DELIMITER):
+            sym_props = common.split(symbols_props, PROPERTY_DELIMITER)
             symbols = self._resolve_symbol(sym_props[0])
             props = [] if len(sym_props) < 2 else sym_props[1:]
             yield _Key(symbols, props)
