@@ -4,3 +4,7 @@ class NotSubstitutedError(UnboundLocalError):
 
 class TriggerParseError(ValueError):
     """Incorrectly specified trigger text."""
+
+
+class SendParseError(ValueError):
+    """Incorrectly specified send command text."""

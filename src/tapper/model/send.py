@@ -15,7 +15,9 @@ class KeyInstruction(SendInstruction):
     symbol: str
     dir: constants.KEY_DIR
 
-    def __init__(self, symbol: str, dir: constants.KEY_DIR | str) -> None:
+    def __init__(
+        self, symbol: str, dir: constants.KEY_DIR | str = constants.KEY_DIR.click
+    ) -> None:
         self.symbol = symbol
         self.dir = dir if isinstance(dir, constants.KEY_DIR) else constants.KEY_DIR[dir]
 
