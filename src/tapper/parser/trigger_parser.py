@@ -32,7 +32,7 @@ _COMMON_PROPS = {
 }
 _MAIN_PROPS = {
     **_COMMON_PROPS,
-    "up": _TriggerProp(r"up", "direction", lambda _: constants.KEY_DIR.UP),
+    "up": _TriggerProp(r"up", "direction", lambda _: constants.KEY_DIR_BOOL.up),
 }
 _AUX_PROPS = {**_COMMON_PROPS}
 

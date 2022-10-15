@@ -1,15 +1,34 @@
+from enum import Enum
 from typing import Final
 
 
-class OS:
-    dummy: Final[str] = "dummy"
-    win32: Final[str] = "win32"
+class KEY_DIR(str, Enum):
+    """Key direction. This is used for commands.
 
+    Some keys may only be pressed (example: mouse wheel).
+    """
 
-class KEY_DIR:
-    UP: Final[bool] = False
+    up = "up"
     """Key released."""
-    DOWN: Final[bool] = True
+    down = "down"
     """Key pressed."""
-    CLICK: Final[None] = None
+    click = "click"
     """Key pressed, the released."""
+    on = "on"
+    """If key is not toggled on, click, else nothing."""
+    off = "off"
+    """If key is not toggled off, click, else nothing."""
+
+
+class KEY_DIR_BOOL:
+    """Key direction. Used for signal recognition."""
+
+    up: Final[bool] = False
+    """Key released."""
+    down: Final[bool] = True
+    """Key pressed."""
+
+
+class OS(str, Enum):
+    dummy = "dummy"
+    win32 = "win32"

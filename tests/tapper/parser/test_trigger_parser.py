@@ -122,12 +122,12 @@ class TestTriggerParser:
 
     def test_up_simplest(self, parse: ParseFn) -> None:
         assert parse("num0 up") == Trigger(
-            MainKey(["num0"], direction=constants.KEY_DIR.UP)
+            MainKey(["num0"], direction=constants.KEY_DIR_BOOL.up)
         )
 
     def test_up_with_modifier(self, parse: ParseFn) -> None:
         assert parse("\\+] up") == Trigger(
-            MainKey(["]"], direction=constants.KEY_DIR.UP),
+            MainKey(["]"], direction=constants.KEY_DIR_BOOL.up),
             [AuxiliaryKey(["\\"])],
         )
 
@@ -158,16 +158,16 @@ class TestTriggerParser:
 
     def test_up_time(self, parse: ParseFn) -> None:
         assert parse("q 2s up") == Trigger(
-            MainKey(["q"], time=2, direction=constants.KEY_DIR.UP)
+            MainKey(["q"], time=2, direction=constants.KEY_DIR_BOOL.up)
         )
 
     def test_up_time_with_mod_time(self, parse: ParseFn) -> None:
         assert parse("alt 1s+esc 350ms up") == Trigger(
-            MainKey(["escape"], time=0.35, direction=constants.KEY_DIR.UP),
+            MainKey(["escape"], time=0.35, direction=constants.KEY_DIR_BOOL.up),
             [AuxiliaryKey(alt_list, time=1)],
         )
 
     def test_up_time_different_order(self, parse: ParseFn) -> None:
         assert parse("g up 1s") == Trigger(
-            MainKey(["g"], time=1, direction=constants.KEY_DIR.UP)
+            MainKey(["g"], time=1, direction=constants.KEY_DIR_BOOL.up)
         )
