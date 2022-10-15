@@ -31,6 +31,11 @@ primitives = (
     | st.binary()
 )
 
+"""Dictionaries not included."""
+primitives_and_seq = (
+    primitives | st.lists(primitives) | st.tuples(primitives) | st.sets(primitives)
+)
+
 
 @st.composite
 def code_symbol_maps(draw: st.DrawFn) -> dict[int, str]:
