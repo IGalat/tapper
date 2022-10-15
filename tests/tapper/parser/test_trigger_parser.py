@@ -14,46 +14,17 @@ shift_list = keyboard.aliases["shift"]
 alt_list = keyboard.aliases["alt"]
 ctrl_list = keyboard.aliases["ctrl"]
 
+ParseFn = Callable[[str], Trigger]
 
-class TestTriggerParser:
-    ParseFn = Callable[[str], Trigger]
 
-    @pytest.fixture(scope="class")
-    def parse(self) -> ParseFn:
-        return trigger_parser.TriggerParser(
-            [keyboard.get_keys(), mouse.get_keys()]
-        ).parse
+@pytest.fixture(scope="module")
+def parse() -> ParseFn:
+    return trigger_parser.TriggerParser([keyboard.get_keys(), mouse.get_keys()]).parse
 
-    def test_register_existing_symbol(self) -> None:
-        with pytest.raises(ValueError):
-            trigger_parser.TriggerParser([keyboard.get_keys(), {"a": ["a"]}])
 
+class TestMisc:
     def test_one_symbol_simplest(self, parse: ParseFn) -> None:
         assert parse("a") == Trigger(MainKey(["a"]))
-
-    def test_non_registered_symbol(self, parse: ParseFn) -> None:
-        with pytest.raises(TriggerParseError):
-            parse("qwerasdf")
-
-    def test_with_alias(self, parse: ParseFn) -> None:
-        assert parse("mmb") == Trigger(MainKey(["middle_mouse_button"]))
-
-    def test_combo_with_aliases(self, parse: ParseFn) -> None:
-        assert parse("esc+scroll_up") == Trigger(
-            MainKey(["scroll_wheel_up"]), [AuxiliaryKey(["escape"])]
-        )
-
-    def test_combo_with_nothing(self, parse: ParseFn) -> None:
-        with pytest.raises(TriggerParseError):
-            parse("1+")
-        with pytest.raises(TriggerParseError):
-            parse("+home")
-
-    def test_alias_points_to_many(self, parse: ParseFn) -> None:
-        assert parse("control") == Trigger(MainKey(ctrl_list))
-
-    def test_alias_with_modifier(self, parse: ParseFn) -> None:
-        assert parse("alt+f1") == Trigger(MainKey(["f1"]), [AuxiliaryKey(alt_list)])
 
     def test_uppercase(self, parse: ParseFn) -> None:
         assert parse("R") == Trigger(MainKey(["r"]), [AuxiliaryKey(shift_list)])
@@ -82,11 +53,60 @@ class TestTriggerParser:
             MainKey(ctrl_list), [AuxiliaryKey(["clear"])]
         )
 
+    def test_two_capital_letters(self, parse: ParseFn) -> None:
+        assert parse("A+B") == Trigger(
+            MainKey(["b"]),
+            [AuxiliaryKey(["a"]), AuxiliaryKey(shift_list)],
+        )
+
+    def test_up_simplest(self, parse: ParseFn) -> None:
+        assert parse("num0 up") == Trigger(
+            MainKey(["num0"], direction=constants.KEY_DIR_BOOL.up)
+        )
+
+    def test_up_with_modifier(self, parse: ParseFn) -> None:
+        assert parse("\\+] up") == Trigger(
+            MainKey(["]"], direction=constants.KEY_DIR_BOOL.up),
+            [AuxiliaryKey(["\\"])],
+        )
+
+
+class TestAlias:
+    def test_with_alias(self, parse: ParseFn) -> None:
+        assert parse("mmb") == Trigger(MainKey(["middle_mouse_button"]))
+
+    def test_combo_with_aliases(self, parse: ParseFn) -> None:
+        assert parse("esc+scroll_up") == Trigger(
+            MainKey(["scroll_wheel_up"]), [AuxiliaryKey(["escape"])]
+        )
+
+    def test_alias_points_to_many(self, parse: ParseFn) -> None:
+        assert parse("control") == Trigger(MainKey(ctrl_list))
+
+    def test_alias_with_modifier(self, parse: ParseFn) -> None:
+        assert parse("alt+f1") == Trigger(MainKey(["f1"]), [AuxiliaryKey(alt_list)])
+
     def test_control_symbols(self, parse: ParseFn) -> None:
         assert parse("\t+\n") == Trigger(MainKey(["enter"]), [AuxiliaryKey(["tab"])])
 
     def test_space(self, parse: ParseFn) -> None:
         assert parse(" ") == Trigger(MainKey(["space"]))
+
+
+class TestEdgeCases:
+    def test_register_existing_symbol(self) -> None:
+        with pytest.raises(ValueError):
+            trigger_parser.TriggerParser([keyboard.get_keys(), {"a": ["a"]}])
+
+    def test_non_registered_symbol(self, parse: ParseFn) -> None:
+        with pytest.raises(TriggerParseError):
+            parse("qwerasdf")
+
+    def test_combo_with_nothing(self, parse: ParseFn) -> None:
+        with pytest.raises(TriggerParseError):
+            parse("1+")
+        with pytest.raises(TriggerParseError):
+            parse("+home")
 
     def test_plus(self, parse: ParseFn) -> None:
         assert parse("1++") == Trigger(
@@ -104,12 +124,6 @@ class TestTriggerParser:
         with pytest.raises(TriggerParseError):
             parse(" +space")
 
-    def test_two_capital_letters(self, parse: ParseFn) -> None:
-        assert parse("A+B") == Trigger(
-            MainKey(["b"]),
-            [AuxiliaryKey(["a"]), AuxiliaryKey(shift_list)],
-        )
-
     def test_space_and_plus(self, parse: ParseFn) -> None:
         assert parse("++ ") == Trigger(
             MainKey(["space"]),
@@ -120,17 +134,8 @@ class TestTriggerParser:
             [AuxiliaryKey(["space"]), AuxiliaryKey(shift_list)],
         )
 
-    def test_up_simplest(self, parse: ParseFn) -> None:
-        assert parse("num0 up") == Trigger(
-            MainKey(["num0"], direction=constants.KEY_DIR_BOOL.up)
-        )
 
-    def test_up_with_modifier(self, parse: ParseFn) -> None:
-        assert parse("\\+] up") == Trigger(
-            MainKey(["]"], direction=constants.KEY_DIR_BOOL.up),
-            [AuxiliaryKey(["\\"])],
-        )
-
+class TestTime:
     def test_time_simplest(self, parse: ParseFn) -> None:
         assert (
             parse("space 0.5s")
