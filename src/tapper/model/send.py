@@ -1,5 +1,6 @@
 from abc import ABC
 from dataclasses import dataclass
+from dataclasses import field
 
 from tapper.model import constants
 
@@ -8,18 +9,12 @@ class SendInstruction(ABC):
     """Single instruction parsed from send command."""
 
 
-@dataclass(init=False)
+@dataclass
 class KeyInstruction(SendInstruction):
     """Regular key, such as on keyboard or mouse button. Generic."""
 
     symbol: str
-    dir: constants.KEY_DIR
-
-    def __init__(
-        self, symbol: str, dir: constants.KEY_DIR | str = constants.KEY_DIR.click
-    ) -> None:
-        self.symbol = symbol
-        self.dir = dir if isinstance(dir, constants.KEY_DIR) else constants.KEY_DIR[dir]
+    dir: constants.KEY_DIR = field(default=constants.KEY_DIR.click)
 
 
 @dataclass

@@ -8,6 +8,9 @@ from tapper.model.send import SendInstruction
 class SendParser:
     """Parses the 'send' command."""
 
+    combo_wrap: str = "$(_)"
+    """Symbols that wrap the combo.
+    Must contain "_" as placeholder for content, at least 1 opening and closing char."""
     symbols: dict[str, type[SendInstruction]] = field(default_factory=dict)
     """Symbol and corresponding command."""
     regexes: dict[str, type[SendInstruction]] = field(default_factory=dict)
