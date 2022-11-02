@@ -14,7 +14,7 @@ class KeyInstruction(SendInstruction):
     """Regular key, such as on keyboard or mouse button. Generic."""
 
     symbol: str
-    dir: constants.KEY_DIR = field(default=constants.KEY_DIR.click)
+    dir: constants.KeyDir = field(default=constants.KeyDir.CLICK)
 
 
 @dataclass

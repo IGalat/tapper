@@ -12,10 +12,10 @@ from tapper.model.send import WheelInstruction
 from tapper.parser import common
 from tapper.parser import send_parser
 
-down = constants.KEY_DIR.down
-up = constants.KEY_DIR.up
-on = constants.KEY_DIR.on
-off = constants.KEY_DIR.off
+down = constants.KeyDir.DOWN
+up = constants.KeyDir.UP
+on = constants.KeyDir.ON
+off = constants.KeyDir.OFF
 
 KI = KeyInstruction
 
