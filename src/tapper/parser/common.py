@@ -1,9 +1,32 @@
-SECONDS_REGEX = r"\d*\.?\d+s"
-MILLIS_REGEX = r"\d+ms"
+from typing import Any
+from typing import Callable
 
 
-def split(text: str, delimiter: str, min_len: int = 1) -> list[str]:
-    """Split str, with minimum length of tokens.
+class ParsedProp:
+    regex: str
+    fn: Callable[[str], Any]
+
+
+class SECONDS(ParsedProp):
+    @staticmethod
+    def parse_seconds(s: str) -> float:
+        return float(s[:-1])
+
+    regex = r"\d*\.?\d+s"
+    fn = parse_seconds
+
+
+class MILLIS(ParsedProp):
+    @staticmethod
+    def parse_millis(ms: str) -> float:
+        return float(ms[:-2]) / 1000
+
+    regex = r"\d+ms"
+    fn = parse_millis
+
+
+def split(text: str, delimiter: str) -> list[str]:
+    """Split str, with minimum length of tokens same as delimiter.
 
     Allows using the same delimiter as token.
 
@@ -17,7 +40,7 @@ def split(text: str, delimiter: str, min_len: int = 1) -> list[str]:
         raise ValueError("No delimiter specified.")
     result = []
     start_pos = 0
-    while (delim_pos := text.find(delimiter, start_pos + min_len)) != -1:
+    while (delim_pos := text.find(delimiter, start_pos + len(delimiter))) != -1:
         result.append(text[start_pos:delim_pos])
         start_pos = delim_pos + len(delimiter)
     result.append(text[start_pos:])

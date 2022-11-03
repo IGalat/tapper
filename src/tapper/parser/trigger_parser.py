@@ -27,12 +27,8 @@ class _TriggerProp:
 
 
 _COMMON_PROPS = {
-    "Time in seconds": _TriggerProp(
-        common.SECONDS_REGEX, "time", lambda s: float(s[:-1])
-    ),
-    "Time in millis": _TriggerProp(
-        common.MILLIS_REGEX, "time", lambda ms: float(ms[:-2]) / 1000
-    ),
+    "Time in seconds": _TriggerProp(common.SECONDS.regex, "time", common.SECONDS.fn),
+    "Time in millis": _TriggerProp(common.MILLIS.regex, "time", common.MILLIS.fn),
 }
 _MAIN_PROPS = {
     **_COMMON_PROPS,

@@ -37,8 +37,8 @@ def parse() -> ParseFn:
         _parser.symbols[symbol] = KI
     for wheel in [*mouse.wheel_buttons, *mouse.wheel_aliases.keys()]:
         _parser.symbols[wheel] = WheelInstruction
-    _parser.regexes[common.SECONDS_REGEX] = SleepInstruction
-    _parser.regexes[common.MILLIS_REGEX] = SleepInstruction
+    _parser.regexes[common.SECONDS.regex] = SleepInstruction
+    _parser.regexes[common.MILLIS.regex] = SleepInstruction
     return _parser.parse
 
 
