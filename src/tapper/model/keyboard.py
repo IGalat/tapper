@@ -114,7 +114,7 @@ aliases: SymbolsWithAliases = {
     " ": ["space"],
 }
 
-platform_specific_keys = {
+platform_specific_keys: dict[str, list[str]] = {
     constants.OS.win32: [
         "browser_back",
         "browser_forward",
@@ -164,11 +164,13 @@ chars_en_upper_to_lower = {
     upper: lower for (upper, lower) in zip(chars_en_upper, chars_en_lower)
 }
 
+shift = "shift"
+
 
 @cache
 def get_key_list(os: str | None = None) -> list[str]:
     """All keys on en-US keyboard, including platform specific, BUT not aliases."""
-    platform_keys = platform_specific_keys.get(os, [])
+    platform_keys = platform_specific_keys.get(os, [])  # type: ignore
     return [*special_chars, *chars_en, *platform_keys]
 
 
