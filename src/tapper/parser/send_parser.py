@@ -1,6 +1,8 @@
+import copy
 import re
 from dataclasses import dataclass
 from dataclasses import field
+from functools import cache
 from typing import Any
 from typing import Callable
 from typing import Optional
@@ -39,6 +41,9 @@ class _Key:
     props: list[str]
     """Unparsed properties."""
 
+    def __hash__(self) -> int:
+        return super().__hash__()
+
 
 def to_content(combo: re.Match[str]) -> str:
     """Extracts contents of the combo from re.Match object."""
@@ -60,9 +65,13 @@ class SendParser:
     ] = field(default_factory=dict)
     """Regex and corresponding instruction and action to parse values for the instruction."""
 
+    def __hash__(self) -> int:
+        return super().__hash__()
+
     def set_wrap(self, combo_wrap: str) -> None:
         self.combo_prefix, self.combo_suffix, self.pattern = parse_wrap(combo_wrap)
 
+    @cache
     def parse(self, command: str) -> list[SendInstruction]:
         """Parse send command into sequential instructions."""
         if not self.pattern:
@@ -78,7 +87,7 @@ class SendParser:
                 combo = combos[0]
                 if i == combo.start():
                     combos.remove(combo)
-                    cmds, shift_down = self.parse_combo(to_content(combo), shift_down)
+                    cmds = self.parse_combo(to_content(combo), shift_down)
                     result.extend(cmds)
 
                     i = combo.end()
@@ -107,6 +116,7 @@ class SendParser:
             result.append(KeyInstruction(keyboard.shift, constants.KeyDir.UP))
         return result
 
+    @cache
     def match_combos(self, command: str) -> list[re.Match[str]]:
         start = 0
         matches = []
@@ -115,40 +125,51 @@ class SendParser:
             start = match.end()
         return matches
 
-    def parse_combo(
-        self, content: str, shift_down: bool
-    ) -> tuple[list[SendInstruction], bool]:
+    @cache
+    def parse_combo(self, content: str, shift_down: bool) -> list[SendInstruction]:
         """
         Parse a combo from content string
         :param content: string like "a+b"
         :param shift_down: if shift is down before combo
-        :return: parsed instructions, new shift_down value
+        :return: parsed instructions
         """
+        result = self._parse_combo(content)
+        if shift_down:
+            result.insert(0, ki_shift_up)
+            result.append(ki_shift_down)
+        return result
+
+    @cache
+    def _parse_combo(self, content: str) -> list[SendInstruction]:
+
         if not content:
             raise SendParseError
 
         symbols_split = common.split(content, SYMBOL_DELIMITER)
         chain_symbols_split = symbols_split[:-1]
 
-        # Buggy but will do for now. If ; - recursive
-        for one_split in chain_symbols_split:
+        for i in range(len(symbols_split)):
+            one_split = symbols_split[i]
             if COMBO_DELIMITER in one_split[1:]:
+                combo_delim_index = i + 1 + one_split.index(COMBO_DELIMITER, 1)
+                combo_delim_index += sum(len(s) for s in symbols_split[:i])
+
                 parsed_combos = [
-                    self.parse_combo(combo, shift_down)
-                    for combo in content.split(COMBO_DELIMITER)
+                    self._parse_combo(combo)
+                    for combo in [
+                        content[: combo_delim_index - 1],
+                        content[combo_delim_index:],
+                    ]
                 ]
-                return (
-                    datastructs.to_flat_list(parsed_combos),
-                    shift_down,
-                )
+                return datastructs.to_flat_list(parsed_combos)
 
         result = []
         result_wrap = []
 
         for chain_split in chain_symbols_split:
             key = _Key(*common.parse_symbol_and_props(chain_split, PROPERTY_DELIMITER))
-            opening, closing, shift_down = self.parse_chain_split(key, shift_down)
-            result.append(opening)
+            opening, closing = self.parse_chain_split(key)
+            result.extend(opening)
             if closing:
                 result_wrap.append(closing)
 
@@ -157,39 +178,57 @@ class SendParser:
             symbol, props = common.parse_symbol_and_props(
                 last_split, PROPERTY_DELIMITER
             )
-            instructions, shift_down = self.parse_last_split(
-                _Key(symbol, props), shift_down
-            )
+            instructions = self.parse_last_split(_Key(symbol, props))
             result.extend(instructions)
 
-        result.extend(result_wrap[:-1:])
-        return result, shift_down
+        result.extend(result_wrap[::-1])
+        return result
 
+    @cache
     def parse_chain_split(
-        self, key: _Key, shift_down: bool
-    ) -> tuple[SendInstruction, Optional[SendInstruction], bool]:
+        self, key: _Key
+    ) -> tuple[list[SendInstruction], Optional[SendInstruction]]:
         """
         In combo like       "a+b 20ms+lmb 2x"
         :param key: one of   ^ ^^^^^^
-        :param shift_down: if shift is down before symbol
-        :return: opening instruction, closing instruction, new shift_down value
+        :return: opening instruction, closing instruction
         """
-        pass
+        if key.symbol not in self.symbols:
+            if key.props:
+                raise SendParseError
+            return self.parse_regex_symbol(key.symbol), None
 
-    def parse_last_split(
-        self, key: _Key, shift_down: bool
-    ) -> tuple[list[SendInstruction], bool]:
+        if key.symbol in keyboard.chars_en_upper:
+            raise SendParseError
+
+        instruction_type = self.symbols[key.symbol]
+        if instruction_type == KeyInstruction:
+            base_ins = KeyInstruction(key.symbol)
+        else:
+            base_ins = WheelInstruction(key.symbol)
+
+        opening = copy.deepcopy(base_ins)
+        opening.dir = constants.KeyDir.DOWN
+        closing = copy.deepcopy(base_ins)
+        closing.dir = constants.KeyDir.UP
+
+        return [opening], closing
+
+    @cache
+    def parse_last_split(self, key: _Key) -> list[SendInstruction]:
         """
         In combo like       "a+b 20ms+lmb 2x"
         :param key:                   ^^^^^^
-        :param shift_down: if shift is down before symbol
-        :return: all instructions, new shift_down value
+        :return: all instructions
         """
         result = []
         if key.symbol not in self.symbols:
             if key.props:
                 raise SendParseError
-            return self.parse_regex_symbol(key.symbol), shift_down
+            return self.parse_regex_symbol(key.symbol)
+
+        if key.symbol in keyboard.chars_en_upper:
+            raise SendParseError
 
         instruction_type = self.symbols[key.symbol]
         if instruction_type == KeyInstruction:
@@ -199,8 +238,9 @@ class SendParser:
 
         result = [base_ins]
 
-        return result, shift_down
+        return result
 
+    @cache
     def parse_regex_symbol(self, symbol: str) -> list[SendInstruction]:
         for regex, value in self.regexes.items():
             instruction_type, fn = value

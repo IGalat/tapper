@@ -122,7 +122,6 @@ class TestSimplestCombosAndMix:
         assert parse("$(1234ms)") == [SleepInstruction(1.234)]
 
 
-@pytest.mark.xfail
 class TestCombosWithoutProps:
     def test_simplest(self, parse: ParseFn) -> None:
         assert parse("$(alt+q)") == [KI("alt", down), KI("q"), KI("alt", up)]
@@ -165,22 +164,13 @@ class TestCombosWithoutProps:
         )
 
     def test_upper(self, parse: ParseFn) -> None:
-        assert parse("$(A+B)") == [
-            shift_down,
-            KI("a", down),
-            KI("b"),
-            KI("a", up),
-            shift_up,
-        ]
+        with pytest.raises(SendParseError):
+            parse("$(A+B)")
 
     def test_literal_plus(self, parse: ParseFn) -> None:
-        assert parse("$(++lmb)") == [
-            shift_down,
-            KI("=", down),
-            KI("lmb"),
-            KI("=", up),
-            shift_up,
-        ]
+        """Plus is an uppercase so nope."""
+        with pytest.raises(SendParseError):
+            parse("$(++lmb)")
 
     def test_literal_comma(self, parse: ParseFn) -> None:
         assert parse("$(a+,+b)") == [
