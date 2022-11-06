@@ -196,8 +196,8 @@ class TestCombosWithoutProps:
 class TestCombosWithOneProp:
     def test_time_s(self, parse: ParseFn) -> None:
         assert (
-            parse("$(f9 0.5s;)")
-            == parse("$(f9 .5s;)")
+            parse("$(f9 0.5s)")
+            == parse("$(f9 .5s)")
             == [KI("f9"), SleepInstruction(0.5)]
         )
 
