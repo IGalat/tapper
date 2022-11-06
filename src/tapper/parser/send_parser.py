@@ -14,6 +14,7 @@ from tapper.model.send import COMBO_CONTENT
 from tapper.model.send import COMBO_WRAP
 from tapper.model.send import KeyInstruction
 from tapper.model.send import SendInstruction
+from tapper.model.send import SleepInstruction
 from tapper.model.send import WheelInstruction
 from tapper.parser import common
 from tapper.util import datastructs
@@ -48,6 +49,69 @@ class _Key:
 def to_content(combo: re.Match[str]) -> str:
     """Extracts contents of the combo from re.Match object."""
     return combo.group()[2:-1]  # todo len, minus escaping backslashes
+
+
+def resolve_last_with_props(
+    base_ins: SendInstruction, props: list[str]
+) -> list[SendInstruction]:
+    mult_allowed = True
+    result = [base_ins]
+    for prop in props:
+        if sleep := sleep_prop(prop):
+            result.append(sleep)
+        elif mult := mult_prop(prop):
+            if not mult_allowed:
+                raise SendParseError
+            result = result * mult
+        elif dir := dir_prop(prop):
+            ins = result[-1]
+            if not isinstance(ins, KeyInstruction):
+                raise SendParseError
+            else:
+                last = copy.deepcopy(ins)
+                last.dir = dir
+                result[-1] = last
+                if constants.KeyDir.DOWN != dir:
+                    mult_allowed = False
+        else:
+            raise SendParseError
+    return result
+
+
+def resolve_chain_opening_with_props(
+    base_ins: SendInstruction, props: list[str]
+) -> list[SendInstruction]:
+    result = [base_ins]
+    for prop in props:
+        if sleep := sleep_prop(prop):
+            result.append(sleep)
+        else:
+            raise SendParseError
+    return result
+
+
+def sleep_prop(prop: str) -> Optional[SleepInstruction]:
+    if common.SECONDS.regex.fullmatch(prop):
+        return SleepInstruction(common.SECONDS.fn(prop))
+    if common.MILLIS.regex.fullmatch(prop):
+        return SleepInstruction(common.MILLIS.fn(prop))
+    return None
+
+
+def mult_prop(prop: str) -> Optional[int]:
+    if re.fullmatch(r"\d+x", prop):
+        result = int(prop[:-1])
+        if result <= 0:
+            raise ValueError
+        return result
+    return None
+
+
+def dir_prop(prop: str) -> Optional[str]:
+    try:
+        return constants.KeyDir(prop)
+    except ValueError:
+        return None
 
 
 @dataclass
@@ -212,6 +276,12 @@ class SendParser:
         closing = copy.deepcopy(base_ins)
         closing.dir = constants.KeyDir.UP
 
+        if key.props:
+            try:
+                return resolve_chain_opening_with_props(opening, key.props), closing
+            except ValueError:
+                raise SendParseError
+
         return [opening], closing
 
     @cache
@@ -221,7 +291,6 @@ class SendParser:
         :param key:                   ^^^^^^
         :return: all instructions
         """
-        result = []
         if key.symbol not in self.symbols:
             if key.props:
                 raise SendParseError
@@ -236,9 +305,12 @@ class SendParser:
         else:
             base_ins = WheelInstruction(key.symbol)
 
-        result = [base_ins]
-
-        return result
+        if key.props:
+            try:
+                return resolve_last_with_props(base_ins, key.props)
+            except ValueError:
+                raise SendParseError
+        return [base_ins]
 
     @cache
     def parse_regex_symbol(self, symbol: str) -> list[SendInstruction]:

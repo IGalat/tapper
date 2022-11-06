@@ -28,8 +28,8 @@ Stage 1, embryo:
 1. DONE. keyboard and mouse dataclasses
 1. DONE. Parent SignalListener+Commander for kb and mouse; factories; Windows impl
 1. DONE. Action runner
-1. Command parser
-1. Trigger parser
+1. DONE. Command parser
+1. DONE. Trigger parser
 1. State(logger/keeper/whatever);
 1. Layer above commanders and listeners(state keeper calls, publish event, bounce fake signal)
 1. SendCommandProcessor

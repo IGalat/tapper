@@ -11,7 +11,10 @@ class ParsedProp:
 class SECONDS(ParsedProp):
     @staticmethod
     def parse_seconds(s: str) -> float:
-        return float(s[:-1])
+        result = float(s[:-1])
+        if result <= 0:
+            raise ValueError
+        return result
 
     regex = re.compile(r"\d*\.?\d+s")
     fn = parse_seconds
@@ -20,7 +23,10 @@ class SECONDS(ParsedProp):
 class MILLIS(ParsedProp):
     @staticmethod
     def parse_millis(ms: str) -> float:
-        return float(ms[:-2]) / 1000
+        result = float(ms[:-2]) / 1000
+        if result <= 0:
+            raise ValueError
+        return result
 
     regex = re.compile(r"\d+ms")
     fn = parse_millis

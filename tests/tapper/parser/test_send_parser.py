@@ -12,6 +12,7 @@ from tapper.model.send import SleepInstruction
 from tapper.model.send import WheelInstruction
 from tapper.parser import common
 from tapper.parser import send_parser
+from tapper.util import datastructs
 
 down = constants.KeyDir.DOWN
 up = constants.KeyDir.UP
@@ -192,8 +193,11 @@ class TestCombosWithoutProps:
         ]
 
 
-@pytest.mark.xfail
 class TestCombosWithOneProp:
+    def test_prop_invalid(self, parse: ParseFn) -> None:
+        with pytest.raises(SendParseError):
+            parse("$(a someprop)")
+
     def test_time_s(self, parse: ParseFn) -> None:
         assert (
             parse("$(f9 0.5s)")
@@ -258,7 +262,6 @@ class TestCombosWithOneProp:
             parse("$(caps on+q)")
 
 
-@pytest.mark.xfail
 class TestCombosWithManyProps:
     def test_time_mult(self, parse: ParseFn) -> None:
         assert parse("$(g 50ms 5x)") == [KI("g"), SleepInstruction(0.05)] * 5
@@ -285,8 +288,9 @@ class TestCombosWithManyProps:
         ]
 
     def test_mult_dir(self, parse: ParseFn) -> None:
-        with pytest.raises(SendParseError):
-            parse("$(esc 7x down)")
+        assert parse("$(esc 7x down)") == datastructs.to_flat_list(
+            [[KI("esc")] * 6, KI("esc", down)]
+        )
 
     def test_dir_mult(self, parse: ParseFn) -> None:
         assert parse("$(esc down 3x)") == [KI("esc", down)] * 3
