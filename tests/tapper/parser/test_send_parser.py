@@ -37,8 +37,8 @@ def parse() -> ParseFn:
         _parser.symbols[symbol] = KI
     for wheel in [*mouse.wheel_buttons, *mouse.wheel_aliases.keys()]:
         _parser.symbols[wheel] = WheelInstruction
-    _parser.regexes[common.SECONDS.regex] = SleepInstruction
-    _parser.regexes[common.MILLIS.regex] = SleepInstruction
+    _parser.regexes[common.SECONDS.regex] = (SleepInstruction, common.SECONDS.fn)
+    _parser.regexes[common.MILLIS.regex] = (SleepInstruction, common.MILLIS.fn)
     return _parser.parse
 
 
@@ -87,7 +87,6 @@ class TestNonCombos:
         ]
 
 
-@pytest.mark.xfail
 class TestSimplestCombosAndMix:
     def test_simplest(self, parse: ParseFn) -> None:
         assert parse("$(a)") == [KI("a")]
@@ -113,9 +112,8 @@ class TestSimplestCombosAndMix:
             ["caps", "b", "c", "lshift", "esc", "f"]
         )
 
-    def test_empty_combo(self, parse: ParseFn) -> None:
-        with pytest.raises(SendParseError):
-            parse("$()")
+    def test_empty_combo_is_not_combo(self, parse: ParseFn) -> None:
+        assert parse("$()") == [shift_down, *key_ins("490"), shift_up]
 
     def test_sleep_s(self, parse: ParseFn) -> None:
         assert parse("$(2s)") == [SleepInstruction(2)]
