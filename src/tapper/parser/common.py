@@ -1,9 +1,10 @@
+import re
 from typing import Any
 from typing import Callable
 
 
 class ParsedProp:
-    regex: str
+    regex: re.Pattern[str]
     fn: Callable[[str], Any]
 
 
@@ -12,7 +13,7 @@ class SECONDS(ParsedProp):
     def parse_seconds(s: str) -> float:
         return float(s[:-1])
 
-    regex = r"\d*\.?\d+s"
+    regex = re.compile(r"\d*\.?\d+s")
     fn = parse_seconds
 
 
@@ -21,7 +22,7 @@ class MILLIS(ParsedProp):
     def parse_millis(ms: str) -> float:
         return float(ms[:-2]) / 1000
 
-    regex = r"\d+ms"
+    regex = re.compile(r"\d+ms")
     fn = parse_millis
 
 
@@ -47,3 +48,14 @@ def split(text: str, delimiter: str) -> list[str]:
     if not result[-1]:
         raise ValueError(f"Delimiter was in the last position in '{text}'.")
     return result
+
+
+def parse_symbol_and_props(
+    sym_props_str: str, property_delimiter: str
+) -> tuple[str, list[str]]:
+    """String of symbol and props from one string.
+    Example: "lmb 2x 20ms" -> ("lmb", ["2x", "20ms"])
+    """
+    sym_props = split(sym_props_str, property_delimiter)
+    props = [] if len(sym_props) < 2 else sym_props[1:]
+    return sym_props[0], props

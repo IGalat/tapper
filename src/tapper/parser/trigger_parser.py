@@ -21,7 +21,7 @@ _SHIFT_LIST = keyboard.aliases["shift"]
 
 @dataclass
 class _TriggerProp:
-    regex: str
+    regex: re.Pattern[str]
     name: str
     fn: Callable[[str], Any]
 
@@ -32,7 +32,9 @@ _COMMON_PROPS = {
 }
 _MAIN_PROPS = {
     **_COMMON_PROPS,
-    "up": _TriggerProp(r"up", "direction", lambda _: constants.KeyDirBool.UP),
+    "up": _TriggerProp(
+        re.compile(r"up"), "direction", lambda _: constants.KeyDirBool.UP
+    ),
 }
 _AUX_PROPS = {**_COMMON_PROPS}
 
@@ -43,7 +45,7 @@ def _resolve_props(
     result: dict[str, Any] = {}
     for prop in props:
         for candidate in allowed_props.values():
-            if re.fullmatch(candidate.regex, prop):
+            if candidate.regex.fullmatch(prop):
                 result[candidate.name] = candidate.fn(prop)
                 break
         else:
@@ -124,9 +126,10 @@ class TriggerParser:
     def _parse_keys(self, trigger_text: str) -> Iterator[_Key]:
         """Parses whole combo to keys."""
         for symbols_props in common.split(trigger_text, SYMBOL_DELIMITER):
-            sym_props = common.split(symbols_props, PROPERTY_DELIMITER)
-            symbols = self._resolve_symbol(sym_props[0])
-            props = [] if len(sym_props) < 2 else sym_props[1:]
+            symbol_unresolved, props = common.parse_symbol_and_props(
+                symbols_props, PROPERTY_DELIMITER
+            )
+            symbols = self._resolve_symbol(symbol_unresolved)
             yield _Key(symbols, props)
 
     def _resolve_symbol(self, symbol: str) -> list[str]:
