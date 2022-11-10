@@ -8,7 +8,7 @@ from typing import Any
 class Emul:
     """Keeps track of emulated actions."""
 
-    to_emulate: set[tuple[Any]] = field(default_factory=set)
+    to_emulate: set[tuple[Any, ...]] = field(default_factory=set)
 
     def will_emulate(self, *signal: Any) -> None:
         """Notify that will emulate a command.

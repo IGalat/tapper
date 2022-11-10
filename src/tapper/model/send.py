@@ -4,7 +4,6 @@ from dataclasses import field
 
 from tapper.model import constants
 
-
 COMBO_WRAP: str = r"\$\(_\)"
 """Symbols that wrap the combo.
 Must contain "_" as placeholder for content, at least 1 opening and closing char."""
