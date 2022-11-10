@@ -1,6 +1,7 @@
 from abc import ABC
 from abc import abstractmethod
 
+from tapper.model import constants
 from tapper.model import errors
 from tapper.model.types_ import Signal
 
@@ -16,7 +17,7 @@ class SignalListener(ABC):
     def get_possible_signal_symbols(cls) -> list[str]:
         """All symbols that this listener may send to on_signal."""
 
-    def on_signal(self, signal: Signal) -> bool:
+    def on_signal(self, signal: Signal) -> constants.ListenerResult:
         """This function is substituted with actual signal processing.
 
         Do not implement.

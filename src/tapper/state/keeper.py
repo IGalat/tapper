@@ -3,6 +3,9 @@ from dataclasses import dataclass
 from dataclasses import field
 from typing import Any
 
+from tapper.model import constants
+from tapper.model.types_ import Signal
+
 
 @dataclass
 class Emul:
@@ -34,6 +37,13 @@ class Pressed:
     """Only keys that can be pressed down. No aliases."""
     pressed_keys: dict[str, float] = field(default_factory=dict)
     """Keys, and pressed at time."""
+
+    def key_event(self, on_signal: Signal) -> None:
+        symbol, direction = on_signal
+        if direction == constants.KeyDirBool.DOWN:
+            self.key_pressed(symbol)
+        else:
+            self.key_released(symbol)
 
     def key_pressed(self, symbol: str) -> None:
         """Key has been pressed."""

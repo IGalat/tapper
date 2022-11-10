@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import Final
+from enum import Flag
 
 
 class KeyDir(str, Enum):
@@ -20,15 +20,22 @@ class KeyDir(str, Enum):
     """If key is not toggled off, click, else nothing."""
 
 
-class KeyDirBool:
+class KeyDirBool(Flag):
     """Key direction. Used for signal recognition."""
 
-    UP: Final[bool] = False
+    UP = False
     """Key released."""
-    DOWN: Final[bool] = True
+    DOWN = True
     """Key pressed."""
 
 
 class OS(str, Enum):
     dummy = "dummy"
     win32 = "win32"
+
+
+class ListenerResult(Flag):
+    PROPAGATE = True
+    """Signal will be received by other apps."""
+    SUPPRESS = False
+    """Signal will be suppressed and will not be received by other apps."""

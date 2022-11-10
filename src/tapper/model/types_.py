@@ -1,7 +1,9 @@
 from typing import Any
 from typing import Callable
 
-Signal = tuple[str, bool]
+from tapper.model import constants
+
+Signal = tuple[str, constants.KeyDirBool]
 """        (symbol, down)
 Signal emitted by SignalListener. Is not alias to other symbol.
 
@@ -9,8 +11,10 @@ Signal emitted by SignalListener. Is not alias to other symbol.
         For possible symbols see implementations of
             SignalListener.get_possible_signal_symbols().
         Alternatively, look at tapper/model/keyboard.py and similar.
-:param down: Is key pressed down? False if it is released.
 """
+
+OnSignalFn = Callable[[Signal], constants.ListenerResult]
+"""An action to execute on receiving a signal from a listener."""
 
 SymbolsWithAliases = dict[str, list[str]]
 """              symbol/alias, reference
