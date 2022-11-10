@@ -8,18 +8,21 @@ from typing import Any
 class Emul:
     """Keeps track of emulated actions."""
 
-    to_emulate: dict[str, Any] = field(default_factory=dict)
+    to_emulate: set[tuple[Any]] = field(default_factory=set)
 
-    def will_emulate(self, symbol: str, *props: Any) -> None:
-        """Notify that will emulate a command."""
-        self.to_emulate[symbol] = props
+    def will_emulate(self, *signal: Any) -> None:
+        """Notify that will emulate a command.
+        :param signal: Any symbol, props.
+        """
+        self.to_emulate.add(signal)
 
-    def is_emulated(self, symbol: str, *props: Any) -> bool:
-        """Check if signal that was received is emulated."""
-        if symbol in self.to_emulate:
-            if self.to_emulate[symbol] == props:
-                del self.to_emulate[symbol]
-                return True
+    def is_emulated(self, *signal: Any) -> bool:
+        """Check if signal that was received is emulated.
+        :param signal: Any symbol, props.
+        """
+        if signal in self.to_emulate:
+            self.to_emulate.remove(signal)
+            return True
         return False
 
 
