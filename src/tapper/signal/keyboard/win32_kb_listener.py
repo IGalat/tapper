@@ -12,7 +12,7 @@ EVENT_PRESS: Final[set[int]] = {256, 260}
 EVENT_RELEASE: Final[set[int]] = {257, 261}
 
 
-def to_callback_result(inner_func_result: bool) -> int:
+def to_callback_result(inner_func_result: constants.ListenerResult) -> int:
     if inner_func_result:
         return WINPUT_PROPAGATE
     else:
@@ -36,8 +36,8 @@ class Win32KeyboardSignalListener(KeyboardSignalListener):
     def keyboard_callback(self, event: winput.KeyboardEvent) -> int:
         key = keyboard.win32_vk_code_to_symbol_map[event.key]
         if event.action in EVENT_PRESS:
-            return to_callback_result(self.on_signal((key, True)))
+            return to_callback_result(self.on_signal((key, constants.KeyDirBool.DOWN)))
         elif event.action in EVENT_RELEASE:
-            return to_callback_result(self.on_signal((key, False)))
+            return to_callback_result(self.on_signal((key, constants.KeyDirBool.UP)))
         else:
             return WINPUT_PROPAGATE
