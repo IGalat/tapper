@@ -9,6 +9,7 @@ from typing import Optional
 
 from tapper.model import constants
 from tapper.model import keyboard
+from tapper.model import mouse
 from tapper.model.errors import SendParseError
 from tapper.model.send import COMBO_CONTENT
 from tapper.model.send import COMBO_WRAP
@@ -55,15 +56,25 @@ def resolve_last_with_props(
     base_ins: SendInstruction, props: list[str]
 ) -> list[SendInstruction]:
     mult_allowed = True
+    dir_allowed = True
     result = [base_ins]
     for prop in props:
         if sleep := sleep_prop(prop):
-            result.append(sleep)
+            if result[-1].dir == constants.KeyDir.CLICK:
+                result[-1].dir = constants.KeyDir.DOWN
+                result.append(sleep)
+                result.append(KeyInstruction(result[-2].symbol, constants.KeyDir.UP))
+                dir_allowed = False
+            else:
+                result.append(sleep)
         elif mult := mult_prop(prop):
             if not mult_allowed:
                 raise SendParseError
             result = result * mult
         elif dir := dir_prop(prop):
+            if not dir_allowed:
+                raise SendParseError
+            dir_allowed = False
             ins = result[-1]
             if not isinstance(ins, KeyInstruction):
                 raise SendParseError
@@ -123,7 +134,9 @@ class SendParser:
     pattern: re.Pattern[str] = ""  # type: ignore
     """Pattern of the combo."""
     symbols: dict[str, type[SendInstruction]] = field(default_factory=dict)
-    """Symbol and corresponding command."""
+    """Symbol and corresponding command. Includes aliases."""
+    aliases: dict[str, str] = field(default_factory=dict)
+    """Alias to first non-alias mapping."""
     regexes: dict[
         re.Pattern[str], tuple[type[SendInstruction], Callable[[str], Any]]
     ] = field(default_factory=dict)
@@ -158,7 +171,7 @@ class SendParser:
                     if i >= len(command):
                         break
                     continue
-            symbol = command[i]
+            symbol = self.unalias(command[i])
             if symbol not in self.symbols:
                 raise SendParseError(
                     f"Symbol '{symbol}' not recognised in command '{command}'"
@@ -231,7 +244,10 @@ class SendParser:
         result_wrap = []
 
         for chain_split in chain_symbols_split:
-            key = _Key(*common.parse_symbol_and_props(chain_split, PROPERTY_DELIMITER))
+            symbol, props = common.parse_symbol_and_props(
+                chain_split, PROPERTY_DELIMITER
+            )
+            key = _Key(self.unalias(symbol), props)
             opening, closing = self.parse_chain_split(key)
             result.extend(opening)
             if closing:
@@ -242,7 +258,7 @@ class SendParser:
             symbol, props = common.parse_symbol_and_props(
                 last_split, PROPERTY_DELIMITER
             )
-            instructions = self.parse_last_split(_Key(symbol, props))
+            instructions = self.parse_last_split(_Key(self.unalias(symbol), props))
             result.extend(instructions)
 
         result.extend(result_wrap[::-1])
@@ -284,6 +300,13 @@ class SendParser:
 
         return [opening], closing
 
+    def unalias(self, symbol: str) -> str:
+        """Returns non-alias symbol for a given symbol"""
+        try:
+            return self.aliases[symbol]
+        except KeyError:
+            return symbol
+
     @cache
     def parse_last_split(self, key: _Key) -> list[SendInstruction]:
         """
@@ -320,3 +343,24 @@ class SendParser:
                 return [instruction_type(fn(symbol))]  # type: ignore
         else:
             raise SendParseError
+
+
+def default_parser() -> SendParser:
+    send_parser = SendParser()
+    for symbol in [
+        *keyboard.get_keys().keys(),
+        *mouse.regular_buttons,
+        *mouse.button_aliases.keys(),
+    ]:
+        send_parser.symbols[symbol] = KeyInstruction
+    for wheel in [*mouse.wheel_buttons, *mouse.wheel_aliases.keys()]:
+        send_parser.symbols[wheel] = WheelInstruction
+    send_parser.regexes[common.SECONDS.regex] = (
+        SleepInstruction,
+        common.SECONDS.fn,
+    )
+    for alias, references in [*keyboard.aliases.items(), *mouse.aliases.items()]:
+        send_parser.aliases[alias] = references[0]
+    send_parser.regexes[common.MILLIS.regex] = (SleepInstruction, common.MILLIS.fn)
+
+    return send_parser

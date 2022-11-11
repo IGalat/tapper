@@ -32,7 +32,7 @@ Stage 1, embryo:
 1. DONE. Trigger parser
 1. DONE. State(logger/keeper/whatever);
 1. DONE. Wrapper for commanders and listeners(state keeper calls, publish event, bounce fake signal)
-1. SendCommandProcessor
+1. DONE. SendCommandProcessor
 1. Tap and group model. How to split Tap into pretty face and actionable?
 1. SignalProcessor. ENDS stage 1.
 1. Readme, logging

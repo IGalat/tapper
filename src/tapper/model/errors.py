@@ -8,3 +8,7 @@ class TriggerParseError(ValueError):
 
 class SendParseError(ValueError):
     """Incorrectly specified send command text."""
+
+
+class SendError(ValueError):
+    """A generic "send" command error."""

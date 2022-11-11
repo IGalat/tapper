@@ -3,14 +3,11 @@ from typing import Callable
 import pytest
 from tapper.model import constants
 from tapper.model import keyboard
-from tapper.model import mouse
 from tapper.model.errors import SendParseError
-from tapper.model.keyboard import shift
 from tapper.model.send import KeyInstruction
 from tapper.model.send import SendInstruction
 from tapper.model.send import SleepInstruction
 from tapper.model.send import WheelInstruction
-from tapper.parser import common
 from tapper.parser import send_parser
 from tapper.util import datastructs
 
@@ -21,26 +18,15 @@ off = constants.KeyDir.OFF
 
 KI = KeyInstruction
 
-shift_down = KI(shift, down)
-shift_up = KI(shift, up)
+shift_down = KI(keyboard.shift, down)
+shift_up = KI(keyboard.shift, up)
 
 ParseFn = Callable[[str], list[SendInstruction]]
 
 
 @pytest.fixture(scope="module")
 def parse() -> ParseFn:
-    _parser = send_parser.SendParser()
-    for symbol in [
-        *keyboard.get_keys().keys(),
-        *mouse.regular_buttons,
-        *mouse.button_aliases.keys(),
-    ]:
-        _parser.symbols[symbol] = KI
-    for wheel in [*mouse.wheel_buttons, *mouse.wheel_aliases.keys()]:
-        _parser.symbols[wheel] = WheelInstruction
-    _parser.regexes[common.SECONDS.regex] = (SleepInstruction, common.SECONDS.fn)
-    _parser.regexes[common.MILLIS.regex] = (SleepInstruction, common.MILLIS.fn)
-    return _parser.parse
+    return send_parser.default_parser().parse
 
 
 def key_ins(symbols: str | list[str]) -> list[KeyInstruction]:
@@ -70,7 +56,8 @@ class TestNonCombos:
 
     def test_shift_mixed(self, parse: ParseFn) -> None:
         assert parse("2007 Ahoy!") == [
-            *key_ins("2007 "),
+            *key_ins("2007"),
+            KI("space"),
             shift_down,
             KI("a"),
             shift_up,
@@ -82,9 +69,9 @@ class TestNonCombos:
 
     def test_control_chars(self, parse: ParseFn) -> None:
         assert parse("\n\t ") == [
-            KI("\n"),
-            KI("\t"),
-            KI(" "),
+            KI("enter"),
+            KI("tab"),
+            KI("space"),
         ]
 
 
@@ -93,24 +80,37 @@ class TestSimplestCombosAndMix:
         assert parse("$(a)") == [KI("a")]
 
     def test_simplest_mouse_wheel(self, parse: ParseFn) -> None:
-        assert parse("$(wheel_left)") == [WheelInstruction("wheel_left")]
+        assert parse("$(wheel_left)") == [WheelInstruction("scroll_wheel_left")]
 
     def test_unregistered_symbol_combo(self, parse: ParseFn) -> None:
         with pytest.raises(SendParseError):
             parse("$(qwerty)")
 
     def test_combo_surrounded(self, parse: ParseFn) -> None:
-        assert parse("\n$(f5)q") == key_ins(["\n", "f5", "q"])
+        assert parse("\n$(f5)q") == key_ins(["enter", "f5", "q"])
+
+    def test_combo_after_text(self, parse: ParseFn) -> None:
+        assert parse("Hi\n$(ctrl+c,v down)") == [
+            shift_down,
+            KI("h"),
+            shift_up,
+            KI("i"),
+            KI("enter"),
+            KI("left_control", down),
+            KI("c"),
+            KI("v", down),
+            KI("left_control", up),
+        ]
 
     def test_two_combos(self, parse: ParseFn) -> None:
         assert parse("$(ctrl)$(page_up)") == [
-            KI("ctrl"),
+            KI("left_control"),
             KI("page_up"),
         ]
 
     def test_combos_mix(self, parse: ParseFn) -> None:
         assert parse("$(caps)bc$(lshift)$(esc)f") == key_ins(
-            ["caps", "b", "c", "lshift", "esc", "f"]
+            ["caps_lock", "b", "c", "left_shift", "escape", "f"]
         )
 
     def test_empty_combo_is_not_combo(self, parse: ParseFn) -> None:
@@ -125,7 +125,7 @@ class TestSimplestCombosAndMix:
 
 class TestCombosWithoutProps:
     def test_simplest(self, parse: ParseFn) -> None:
-        assert parse("$(alt+q)") == [KI("alt", down), KI("q"), KI("alt", up)]
+        assert parse("$(alt+q)") == [KI("left_alt", down), KI("q"), KI("left_alt", up)]
 
     def test_long_combo(self, parse: ParseFn) -> None:
         assert parse("$(q+w+e+r+\t)") == [
@@ -133,7 +133,7 @@ class TestCombosWithoutProps:
             KI("w", down),
             KI("e", down),
             KI("r", down),
-            KI("\t"),
+            KI("tab"),
             KI("r", up),
             KI("e", up),
             KI("w", up),
@@ -142,11 +142,11 @@ class TestCombosWithoutProps:
 
     def test_comma(self, parse: ParseFn) -> None:
         assert parse("$(ctrl+a,c,v)") == [
-            KI("ctrl", down),
+            KI("left_control", down),
             KI("a"),
             KI("c"),
             KI("v"),
-            KI("ctrl", up),
+            KI("left_control", up),
         ]
 
     def test_semicolon(self, parse: ParseFn) -> None:
@@ -154,13 +154,13 @@ class TestCombosWithoutProps:
             parse("$(ctrl+c,v;alt+tab)")
             == parse("$(ctrl+c,v)$(alt+tab)")
             == [
-                KI("ctrl", down),
+                KI("left_control", down),
                 KI("c"),
                 KI("v"),
-                KI("ctrl", up),
-                KI("alt", down),
+                KI("left_control", up),
+                KI("left_alt", down),
                 KI("tab"),
-                KI("alt", up),
+                KI("left_alt", up),
             ]
         )
 
@@ -202,14 +202,22 @@ class TestCombosWithOneProp:
         assert (
             parse("$(f9 0.5s)")
             == parse("$(f9 .5s)")
-            == [KI("f9"), SleepInstruction(0.5)]
+            == [KI("f9", down), SleepInstruction(0.5), KI("f9", up)]
         )
 
     def test_time_ms(self, parse: ParseFn) -> None:
-        assert parse("$(1 1ms)") == [KI("1"), SleepInstruction(0.001)]
+        assert parse("$(1 1ms)") == [
+            KI("1", down),
+            SleepInstruction(0.001),
+            KI("1", up),
+        ]
 
     def test_literal_space(self, parse: ParseFn) -> None:
-        assert parse("$(  123s)") == [KI(" "), SleepInstruction(123)]
+        assert parse("$(  123s)") == [
+            KI("space", down),
+            SleepInstruction(123),
+            KI("space", up),
+        ]
 
     def test_time_in_chain(self, parse: ParseFn) -> None:
         assert parse("$(a 50ms+b)") == [
@@ -226,7 +234,7 @@ class TestCombosWithOneProp:
             parse("$(a -123ms)")
 
     def test_mult(self, parse: ParseFn) -> None:
-        assert parse("$(lmb 4x)") == [KI("lmb")] * 4
+        assert parse("$(lmb 4x)") == [KI("left_mouse_button")] * 4
 
     def test_invalid_mult(self, parse: ParseFn) -> None:
         with pytest.raises(SendParseError):
@@ -239,7 +247,12 @@ class TestCombosWithOneProp:
             parse("$(shift 2x+q)")
 
     def test_mult_chain_end(self, parse: ParseFn) -> None:
-        assert parse("$(shift+lmb 2x)") == [shift_down, KI("lmb"), KI("lmb"), shift_up]
+        assert parse("$(shift+lmb 2x)") == [
+            shift_down,
+            KI("left_mouse_button"),
+            KI("left_mouse_button"),
+            shift_up,
+        ]
 
     def test_dir_simplest(self, parse: ParseFn) -> None:
         assert parse("$(a down)") == [KI("a", down)]
@@ -252,7 +265,7 @@ class TestCombosWithOneProp:
             parse("$(1 down+2)")
 
     def test_dir_on(self, parse: ParseFn) -> None:
-        assert parse("$(caps on)") == [KI("caps", on)]
+        assert parse("$(caps on)") == [KI("caps_lock", on)]
 
     def test_dir_off(self, parse: ParseFn) -> None:
         assert parse("$(j off)") == [KI("j", off)]
@@ -264,14 +277,18 @@ class TestCombosWithOneProp:
 
 class TestCombosWithManyProps:
     def test_time_mult(self, parse: ParseFn) -> None:
-        assert parse("$(g 50ms 5x)") == [KI("g"), SleepInstruction(0.05)] * 5
+        assert (
+            parse("$(g 50ms 5x)")
+            == [KI("g", down), SleepInstruction(0.05), KI("g", up)] * 5
+        )
 
     def test_mult_time(self, parse: ParseFn) -> None:
         assert parse("$(v+clear 2x 1s)") == [
             KI("v", down),
-            KI("clear"),
-            KI("clear"),
+            KI("clear", down),
+            KI("clear", down),
             SleepInstruction(1),
+            KI("clear", up),
             KI("v", up),
         ]
 
@@ -289,11 +306,11 @@ class TestCombosWithManyProps:
 
     def test_mult_dir(self, parse: ParseFn) -> None:
         assert parse("$(esc 7x down)") == datastructs.to_flat_list(
-            [[KI("esc")] * 6, KI("esc", down)]
+            [[KI("escape")] * 6, KI("escape", down)]
         )
 
     def test_dir_mult(self, parse: ParseFn) -> None:
-        assert parse("$(esc down 3x)") == [KI("esc", down)] * 3
+        assert parse("$(esc down 3x)") == [KI("escape", down)] * 3
 
     def test_off_mult(self, parse: ParseFn) -> None:
         with pytest.raises(SendParseError):

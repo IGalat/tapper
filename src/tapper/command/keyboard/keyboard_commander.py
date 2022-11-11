@@ -59,12 +59,12 @@ class KeyboardCmdProxy(KeyboardCommander):
         super().__init__()
 
     def press(self, symbol: str) -> None:
-        self.emul_keeper.will_emulate(symbol, constants.KeyDirBool.DOWN)
+        self.emul_keeper.will_emulate((symbol, constants.KeyDirBool.DOWN))
         self.commander.press(symbol)
 
     def release(self, symbol: str) -> None:
-        self.emul_keeper.will_emulate(symbol, constants.KeyDirBool.UP)
-        self.commander.press(symbol)
+        self.emul_keeper.will_emulate((symbol, constants.KeyDirBool.UP))
+        self.commander.release(symbol)
 
     def pressed(self, symbol: str) -> bool:
         return self.commander.pressed(symbol)

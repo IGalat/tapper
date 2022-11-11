@@ -76,11 +76,11 @@ class MouseCmdProxy(MouseCommander):
         self.emul_keeper = emul_keeper
 
     def press(self, symbol: str) -> None:
-        self.emul_keeper.will_emulate(symbol, constants.KeyDirBool.DOWN)
+        self.emul_keeper.will_emulate((symbol, constants.KeyDirBool.DOWN))
         self.commander.press(symbol)
 
     def release(self, symbol: str) -> None:
-        self.emul_keeper.will_emulate(symbol, constants.KeyDirBool.UP)
+        self.emul_keeper.will_emulate((symbol, constants.KeyDirBool.UP))
         self.commander.release(symbol)
 
     def move(

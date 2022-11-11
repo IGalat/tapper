@@ -164,7 +164,8 @@ chars_en_upper_to_lower = {
     upper: lower for (upper, lower) in zip(chars_en_upper, chars_en_lower)
 }
 
-shift = "shift"
+shift = "left_shift"
+"""Default shift."""
 
 
 @cache
