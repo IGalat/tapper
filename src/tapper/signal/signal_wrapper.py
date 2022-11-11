@@ -37,6 +37,7 @@ class ListenerWrapper:
 
     def on_signal_wrap(self, signal: Signal) -> constants.ListenerResult:
         if self.emul_keeper.is_emulated(signal):
+            self.state_keeper.key_event(signal)
             return constants.ListenerResult.PROPAGATE
         result = self.on_signal(signal)
         event.publish(self.listener.__class__.__name__, signal)
