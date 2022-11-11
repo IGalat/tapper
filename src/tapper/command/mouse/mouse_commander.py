@@ -4,6 +4,7 @@ from typing import Optional
 
 from tapper.command import base_commander
 from tapper.model import constants
+from tapper.state import keeper
 
 
 class MouseCommander(base_commander.Commander, ABC):
@@ -62,3 +63,39 @@ def _get_win32_impl() -> type[MouseCommander]:
 
 
 _os_impl_list = {constants.OS.win32: _get_win32_impl}
+
+
+class MouseCmdProxy(MouseCommander):
+    """Adds emulation notifications."""
+
+    commander: MouseCommander
+    emul_keeper: keeper.Emul
+
+    def __init__(self, commander: MouseCommander, emul_keeper: keeper.Emul) -> None:
+        self.commander = commander
+        self.emul_keeper = emul_keeper
+
+    def press(self, symbol: str) -> None:
+        self.emul_keeper.will_emulate(symbol, constants.KeyDirBool.DOWN)
+        self.commander.press(symbol)
+
+    def release(self, symbol: str) -> None:
+        self.emul_keeper.will_emulate(symbol, constants.KeyDirBool.UP)
+        self.commander.release(symbol)
+
+    def move(
+        self, x: Optional[int] = None, y: Optional[int] = None, relative: bool = False
+    ) -> None:
+        self.commander.move(x, y, relative)
+
+    def pressed(self, symbol: str) -> bool:
+        return self.commander.pressed(symbol)
+
+    def toggled(self, symbol: str) -> bool:
+        return self.commander.toggled(symbol)
+
+    def pressed_toggled(self, symbol: str) -> tuple[bool, bool]:
+        return self.commander.pressed_toggled(symbol)
+
+    def get_pos(self) -> tuple[int, int]:
+        return self.commander.get_pos()

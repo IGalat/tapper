@@ -3,6 +3,7 @@ from abc import abstractmethod
 
 from tapper.command import base_commander
 from tapper.model import constants
+from tapper.state import keeper
 
 
 class KeyboardCommander(base_commander.Commander, ABC):
@@ -44,3 +45,32 @@ def _get_win32_impl() -> type[KeyboardCommander]:
 
 
 _os_impl_list = {constants.OS.win32: _get_win32_impl}
+
+
+class KeyboardCmdProxy(KeyboardCommander):
+    """Adds emulation notifications."""
+
+    commander: KeyboardCommander
+    emul_keeper: keeper.Emul
+
+    def __init__(self, commander: KeyboardCommander, emul_keeper: keeper.Emul) -> None:
+        self.commander = commander
+        self.emul_keeper = emul_keeper
+        super().__init__()
+
+    def press(self, symbol: str) -> None:
+        self.emul_keeper.will_emulate(symbol, constants.KeyDirBool.DOWN)
+        self.commander.press(symbol)
+
+    def release(self, symbol: str) -> None:
+        self.emul_keeper.will_emulate(symbol, constants.KeyDirBool.UP)
+        self.commander.press(symbol)
+
+    def pressed(self, symbol: str) -> bool:
+        return self.commander.pressed(symbol)
+
+    def toggled(self, symbol: str) -> bool:
+        return self.commander.toggled(symbol)
+
+    def pressed_toggled(self, symbol: str) -> tuple[bool, bool]:
+        return self.commander.pressed_toggled(symbol)
