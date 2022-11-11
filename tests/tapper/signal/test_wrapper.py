@@ -26,7 +26,7 @@ def wrap_fixture() -> WrapFixture:
     pressed.registered_symbols.extend(keyboard.get_key_list())
     pressed.registered_symbols.extend(mouse.regular_buttons)
 
-    listener = dummy.Listener.get_for_os("")
+    listener = dummy.Listener()
     wrapper = ListenerWrapper(listener, noop, emul, pressed)
     return wrapper, listener, emul, pressed
 
