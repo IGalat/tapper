@@ -45,12 +45,14 @@ Stage 2, we're live baby:
 1. TriggerConditions system, WindowTriggerConditionsTracker
 1. Linux impl
 1. hotkey on hold/release for time (up20ms / down - 500ms)
+1. Make sure it catches signals before other programs on OS
 1. hotstring support
 1. One keyboard variation(ua) to make sure it's multi-lang
 1. (input/output multi-lang) ehhh, just hepler function here
 1. Tray icon
-1. Logging, error handling, Validationvwith tkinter warnings
+1. Error handling, Validation with tkinter warnings
 1. Moar trackers: process, device connect/disconnect, service/daemon, file, resource(cpu/gpu/network) load
+1. Group actions when it goes on/off, timer for checking group states?
 
 ## Limitations of the current design
 
