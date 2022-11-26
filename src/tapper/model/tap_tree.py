@@ -12,13 +12,13 @@ class TapGeneric:
     In a Group, each field will be inherited by Taps and other Groups in it, unless overridden.
     """
 
-    executor: int
+    executor: int | None
     """Which executor to run the action in. see ActionRunner."""
-    suppress_trigger: bool
+    suppress_trigger: bool | None
     """Whether to suppress main key when an action is triggered."""
 
 
-@dataclass
+@dataclass(init=False)
 class Tap(TapGeneric):
     """Trigger-action plan API."""
 
@@ -27,12 +27,24 @@ class Tap(TapGeneric):
     action: Action
     """Action to be executed when triggered. Will run in a separate thread."""
 
+    def __init__(
+        self,
+        trigger: Trigger,
+        action: Action,
+        executor: int | None = None,
+        suppress_trigger: bool | None = None,
+    ) -> None:
+        self.trigger = trigger
+        self.action = action
+        self.executor = executor
+        self.suppress_trigger = suppress_trigger
 
-@dataclass
+
+@dataclass(init=False)
 class Group(TapGeneric):
     """Contains taps or other groups. Allows hierarchical structure."""
 
-    name: str
+    name: str | None
 
     _children: list[TapGeneric | dict[Trigger, Action]] = field(default_factory=list)
 
@@ -50,3 +62,13 @@ class Group(TapGeneric):
         """
         self._children.append(*children)
         return self
+
+    def __init__(
+        self,
+        name: str | None = None,
+        executor: int | None = None,
+        suppress_trigger: bool | None = None,
+    ) -> None:
+        self.name = name
+        self.executor = executor
+        self.suppress_trigger = suppress_trigger
