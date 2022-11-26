@@ -38,6 +38,18 @@ Example:
     Trigger for "ctrl" will work when signal is received for any of the references.
 """
 
+Trigger = str
+"""Combo or a single key that will trigger the action.
+
+Examples:
+    a
+    ctrl+f11
+    scroll_up
+    left_mouse_button+j
+
+Last key in the combo is called main key, other keys are auxiliary.
+"""
+
 Action = Callable[[], Any]
 """An action to run in ActionRunner.
 It must require no arguments. Use `functools.partial` to provide arguments beforehand."""

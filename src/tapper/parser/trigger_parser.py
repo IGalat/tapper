@@ -107,7 +107,7 @@ class TriggerParser:
                     raise ValueError(f"Symbol already registered: {symbol}")
                 self.registered_symbols[symbol] = value
 
-    def parse(self, trigger_text: str) -> Trigger:
+    def parse(self, trigger_text: Trigger) -> Trigger:
         """Parse single combo, to be pressed in one go."""
         try:
             keys = list(self._parse_keys(trigger_text))
