@@ -34,7 +34,7 @@ Stage 1, embryo:
 1. DONE. Wrapper for commanders and listeners(state keeper calls, publish event, bounce fake signal)
 1. DONE. SendCommandProcessor
 1. DONE. Tree (Tap and group) model: api and shadow
-1. tapper api
+1. DONE. tapper api
 1. SignalProcessor
 1. Initializer/booter/starter
 1. tapper impl
