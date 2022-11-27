@@ -5,8 +5,8 @@ from tapper.model import constants
 from tapper.model import keyboard
 from tapper.model import mouse
 from tapper.model.types_ import Signal
-from tapper.signal.base_signal_listener import SignalListener
-from tapper.signal.signal_wrapper import ListenerWrapper
+from tapper.signal.base_listener import SignalListener
+from tapper.signal.wrapper import ListenerWrapper
 from tapper.state import keeper
 from tapper.util import event
 

@@ -6,7 +6,7 @@ from tapper.command.keyboard.keyboard_commander import KeyboardCommander
 from tapper.command.mouse.mouse_commander import MouseCommander
 from tapper.model import constants
 from tapper.model.types_ import Signal
-from tapper.signal.base_signal_listener import SignalListener
+from tapper.signal.base_listener import SignalListener
 
 
 # DUMMY START #

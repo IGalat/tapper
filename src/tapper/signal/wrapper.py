@@ -3,7 +3,7 @@ from functools import partial
 from tapper.model import constants
 from tapper.model.types_ import OnSignalFn
 from tapper.model.types_ import Signal
-from tapper.signal.base_signal_listener import SignalListener
+from tapper.signal.base_listener import SignalListener
 from tapper.state import keeper
 from tapper.util import event
 

@@ -10,7 +10,7 @@ from tapper.model import keyboard
 from tapper.model import mouse
 from tapper.model.types_ import Signal
 from tapper.parser import send_parser
-from tapper.signal.signal_wrapper import ListenerWrapper
+from tapper.signal.wrapper import ListenerWrapper
 from tapper.state import keeper
 from tapper.util import event
 
