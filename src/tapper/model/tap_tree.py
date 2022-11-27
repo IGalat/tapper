@@ -1,12 +1,12 @@
+from abc import ABC
 from dataclasses import dataclass
 from dataclasses import field
 
 from tapper.model.types_ import Action
-from tapper.model.types_ import Trigger
+from tapper.model.types_ import TriggerStr
 
 
-@dataclass
-class TapGeneric:
+class TapGeneric(ABC):
     """
     Shared data between Tap and Group.
     In a Group, each field will be inherited by Taps and other Groups in it, unless overridden.
@@ -22,14 +22,14 @@ class TapGeneric:
 class Tap(TapGeneric):
     """Trigger-action plan API."""
 
-    trigger: Trigger
+    trigger: TriggerStr
     """Combo or a single key that will trigger the action."""
     action: Action
     """Action to be executed when triggered. Will run in a separate thread."""
 
     def __init__(
         self,
-        trigger: Trigger,
+        trigger: TriggerStr,
         action: Action,
         executor: int | None = None,
         suppress_trigger: bool | None = None,
@@ -46,9 +46,9 @@ class Group(TapGeneric):
 
     name: str | None
 
-    _children: list[TapGeneric | dict[Trigger, Action]] = field(default_factory=list)
+    _children: list[TapGeneric | dict[TriggerStr, Action]] = field(default_factory=list)
 
-    def add(self, *children: TapGeneric | dict[Trigger, Action]) -> "Group":
+    def add(self, *children: TapGeneric | dict[TriggerStr, Action]) -> "Group":
         """
         Add new child elements to the group.
 

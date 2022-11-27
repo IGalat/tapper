@@ -38,7 +38,7 @@ Example:
     Trigger for "ctrl" will work when signal is received for any of the references.
 """
 
-Trigger = str
+TriggerStr = str
 """Combo or a single key that will trigger the action.
 
 Examples:

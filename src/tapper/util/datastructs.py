@@ -8,6 +8,14 @@ from tapper.model.types_ import SymbolsWithAliases
 SymbolCode = int | tuple[Any, ...]
 
 
+def unique_list(data_structure: Sequence[Any]) -> list[Any]:
+    result = []
+    for item in data_structure:
+        if item not in result:
+            result.append(item)
+    return result
+
+
 def to_flat_list(data_structure: Sequence[Any] | Any) -> list[Any]:
     """Transforms single values to list; flattens to list any (nested too) Sequence."""
     return list(_flatten(data_structure))

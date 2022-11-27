@@ -4,6 +4,8 @@ from abc import ABC
 from dataclasses import dataclass
 from dataclasses import field
 
+from tapper.model import constants
+
 
 @dataclass
 class TriggerKey(ABC):
@@ -25,7 +27,7 @@ class MainKey(TriggerKey):
 
     time: float = field(default=0)
     """Minimum time it has to be pressed for trigger to work. (! or released after. see future plans)"""
-    direction: bool = True
+    direction: constants.KeyDirBool = constants.KeyDirBool.DOWN
     """When to trigger on main key: down(press)(True)/up(release)(False)."""
 
 

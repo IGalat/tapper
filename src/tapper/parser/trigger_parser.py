@@ -11,6 +11,7 @@ from tapper.model.trigger import AuxiliaryKey
 from tapper.model.trigger import MainKey
 from tapper.model.trigger import Trigger
 from tapper.model.types_ import SymbolsWithAliases
+from tapper.model.types_ import TriggerStr
 from tapper.parser import common
 from tapper.util import datastructs
 
@@ -107,7 +108,7 @@ class TriggerParser:
                     raise ValueError(f"Symbol already registered: {symbol}")
                 self.registered_symbols[symbol] = value
 
-    def parse(self, trigger_text: Trigger) -> Trigger:
+    def parse(self, trigger_text: TriggerStr) -> Trigger:
         """Parse single combo, to be pressed in one go."""
         try:
             keys = list(self._parse_keys(trigger_text))
