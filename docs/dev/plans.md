@@ -25,18 +25,21 @@ By having user configure triggers and corresponding actions, and running a loop 
 Stage 1, embryo:
 
 1. DONE. Parent classes for SignalListener and Commander
-1. DONE. keyboard and mouse dataclasses
-1. DONE. Parent SignalListener+Commander for kb and mouse; factories; Windows impl
-1. DONE. Action runner
-1. DONE. Command parser
-1. DONE. Trigger parser
-1. DONE. State(logger/keeper/whatever);
-1. DONE. Wrapper for commanders and listeners(state keeper calls, publish event, bounce fake signal)
-1. DONE. SendCommandProcessor
-1. Tap and group model. How to split Tap into pretty face and actionable?
-1. SignalProcessor. ENDS stage 1.
-1. Readme, logging
-1. First release!
+2. DONE. keyboard and mouse dataclasses
+3. DONE. Parent SignalListener+Commander for kb and mouse; factories; Windows impl
+4. DONE. Action runner
+5. DONE. Command parser
+6. DONE. Trigger parser
+7. DONE. State(logger/keeper/whatever);
+8. DONE. Wrapper for commanders and listeners(state keeper calls, publish event, bounce fake signal)
+9. DONE. SendCommandProcessor
+10. Tree (Tap and group) model: api and shadow
+11. tapper api
+12. SignalProcessor
+13. Initializer/booter/starter
+14. tapper impl
+15. Readme, logging
+16. First release!
 
 Stage 2, we're live baby:
 
