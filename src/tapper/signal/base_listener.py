@@ -39,6 +39,11 @@ class SignalListener(ABC):
     def stop(self) -> None:
         """And clean resources, this is terminal."""
 
+    @property
+    @abstractmethod
+    def name(self) -> str:
+        """Aspect, not concrete impl. Used as topic in event subscription."""
+
     @staticmethod
     @abstractmethod
     def get_for_os(os: str) -> "SignalListener":

@@ -32,9 +32,7 @@ class ListenerWrapper:
         self.state_keeper = state_keeper
 
     def wrap(self, listener: SignalListener) -> None:
-        listener.on_signal = partial(
-            self._on_signal_wrap, topic=listener.__class__.__name__
-        )
+        listener.on_signal = partial(self._on_signal_wrap, topic=listener.name)
 
     def _on_signal_wrap(self, signal: Signal, topic: str) -> constants.ListenerResult:
         if self.emul_keeper.is_emulated(signal):

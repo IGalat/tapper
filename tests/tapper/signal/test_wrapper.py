@@ -54,7 +54,7 @@ def test_subscription(wrap_fixture: WrapFixture) -> None:
         nonlocal subscription_log
         subscription_log.append(signal)
 
-    event.subscribe(listener.__class__.__name__, sub_fn)
+    event.subscribe(listener.name, sub_fn)
 
     will_signal = [
         down("a"),

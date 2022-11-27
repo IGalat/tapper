@@ -13,6 +13,8 @@ from tapper.signal.base_listener import SignalListener
 
 
 class DummyListener(SignalListener):
+    name = "dummy"
+
     @classmethod
     def get_possible_signal_symbols(cls) -> list[str]:
         pass

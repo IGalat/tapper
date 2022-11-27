@@ -2,6 +2,7 @@ import time
 from typing import Callable
 
 import pytest
+from conftest import Dummy
 from tapper.command.keyboard.keyboard_commander import KeyboardCmdProxy
 from tapper.command.mouse.mouse_commander import MouseCmdProxy
 from tapper.command.send_processor import SendCommandProcessor
@@ -41,7 +42,7 @@ class TestSendCommandProcessor:
     """Should be empty in this test: send means emul only."""
 
     @pytest.fixture(autouse=True)
-    def setup(self, dummy) -> None:
+    def setup(self, dummy: Dummy) -> None:
         self.all_signals = []
         self.real_signals = []
 
@@ -67,9 +68,7 @@ class TestSendCommandProcessor:
         self.sender = SendCommandProcessor("", parser, kbc, mousec)
         self.sender.sleep_fn = lambda f: self.all_signals.append(sleep(f))
 
-        event.subscribe(
-            listener.__class__.__name__, lambda signal: self.real_signals.append(signal)
-        )
+        event.subscribe(listener.name, lambda signal: self.real_signals.append(signal))
 
     def test_simplest(self) -> None:
         self.sender.send("a")

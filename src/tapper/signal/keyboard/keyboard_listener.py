@@ -8,6 +8,8 @@ class KeyboardSignalListener(base_listener.SignalListener, ABC):
     """Listens to keyboard key presses and releases.
     See SignalListener for listener documentation."""
 
+    name = "keyboard"
+
     @staticmethod
     def get_for_os(os: str) -> "KeyboardSignalListener":
         """
