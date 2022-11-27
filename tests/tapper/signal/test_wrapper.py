@@ -1,7 +1,6 @@
 import time
 
 import pytest
-from tapper import dummy
 from tapper.model import constants
 from tapper.model import keyboard
 from tapper.model import mouse
@@ -20,7 +19,7 @@ WrapFixture = tuple[ListenerWrapper, SignalListener, keeper.Emul, keeper.Pressed
 
 
 @pytest.fixture
-def wrap_fixture() -> WrapFixture:
+def wrap_fixture(dummy) -> WrapFixture:
     emul = keeper.Emul()
     pressed = keeper.Pressed()
     pressed.registered_symbols.extend(keyboard.get_key_list())

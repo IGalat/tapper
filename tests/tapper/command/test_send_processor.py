@@ -2,7 +2,6 @@ import time
 from typing import Callable
 
 import pytest
-from tapper import dummy
 from tapper.command.keyboard.keyboard_commander import KeyboardCmdProxy
 from tapper.command.mouse.mouse_commander import MouseCmdProxy
 from tapper.command.send_processor import SendCommandProcessor
@@ -42,7 +41,7 @@ class TestSendCommandProcessor:
     """Should be empty in this test: send means emul only."""
 
     @pytest.fixture(autouse=True)
-    def setup(self) -> None:
+    def setup(self, dummy) -> None:
         self.all_signals = []
         self.real_signals = []
 
