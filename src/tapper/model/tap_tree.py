@@ -60,7 +60,7 @@ class Group(TapGeneric):
             If you add({"ctrl+a": action2, "a": action1})
                 , pressing ctrl+a will trigger action1
         """
-        self._children.append(*children)
+        self._children.extend(children)
         return self
 
     def __init__(

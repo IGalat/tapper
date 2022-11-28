@@ -1,6 +1,7 @@
 from abc import ABC
 from abc import abstractmethod
 from dataclasses import dataclass
+from dataclasses import field
 
 from tapper.model import constants
 from tapper.model.tap_tree import TapGeneric
@@ -20,7 +21,7 @@ class STapGeneric(ABC):
     """Item based on which this shadow is created."""
 
     @abstractmethod
-    def get_triggers(self, direction: constants.KeyDirBool) -> list[str]:
+    def get_main_triggers(self, direction: constants.KeyDirBool) -> list[str]:
         """All main keys. If group - all children's main keys."""
 
 
@@ -34,10 +35,10 @@ class STap(STapGeneric):
     """Action to be executed when triggered. Will run in a separate thread."""
     executor: int
     """Which executor to run the action in. see ActionRunner."""
-    suppress_trigger: bool
+    suppress_trigger: constants.ListenerResult
     """Whether to suppress main key when an action is triggered."""
 
-    def get_triggers(self, direction: constants.KeyDirBool) -> list[str]:
+    def get_main_triggers(self, direction: constants.KeyDirBool) -> list[str]:
         if self.trigger.main.direction == direction:
             return self.trigger.main.symbols
         else:
@@ -48,9 +49,15 @@ class STap(STapGeneric):
 class SGroup(STapGeneric):
     """Shadow group: used during runtime."""
 
-    children: list[STapGeneric]
+    children: list[STapGeneric] = field(default_factory=list)
 
     @lru_cache
-    def get_triggers(self, direction: constants.KeyDirBool) -> list[str]:
-        nested_non_unique = [child.get_triggers(direction) for child in self.children]
+    def get_main_triggers(self, direction: constants.KeyDirBool) -> list[str]:
+        nested_non_unique = [
+            child.get_main_triggers(direction) for child in self.children
+        ]
         return unique_list(to_flat_list(nested_non_unique))
+
+    def add(self, *children: STapGeneric) -> "SGroup":
+        self.children.extend(children)
+        return self

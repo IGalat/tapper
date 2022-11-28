@@ -20,6 +20,7 @@ control_group = _stub
 """
 A special group, intended to control the flow of tapper - pause, shutdown, reboot.
 Actions of this group have a dedicated executor, to avoid being blocked by other running actions.
+It has the highest priority of triggering, before the root group.
 If user doesn't add any controls, default ones will be added on init.
 """
 

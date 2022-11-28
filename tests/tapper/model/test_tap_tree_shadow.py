@@ -19,13 +19,13 @@ def test_get_triggers() -> None:
     outer_tap3 = stap("out3")
     outer_group = SGroup([outer_tap1, inner_group, outer_tap2, outer_tap3])
 
-    assert outer_group.get_triggers(constants.KeyDirBool.DOWN) == [
+    assert outer_group.get_main_triggers(constants.KeyDirBool.DOWN) == [
         "out1",
         "in2",
         "out3",
     ]
 
-    assert outer_group.get_triggers(constants.KeyDirBool.UP) == ["in1", "out2"]
+    assert outer_group.get_main_triggers(constants.KeyDirBool.UP) == ["in1", "out2"]
 
-    assert inner_tap1.get_triggers(constants.KeyDirBool.DOWN) == []
-    assert inner_tap1.get_triggers(constants.KeyDirBool.UP) == ["in1"]
+    assert inner_tap1.get_main_triggers(constants.KeyDirBool.DOWN) == []
+    assert inner_tap1.get_main_triggers(constants.KeyDirBool.UP) == ["in1"]

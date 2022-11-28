@@ -1,10 +1,13 @@
 """This file in tests root is required for pytest path discovery for some reason."""
+from collections import defaultdict
 from typing import Optional
 
 import pytest
+from tapper.action.runner import ActionRunner
 from tapper.command.keyboard.keyboard_commander import KeyboardCommander
 from tapper.command.mouse.mouse_commander import MouseCommander
 from tapper.model import constants
+from tapper.model import types_
 from tapper.model.types_ import Signal
 from tapper.signal.base_listener import SignalListener
 
@@ -94,10 +97,27 @@ class DummyMouseCmd(MouseCommander):
         pass
 
 
+class DummyActionRunner(ActionRunner):
+    actions_ran: defaultdict[int, list[types_.Action]]
+    """{executor ordinal: list of every action ran}"""
+    control_actions_ran: list[types_.Action]
+
+    def __init__(self) -> None:
+        self.actions_ran = defaultdict(list)
+        self.control_actions_ran = []
+
+    def run(self, fn: types_.Action, executor_ordinal: int = 0) -> None:
+        self.actions_ran[executor_ordinal].append(fn)
+
+    def run_control(self, fn: types_.Action) -> None:
+        self.control_actions_ran.append(fn)
+
+
 class Dummy:
     Listener = DummyListener
     KbCmd = DummyKbCmd
     MouseCmd = DummyMouseCmd
+    ActionRunner = DummyActionRunner
 
 
 @pytest.fixture
