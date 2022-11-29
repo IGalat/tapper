@@ -17,20 +17,17 @@ class SignalProcessor:
     state_keeper: keeper.Pressed
     runner: ActionRunner
 
-    @classmethod
-    def from_all(
-        cls,
+    def __init__(
+        self,
         root: SGroup,
         control: SGroup,
         state_keeper: keeper.Pressed,
         runner: ActionRunner,
-    ) -> "SignalProcessor":
-        p = SignalProcessor()
-        p.root = root
-        p.control = control
-        p.state_keeper = state_keeper
-        p.runner = runner
-        return p
+    ) -> None:
+        self.root = root
+        self.control = control
+        self.state_keeper = state_keeper
+        self.runner = runner
 
     def on_signal(self, signal: Signal) -> ListenerResult:
         """

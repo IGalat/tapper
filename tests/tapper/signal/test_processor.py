@@ -68,9 +68,7 @@ class TestSignalProcessor:
         pressed.registered_symbols.extend(mouse.regular_buttons)
         self.state_keeper = pressed
         self.runner = dummy.ActionRunner()
-        self.processor = SignalProcessor.from_all(
-            self.root, self.control, pressed, self.runner
-        )
+        self.processor = SignalProcessor(self.root, self.control, pressed, self.runner)
 
     def test_simplest(self) -> None:
         self.root.add(tap([["a"]]))
