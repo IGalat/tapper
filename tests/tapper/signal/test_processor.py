@@ -165,9 +165,9 @@ class TestSignalProcessor:
         another_action = lambda: "some"
         third_action = lambda: "some3"
         self.root.add(
-            tap([alt, ["a"]], action=third_action),
-            tap([ctrl, ["a"]], action=another_action),
             tap([["a"]]),
+            tap([ctrl, ["a"]], action=another_action),
+            tap([alt, ["a"]], action=third_action),
         )
 
         assert self.processor.on_signal(down("a")) == ListenerResult.SUPPRESS
