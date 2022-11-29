@@ -24,11 +24,7 @@ class TestActionRunnerImpl:
         """Created once and reused. Do not mutate."""
         return ActionRunnerImpl([1])
 
-    def test_init(self) -> None:
-        runner_ = ActionRunnerImpl()
-        assert len(runner_.executors) == 1
-        assert runner_.ex_threads == [1]
-
+    def test_init(self, simple_runner: ActionRunner) -> None:
         config_value = [10, 20, 1, 30]
         runner_ = ActionRunnerImpl(config_value)
         assert len(runner_.executors) == len(config_value)
@@ -64,7 +60,7 @@ class TestActionRunnerImpl:
     @given(q=st.integers(min_value=1, max_value=500))
     @hypothesis.settings(max_examples=10)
     def test_no_queue_for_1_thread(self, q: int) -> None:
-        runner_ = ActionRunnerImpl()
+        runner_ = ActionRunnerImpl([1])
         result = 0
 
         def increment() -> None:
