@@ -53,10 +53,14 @@ class KeyboardCmdProxy(KeyboardCommander):
     commander: KeyboardCommander
     emul_keeper: keeper.Emul
 
-    def __init__(self, commander: KeyboardCommander, emul_keeper: keeper.Emul) -> None:
-        self.commander = commander
-        self.emul_keeper = emul_keeper
-        super().__init__()
+    @classmethod
+    def from_all(
+        cls, commander: KeyboardCommander, emul_keeper: keeper.Emul
+    ) -> "KeyboardCmdProxy":
+        result = KeyboardCmdProxy()
+        result.commander = commander
+        result.emul_keeper = emul_keeper
+        return result
 
     def press(self, symbol: str) -> None:
         self.emul_keeper.will_emulate((symbol, constants.KeyDirBool.DOWN))

@@ -35,6 +35,11 @@ class SendCommandProcessor:
         self.kb_commander = kb_commander
         self.mouse_commander = mouse_commander
 
+    @classmethod
+    def from_none(cls) -> "SendCommandProcessor":
+        """To be filled during init."""
+        return SendCommandProcessor(None, None, None, None)  # type: ignore
+
     def send(self, command: str) -> None:
         """Entry point, processes the command and sends instructions."""
         instructions: list[SendInstruction] = self.parser.parse(command)

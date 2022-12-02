@@ -71,9 +71,14 @@ class MouseCmdProxy(MouseCommander):
     commander: MouseCommander
     emul_keeper: keeper.Emul
 
-    def __init__(self, commander: MouseCommander, emul_keeper: keeper.Emul) -> None:
-        self.commander = commander
-        self.emul_keeper = emul_keeper
+    @classmethod
+    def from_all(
+        cls, commander: MouseCommander, emul_keeper: keeper.Emul
+    ) -> "MouseCmdProxy":
+        result = MouseCmdProxy()
+        result.commander = commander
+        result.emul_keeper = emul_keeper
+        return result
 
     def press(self, symbol: str) -> None:
         self.emul_keeper.will_emulate((symbol, constants.KeyDirBool.DOWN))

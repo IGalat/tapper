@@ -9,7 +9,6 @@ from typing import Optional
 
 from tapper.model import constants
 from tapper.model import keyboard
-from tapper.model import mouse
 from tapper.model.errors import SendParseError
 from tapper.model.send import COMBO_CONTENT
 from tapper.model.send import COMBO_WRAP
@@ -343,24 +342,3 @@ class SendParser:
                 return [instruction_type(fn(symbol))]  # type: ignore
         else:
             raise SendParseError
-
-
-def default_parser() -> SendParser:
-    send_parser = SendParser()
-    for symbol in [
-        *keyboard.get_keys().keys(),
-        *mouse.regular_buttons,
-        *mouse.button_aliases.keys(),
-    ]:
-        send_parser.symbols[symbol] = KeyInstruction
-    for wheel in [*mouse.wheel_buttons, *mouse.wheel_aliases.keys()]:
-        send_parser.symbols[wheel] = WheelInstruction
-    send_parser.regexes[common.SECONDS.regex] = (
-        SleepInstruction,
-        common.SECONDS.fn,
-    )
-    for alias, references in [*keyboard.aliases.items(), *mouse.aliases.items()]:
-        send_parser.aliases[alias] = references[0]
-    send_parser.regexes[common.MILLIS.regex] = (SleepInstruction, common.MILLIS.fn)
-
-    return send_parser

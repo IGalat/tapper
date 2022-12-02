@@ -27,7 +27,6 @@ user32 = winput.user32
 
 class Win32MouseCommander(mouse_commander.MouseCommander):
     def start(self) -> None:
-        print("Starting Win32MouseCommander")
         winput.set_DPI_aware(per_monitor=True)
 
     def press(self, symbol: str) -> None:

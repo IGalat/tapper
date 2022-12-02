@@ -1,4 +1,5 @@
 from abc import ABC
+from typing import Callable
 
 from tapper.model import constants
 from tapper.model import mouse
@@ -34,4 +35,6 @@ def _get_win32_impl() -> type[MouseSignalListener]:
     return win32_mouse_listener.Win32MouseSignalListener
 
 
-_os_impl_list = {constants.OS.win32: _get_win32_impl}
+_os_impl_list: dict[str, Callable[[], type[MouseSignalListener]]] = {
+    constants.OS.win32: _get_win32_impl
+}

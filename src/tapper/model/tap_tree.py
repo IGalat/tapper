@@ -1,7 +1,8 @@
 from abc import ABC
 from dataclasses import dataclass
-from dataclasses import field
+from typing import Optional
 
+from tapper.model.constants import ListenerResult
 from tapper.model.types_ import Action
 from tapper.model.types_ import TriggerStr
 
@@ -9,12 +10,13 @@ from tapper.model.types_ import TriggerStr
 class TapGeneric(ABC):
     """
     Shared data between Tap and Group.
-    In a Group, each field will be inherited by Taps and other Groups in it, unless overridden.
+    In a Group, each field except "parent" will be inherited
+    by its children, unless overridden.
     """
 
-    executor: int | None
+    executor: Optional[int]
     """Which executor to run the action in. see ActionRunner."""
-    suppress_trigger: bool | None
+    suppress_trigger: Optional[ListenerResult]
     """Whether to suppress main key when an action is triggered."""
 
 
@@ -24,20 +26,27 @@ class Tap(TapGeneric):
 
     trigger: TriggerStr
     """Combo or a single key that will trigger the action."""
-    action: Action
-    """Action to be executed when triggered. Will run in a separate thread."""
+    action: Action | str
+    """
+    Action to be executed when triggered. Will run in a separate thread.
+    If string is specified, it will send(action) instead.
+    """
+    _parent: "Group"
 
     def __init__(
         self,
         trigger: TriggerStr,
         action: Action,
-        executor: int | None = None,
-        suppress_trigger: bool | None = None,
+        executor: Optional[int] = None,
+        suppress_trigger: Optional[bool] = None,
     ) -> None:
         self.trigger = trigger
         self.action = action
         self.executor = executor
         self.suppress_trigger = suppress_trigger
+
+    def __repr__(self) -> str:
+        return f"Tap('{self.trigger}')"
 
 
 @dataclass(init=False)
@@ -46,9 +55,10 @@ class Group(TapGeneric):
 
     name: str | None
 
-    _children: list[TapGeneric | dict[TriggerStr, Action]] = field(default_factory=list)
+    _children: list[TapGeneric | dict[TriggerStr, Action | str]]
+    _parent: Optional["Group"] = None
 
-    def add(self, *children: TapGeneric | dict[TriggerStr, Action]) -> "Group":
+    def add(self, *children: TapGeneric | dict[TriggerStr, Action | str]) -> "Group":
         """
         Add new child elements to the group.
 
@@ -61,14 +71,21 @@ class Group(TapGeneric):
                 , pressing ctrl+a will trigger action1
         """
         self._children.extend(children)
+        for child in children:
+            if isinstance(child, TapGeneric):
+                child._parent = self
         return self
 
     def __init__(
         self,
-        name: str | None = None,
-        executor: int | None = None,
-        suppress_trigger: bool | None = None,
+        name: Optional[str] = None,
+        executor: Optional[int] = None,
+        suppress_trigger: Optional[ListenerResult] = None,
     ) -> None:
         self.name = name
         self.executor = executor
         self.suppress_trigger = suppress_trigger
+        self._children = []
+
+    def __repr__(self) -> str:
+        return f"Group '{self.name}': {self._children}"

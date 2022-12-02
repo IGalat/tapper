@@ -1,6 +1,7 @@
 from typing import Callable
 
 import pytest
+from tapper.boot import initializer
 from tapper.model import constants
 from tapper.model import keyboard
 from tapper.model.errors import SendParseError
@@ -8,7 +9,6 @@ from tapper.model.send import KeyInstruction
 from tapper.model.send import SendInstruction
 from tapper.model.send import SleepInstruction
 from tapper.model.send import WheelInstruction
-from tapper.parser import send_parser
 from tapper.util import datastructs
 
 down = constants.KeyDir.DOWN
@@ -26,7 +26,7 @@ ParseFn = Callable[[str], list[SendInstruction]]
 
 @pytest.fixture(scope="module")
 def parse() -> ParseFn:
-    return send_parser.default_parser().parse
+    return initializer.default_send_parser().parse
 
 
 def key_ins(symbols: str | list[str]) -> list[KeyInstruction]:

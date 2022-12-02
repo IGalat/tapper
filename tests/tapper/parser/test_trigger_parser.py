@@ -1,9 +1,9 @@
 from typing import Callable
 
 import pytest
+from tapper.boot import initializer
 from tapper.model import constants
 from tapper.model import keyboard
-from tapper.model import mouse
 from tapper.model.errors import TriggerParseError
 from tapper.model.trigger import AuxiliaryKey
 from tapper.model.trigger import MainKey
@@ -19,7 +19,7 @@ ParseFn = Callable[[str], Trigger]
 
 @pytest.fixture(scope="module")
 def parse() -> ParseFn:
-    return trigger_parser.TriggerParser([keyboard.get_keys(), mouse.get_keys()]).parse
+    return initializer.default_trigger_parser().parse
 
 
 class TestMisc:

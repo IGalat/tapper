@@ -1,4 +1,5 @@
 from abc import ABC
+from typing import Callable
 
 from tapper.model import constants
 from tapper.signal import base_listener
@@ -25,4 +26,6 @@ def _get_win32_impl() -> type[KeyboardSignalListener]:
     return win32_kb_listener.Win32KeyboardSignalListener
 
 
-_os_impl_list = {constants.OS.win32: _get_win32_impl}
+_os_impl_list: dict[str, Callable[[], type[KeyboardSignalListener]]] = {
+    constants.OS.win32: _get_win32_impl
+}

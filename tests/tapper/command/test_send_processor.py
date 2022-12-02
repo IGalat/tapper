@@ -3,6 +3,7 @@ from typing import Callable
 
 import pytest
 from conftest import Dummy
+from tapper.boot import initializer
 from tapper.command.keyboard.keyboard_commander import KeyboardCmdProxy
 from tapper.command.mouse.mouse_commander import MouseCmdProxy
 from tapper.command.send_processor import SendCommandProcessor
@@ -10,7 +11,6 @@ from tapper.model import constants
 from tapper.model import keyboard
 from tapper.model import mouse
 from tapper.model.types_ import Signal
-from tapper.parser import send_parser
 from tapper.signal.wrapper import ListenerWrapper
 from tapper.state import keeper
 from tapper.util import event
@@ -53,7 +53,7 @@ class TestSendCommandProcessor:
 
         emul = keeper.Emul()
 
-        parser = send_parser.default_parser()
+        parser = initializer.default_send_parser()
 
         listener = dummy.Listener()
         ListenerWrapper(
@@ -62,8 +62,10 @@ class TestSendCommandProcessor:
             pressed,
         ).wrap(listener)
 
-        kbc = KeyboardCmdProxy(dummy.KbCmd(listener, self.all_signals), emul)
-        mousec = MouseCmdProxy(dummy.MouseCmd(listener, self.all_signals), emul)
+        kbc = KeyboardCmdProxy.from_all(dummy.KbCmd(listener, self.all_signals), emul)
+        mousec = MouseCmdProxy.from_all(
+            dummy.MouseCmd(listener, self.all_signals), emul
+        )
 
         self.sender = SendCommandProcessor("", parser, kbc, mousec)
         self.sender.sleep_fn = lambda f: self.all_signals.append(sleep(f))

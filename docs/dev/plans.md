@@ -36,8 +36,7 @@ Stage 1, embryo:
 1. DONE. Tree (Tap and group) model: api and shadow
 1. DONE. tapper api
 1. DONE. SignalProcessor
-1. Initializer/booter/starter
-1. tapper impl
+1. DONE. Initializer
 1. Readme, logging
 1. First release!
 
