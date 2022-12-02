@@ -10,6 +10,7 @@ from tapper.signal.base_listener import SignalListener as _SignalListener
 _listeners: list[_SignalListener]
 
 _send_processor = _SendCommandProcessor.from_none()
+_initialized = False
 
 Tap = _tap_tree.Tap
 """Trigger-action plan. Main part of this library. Allows setting hotkeys."""
@@ -41,9 +42,11 @@ mouse = _MouseCmdProxy()
 def init() -> None:
     """Initializes all underlying tools."""
     global _listeners
+    global _initialized
     _listeners = _initializer.init(
         root, control_group, _send_processor, kb, mouse, send
     )
+    _initialized = True
 
 
 def start() -> None:
@@ -52,7 +55,9 @@ def start() -> None:
     This method is blocking, it should be the last in your script.
     """
     global _listeners
-    init()
+    global _initialized
+    if not _initialized:
+        init()
     kb.start()
     mouse.start()
     _initializer.start(_listeners)
