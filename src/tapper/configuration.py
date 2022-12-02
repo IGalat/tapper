@@ -18,7 +18,7 @@ action_runner_executors_threads: list[int] = [1]
 Setting value to N will allow N actions to execute simultaneously for a given executor.
 """
 
-os: sys.platform
+os = sys.platform
 
 
 """
