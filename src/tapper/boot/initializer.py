@@ -71,8 +71,10 @@ def init(
     os = configuration.os
 
     transformer = TreeTransformer(send, default_trigger_parser(os))
+    _fill_default_properties(iroot)
     root = transformer.transform(iroot)
     _fill_control_if_empty(icontrol)
+    _fill_default_properties(icontrol)
     control = transformer.transform(icontrol)
 
     runner = default_action_runner()

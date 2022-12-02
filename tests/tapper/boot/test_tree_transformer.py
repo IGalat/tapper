@@ -31,10 +31,6 @@ class TestTreeTransformer:
     def group(self) -> Group:
         return Group("fixture_group", self.ex, self.res)
 
-    def test_empty(self, transform: TransformFn) -> None:
-        with pytest.raises(Exception):
-            assert transform(Group())
-
     def test_empty_with_props(self, transform: TransformFn) -> None:
         group = Group()
         group.executor = 33
