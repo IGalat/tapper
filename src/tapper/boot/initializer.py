@@ -1,4 +1,3 @@
-import time
 from threading import Thread
 
 from tapper import configuration
@@ -6,6 +5,7 @@ from tapper import parser
 from tapper.action.runner import ActionRunner
 from tapper.action.runner import ActionRunnerImpl
 from tapper.boot.tree_transformer import TreeTransformer
+from tapper.command.base_commander import Commander
 from tapper.command.keyboard.keyboard_commander import KeyboardCmdProxy
 from tapper.command.keyboard.keyboard_commander import KeyboardCommander
 from tapper.command.mouse.mouse_commander import MouseCmdProxy
@@ -94,10 +94,12 @@ def init(
         for listener in configuration.listeners
     ]
 
-    kb_cmd_proxy.commander = KeyboardCommander.get_for_os(os)
-    kb_cmd_proxy.emul_keeper = emul_keeper
-    mouse_cmd_proxy.commander = MouseCommander.get_for_os(os)
-    mouse_cmd_proxy.emul_keeper = emul_keeper
+    if not hasattr(kb_cmd_proxy, "_commander"):
+        kb_cmd_proxy._commander = KeyboardCommander.get_for_os(os)
+    kb_cmd_proxy._emul_keeper = emul_keeper
+    if not hasattr(mouse_cmd_proxy, "_commander"):
+        mouse_cmd_proxy._commander = MouseCommander.get_for_os(os)
+    mouse_cmd_proxy._emul_keeper = emul_keeper
 
     send_processor.os = os
     send_processor.parser = default_send_parser()
@@ -119,13 +121,12 @@ def _fill_default_properties(group: Group) -> None:
         group.suppress_trigger = constants.ListenerResult.SUPPRESS
 
 
-def start(listeners: list[SignalListener]) -> None:
+def start(commanders: list[Commander], listeners: list[SignalListener]) -> None:
     """
     Starts listeners in a separate thread each.
     More globally, starts the application.
     Is blocking.
     """
-    for listener in listeners:
+    [commander.start() for commander in commanders]
+    for listener in [*listeners]:
         Thread(target=listener.start).start()
-    while True:
-        time.sleep(1_000_000)

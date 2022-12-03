@@ -68,39 +68,39 @@ _os_impl_list = {constants.OS.win32: _get_win32_impl}
 class MouseCmdProxy(MouseCommander):
     """Adds emulation notifications."""
 
-    commander: MouseCommander
-    emul_keeper: keeper.Emul
+    _commander: MouseCommander
+    _emul_keeper: keeper.Emul
 
     @classmethod
     def from_all(
         cls, commander: MouseCommander, emul_keeper: keeper.Emul
     ) -> "MouseCmdProxy":
         result = MouseCmdProxy()
-        result.commander = commander
-        result.emul_keeper = emul_keeper
+        result._commander = commander
+        result._emul_keeper = emul_keeper
         return result
 
     def press(self, symbol: str) -> None:
-        self.emul_keeper.will_emulate((symbol, constants.KeyDirBool.DOWN))
-        self.commander.press(symbol)
+        self._emul_keeper.will_emulate((symbol, constants.KeyDirBool.DOWN))
+        self._commander.press(symbol)
 
     def release(self, symbol: str) -> None:
-        self.emul_keeper.will_emulate((symbol, constants.KeyDirBool.UP))
-        self.commander.release(symbol)
+        self._emul_keeper.will_emulate((symbol, constants.KeyDirBool.UP))
+        self._commander.release(symbol)
 
     def move(
         self, x: Optional[int] = None, y: Optional[int] = None, relative: bool = False
     ) -> None:
-        self.commander.move(x, y, relative)
+        self._commander.move(x, y, relative)
 
     def pressed(self, symbol: str) -> bool:
-        return self.commander.pressed(symbol)
+        return self._commander.pressed(symbol)
 
     def toggled(self, symbol: str) -> bool:
-        return self.commander.toggled(symbol)
+        return self._commander.toggled(symbol)
 
     def pressed_toggled(self, symbol: str) -> tuple[bool, bool]:
-        return self.commander.pressed_toggled(symbol)
+        return self._commander.pressed_toggled(symbol)
 
     def get_pos(self) -> tuple[int, int]:
-        return self.commander.get_pos()
+        return self._commander.get_pos()

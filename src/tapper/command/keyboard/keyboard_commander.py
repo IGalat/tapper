@@ -50,31 +50,31 @@ _os_impl_list = {constants.OS.win32: _get_win32_impl}
 class KeyboardCmdProxy(KeyboardCommander):
     """Adds emulation notifications."""
 
-    commander: KeyboardCommander
-    emul_keeper: keeper.Emul
+    _commander: KeyboardCommander
+    _emul_keeper: keeper.Emul
 
     @classmethod
     def from_all(
         cls, commander: KeyboardCommander, emul_keeper: keeper.Emul
     ) -> "KeyboardCmdProxy":
         result = KeyboardCmdProxy()
-        result.commander = commander
-        result.emul_keeper = emul_keeper
+        result._commander = commander
+        result._emul_keeper = emul_keeper
         return result
 
     def press(self, symbol: str) -> None:
-        self.emul_keeper.will_emulate((symbol, constants.KeyDirBool.DOWN))
-        self.commander.press(symbol)
+        self._emul_keeper.will_emulate((symbol, constants.KeyDirBool.DOWN))
+        self._commander.press(symbol)
 
     def release(self, symbol: str) -> None:
-        self.emul_keeper.will_emulate((symbol, constants.KeyDirBool.UP))
-        self.commander.release(symbol)
+        self._emul_keeper.will_emulate((symbol, constants.KeyDirBool.UP))
+        self._commander.release(symbol)
 
     def pressed(self, symbol: str) -> bool:
-        return self.commander.pressed(symbol)
+        return self._commander.pressed(symbol)
 
     def toggled(self, symbol: str) -> bool:
-        return self.commander.toggled(symbol)
+        return self._commander.toggled(symbol)
 
     def pressed_toggled(self, symbol: str) -> tuple[bool, bool]:
-        return self.commander.pressed_toggled(symbol)
+        return self._commander.pressed_toggled(symbol)

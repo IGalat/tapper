@@ -9,7 +9,7 @@ class Commander(ABC):
     """
 
     def start(self) -> None:
-        """Initialize resources."""
+        """Initialize resources. Not a separate thread; shouldn't be blocking."""
 
     def stop(self) -> None:
         """And clean resources, this is terminal."""

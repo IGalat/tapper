@@ -1,3 +1,5 @@
+import time as _time
+
 from tapper.boot import initializer as _initializer
 from tapper.command.keyboard.keyboard_commander import (
     KeyboardCmdProxy as _KeyboardCmdProxy,
@@ -49,15 +51,19 @@ def init() -> None:
     _initialized = True
 
 
-def start() -> None:
+def start(blocking: bool = True) -> None:
     """
     Initializes all underlying tools, and starts listeners.
-    This method is blocking, it should be the last in your script.
+    No changes by user in any elements of tapper are expected after this command,
+    it should be the last in your script.
     """
     global _listeners
     global _initialized
+
     if not _initialized:
         init()
-    kb.start()
-    mouse.start()
-    _initializer.start(_listeners)
+    _initializer.start([kb, mouse], _listeners)
+
+    if blocking:
+        while True:
+            _time.sleep(1000000)
