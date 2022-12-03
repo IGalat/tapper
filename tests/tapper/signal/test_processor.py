@@ -3,8 +3,7 @@ import time
 import pytest
 from conftest import Dummy
 from conftest import DummyActionRunner
-from tapper.model import keyboard
-from tapper.model import mouse
+from tapper.boot import initializer
 from tapper.model.constants import KeyDirBool
 from tapper.model.constants import ListenerResult
 from tapper.model.tap_tree_shadow import SGroup
@@ -63,9 +62,7 @@ class TestSignalProcessor:
     def setup(self, dummy: Dummy) -> None:
         self.root = SGroup()
         self.control = SGroup()
-        pressed = keeper.Pressed()
-        pressed.registered_symbols.extend(keyboard.get_key_list())
-        pressed.registered_symbols.extend(mouse.regular_buttons)
+        pressed = initializer.default_keeper_pressed()
         self.state_keeper = pressed
         self.runner = dummy.ActionRunner()
         self.processor = SignalProcessor(self.root, self.control, pressed, self.runner)

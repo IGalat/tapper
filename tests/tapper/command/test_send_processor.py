@@ -8,8 +8,6 @@ from tapper.command.keyboard.keyboard_commander import KeyboardCmdProxy
 from tapper.command.mouse.mouse_commander import MouseCmdProxy
 from tapper.command.send_processor import SendCommandProcessor
 from tapper.model import constants
-from tapper.model import keyboard
-from tapper.model import mouse
 from tapper.model.types_ import Signal
 from tapper.signal.wrapper import ListenerWrapper
 from tapper.state import keeper
@@ -46,9 +44,7 @@ class TestSendCommandProcessor:
         self.all_signals = []
         self.real_signals = []
 
-        pressed = keeper.Pressed()
-        pressed.registered_symbols.extend(keyboard.get_key_list())
-        pressed.registered_symbols.extend(mouse.regular_buttons)
+        pressed = initializer.default_keeper_pressed()
         self.pressed = pressed
 
         emul = keeper.Emul()

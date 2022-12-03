@@ -35,6 +35,10 @@ def default_action_runner() -> ActionRunner:
     return ActionRunnerImpl(configuration.action_runner_executors_threads)
 
 
+def default_keeper_pressed(os: str | None = None) -> keeper.Pressed:
+    return keeper.Pressed(registered_symbols=configuration.keys_held_down(os))
+
+
 def default_send_parser() -> SendParser:
     send_parser = SendParser()
     for symbol in [
@@ -79,7 +83,7 @@ def init(
 
     runner = default_action_runner()
     emul_keeper = keeper.Emul()
-    state_keeper = keeper.Pressed()
+    state_keeper = default_keeper_pressed()
 
     signal_processor = SignalProcessor(root, control, state_keeper, runner)
     listener_wrapper = ListenerWrapper(

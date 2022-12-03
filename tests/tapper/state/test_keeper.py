@@ -1,9 +1,8 @@
 import time
 
 import pytest
+from tapper.boot import initializer
 from tapper.model import constants
-from tapper.model import keyboard
-from tapper.model import mouse
 from tapper.state.keeper import Emul
 from tapper.state.keeper import Pressed
 
@@ -37,9 +36,7 @@ class TestEmul:
 class TestPressed:
     @pytest.fixture
     def pressed_keeper(self) -> Pressed:
-        pressed = Pressed()
-        pressed.registered_symbols.extend(keyboard.get_key_list())
-        pressed.registered_symbols.extend(mouse.regular_buttons)
+        pressed = initializer.default_keeper_pressed()
         return pressed
 
     def test_simplest(self, pressed_keeper: Pressed) -> None:
