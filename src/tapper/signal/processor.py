@@ -73,8 +73,8 @@ class SignalProcessor:
 
         for aux in tap.trigger.aux:
             pressed = False
-            for symbol in aux.symbols:
-                if symbol in state and aux.time <= state[symbol]:
+            for aux_symbol in aux.symbols:
+                if aux_symbol in state and aux.time <= state[aux_symbol]:
                     pressed = True
                     break
             if not pressed:
