@@ -1,6 +1,8 @@
+from __future__ import annotations
+
+
 """This file in tests root is required for pytest path discovery for some reason."""
 from collections import defaultdict
-from typing import Optional
 
 import pytest
 from tapper.action.runner import ActionRunner
@@ -13,6 +15,8 @@ from tapper.signal.base_listener import SignalListener
 
 
 # DUMMY START #
+
+dumL = None
 
 
 class DummyListener(SignalListener):
@@ -29,8 +33,11 @@ class DummyListener(SignalListener):
         pass
 
     @staticmethod
-    def get_for_os(os: str) -> "SignalListener":
-        return DummyListener()
+    def get_for_os(os: str) -> SignalListener:
+        global dumL
+        if not dumL:
+            dumL = DummyListener()
+        return dumL
 
 
 class DummyKbCmd(KeyboardCommander):
@@ -80,7 +87,7 @@ class DummyMouseCmd(MouseCommander):
         self.listener.on_signal(signal)
 
     def move(
-        self, x: Optional[int] = None, y: Optional[int] = None, relative: bool = False
+        self, x: int | None = None, y: int | None = None, relative: bool = False
     ) -> None:
         pass
 

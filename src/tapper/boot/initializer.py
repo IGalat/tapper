@@ -122,11 +122,7 @@ def _fill_default_properties(group: Group) -> None:
 
 
 def start(commanders: list[Commander], listeners: list[SignalListener]) -> None:
-    """
-    Starts listeners in a separate thread each.
-    More globally, starts the application.
-    Is blocking.
-    """
+    """Starts the application. Should be called after init"""
     [commander.start() for commander in commanders]
     for listener in [*listeners]:
         Thread(target=listener.start).start()
