@@ -22,8 +22,6 @@ By having user configure triggers and corresponding actions, and running a loop 
 
 ## Development milestones
 
-Stage 1, embryo:
-
 1. DONE. Parent classes for SignalListener and Commander
 1. DONE. keyboard and mouse dataclasses
 1. DONE. Parent SignalListener+Commander for kb and mouse; factories; Windows impl
@@ -37,14 +35,9 @@ Stage 1, embryo:
 1. DONE. tapper api
 1. DONE. SignalProcessor
 1. DONE. Initializer
-1. Readme, logging
-1. First release!
-
-Stage 2, we're live baby:
-
 1. trigger_if - free-style conditions
-1. kwargs map, to make conditions for Taps much easier
-1. TriggerConditions system, WindowTriggerConditionsTracker
+1. kwargs map, to make conditions for Taps much easier; TriggerConditions system, WindowTriggerConditionsTracker
+1. Readme, logging
 1. Linux impl
 1. hotkey on hold/release for time (up20ms / down - 500ms)
 1. Make sure it catches signals before other programs on OS
