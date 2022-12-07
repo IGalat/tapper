@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import sys
 
 """This file in tests root is required for pytest path discovery for some reason."""
 from collections import defaultdict
@@ -133,3 +134,8 @@ def dummy() -> Dummy:
 
 
 # DUMMY END #
+
+
+@pytest.fixture
+def is_debug() -> bool:
+    return hasattr(sys, "gettrace") and (sys.gettrace() is not None)
