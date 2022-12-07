@@ -36,7 +36,7 @@ class Tap(TapGeneric):
     def __init__(
         self,
         trigger: TriggerStr,
-        action: Action,
+        action: Action | str,
         executor: Optional[int] = None,
         suppress_trigger: Optional[bool] = None,
     ) -> None:

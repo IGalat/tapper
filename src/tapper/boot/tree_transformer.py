@@ -50,7 +50,8 @@ class TreeTransformer:
             executor = find_property("executor", tap._parent)
         if (suppress_trigger := tap.suppress_trigger) is None:
             suppress_trigger = find_property("suppress_trigger", tap._parent)
-        result = STap(trigger, tap.action, executor, suppress_trigger)
+        action = self.to_action(tap.action)
+        result = STap(trigger, action, executor, suppress_trigger)
         result.original = tap
 
         return result
@@ -63,7 +64,11 @@ class TreeTransformer:
         suppress_trigger = find_property("suppress_trigger", parent)
         for trigger_str, action in taps.items():
             trigger = self.trigger_parser.parse(trigger_str)
-            if isinstance(action, str):
-                action = partial(self.send, action)
+            action = self.to_action(action)
             result.append(STap(trigger, action, executor, suppress_trigger))
         return result
+
+    def to_action(self, action: Action | str) -> Action:
+        if isinstance(action, str):
+            action = partial(self.send, action)
+        return action
