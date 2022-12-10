@@ -37,18 +37,17 @@ By having user configure triggers and corresponding actions, and running a loop 
 1. DONE. Initializer
 1. trigger_if - free-style conditions
 1. kwargs map, to make conditions for Taps much easier; TriggerConditions system, WindowTriggerConditionsTracker
-1. Readme, logging
-1. Linux impl
-1. hotkey on hold/release for time (up20ms / down - 500ms)
-1. Make sure it catches signals before other programs on OS
 1. hotstring support
-1. One keyboard variation(ua) to make sure it's multi-lang
+1. Readme
+1. Linux impl
+1. Make sure it catches signals before other programs on OS
+1. Helper: one keyboard variation(ua) to make sure it's multi-lang
 1. (input/output multi-lang) ehhh, just hepler function here
 1. Tray icon
-1. Error handling, Validation with tkinter warnings
-1. Moar trackers: process, device connect/disconnect, service/daemon, file, resource(cpu/gpu/network) load
+1. Error handling, Validation with tkinter warnings, Logging
+1. Moar trackers: kb lang, process, device connect/disconnect, service/daemon, file, resource(cpu/gpu/network) load
 1. Group actions when it goes on/off, timer for checking group states?
-
+1. Helpers galore: picture assist, on repeat/hold,
 ## Limitations of the current design
 
 Unable to terminate/pause/unpause actions.
