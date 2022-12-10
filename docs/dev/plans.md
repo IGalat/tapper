@@ -48,6 +48,7 @@ By having user configure triggers and corresponding actions, and running a loop 
 1. Moar trackers: kb lang, process, device connect/disconnect, service/daemon, file, resource(cpu/gpu/network) load
 1. Group actions when it goes on/off, timer for checking group states?
 1. Helpers galore: picture assist, on repeat/hold,
+
 ## Limitations of the current design
 
 Unable to terminate/pause/unpause actions.
