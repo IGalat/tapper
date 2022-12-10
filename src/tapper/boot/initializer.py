@@ -1,6 +1,6 @@
 from threading import Thread
 
-from tapper import configuration
+from tapper import config
 from tapper import parser
 from tapper.action.runner import ActionRunner
 from tapper.action.runner import ActionRunnerImpl
@@ -32,11 +32,11 @@ def default_trigger_parser(os: str | None = None) -> TriggerParser:
 
 
 def default_action_runner() -> ActionRunner:
-    return ActionRunnerImpl(configuration.action_runner_executors_threads)
+    return ActionRunnerImpl(config.action_runner_executors_threads)
 
 
 def default_keeper_pressed(os: str | None = None) -> keeper.Pressed:
-    return keeper.Pressed(registered_symbols=configuration.keys_held_down(os))
+    return keeper.Pressed(registered_symbols=config.keys_held_down(os))
 
 
 def default_send_parser() -> SendParser:
@@ -72,7 +72,7 @@ def init(
     send: SendFn,
 ) -> list[SignalListener]:
     """Initialize components with config values."""
-    os = configuration.os
+    os = config.os
 
     transformer = TreeTransformer(send, default_trigger_parser(os))
     _fill_default_properties(iroot)
@@ -90,8 +90,7 @@ def init(
         signal_processor.on_signal, emul_keeper, state_keeper
     )
     listeners = [
-        listener_wrapper.wrap(listener.get_for_os(os))
-        for listener in configuration.listeners
+        listener_wrapper.wrap(listener.get_for_os(os)) for listener in config.listeners
     ]
 
     if not hasattr(kb_cmd_proxy, "_commander"):

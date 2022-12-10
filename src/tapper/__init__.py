@@ -1,5 +1,6 @@
 import time as _time
 
+from tapper import config
 from tapper.boot import initializer as _initializer
 from tapper.command.keyboard.keyboard_commander import (
     KeyboardCmdProxy as _KeyboardCmdProxy,
