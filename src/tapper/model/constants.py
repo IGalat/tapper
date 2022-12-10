@@ -19,6 +19,9 @@ class KeyDir(str, Enum):
     OFF = "off"
     """If key is not toggled off, click, else nothing."""
 
+    def __repr__(self) -> str:
+        return self.name
+
 
 class KeyDirBool(Flag):
     """Key direction. Used for signal recognition."""
@@ -27,6 +30,9 @@ class KeyDirBool(Flag):
     """Key released."""
     DOWN = True
     """Key pressed."""
+
+    def __repr__(self) -> str:
+        return self.name if self.name else ""
 
 
 class OS(str, Enum):
