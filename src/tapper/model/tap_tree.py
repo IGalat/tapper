@@ -4,20 +4,28 @@ from typing import Optional
 
 from tapper.model.constants import ListenerResult
 from tapper.model.types_ import Action
+from tapper.model.types_ import TriggerIfFn
 from tapper.model.types_ import TriggerStr
 
 
 class TapGeneric(ABC):
     """
     Shared data between Tap and Group.
-    In a Group, each field except "parent" will be inherited
-    by its children, unless overridden.
+    In a Group, each field will be inherited
+    by its children, unless overridden down the line.
     """
 
     executor: Optional[int]
     """Which executor to run the action in. see ActionRunner."""
     suppress_trigger: Optional[ListenerResult]
     """Whether to suppress main key when an action is triggered."""
+    trigger_if: Optional[TriggerIfFn]
+    """
+    Cannot trigger unless this resolves to True.
+
+    PERFORMANCE WARNING: no performance optimization, this check will execute every trigger.
+    May significantly impact overall performance of tapper.
+    """
 
 
 @dataclass(init=False)
@@ -39,11 +47,13 @@ class Tap(TapGeneric):
         action: Action | str,
         executor: Optional[int] = None,
         suppress_trigger: Optional[bool] = None,
+        trigger_if: Optional[TriggerIfFn] = None,
     ) -> None:
         self.trigger = trigger
         self.action = action
         self.executor = executor
         self.suppress_trigger = suppress_trigger
+        self.trigger_if = trigger_if
 
     def __repr__(self) -> str:
         return f"Tap('{self.trigger}')"
@@ -81,10 +91,13 @@ class Group(TapGeneric):
         name: Optional[str] = None,
         executor: Optional[int] = None,
         suppress_trigger: Optional[ListenerResult] = None,
+        trigger_if: Optional[TriggerIfFn] = None,
     ) -> None:
         self.name = name
         self.executor = executor
         self.suppress_trigger = suppress_trigger
+        self.trigger_if = trigger_if
+
         self._children = []
 
     def __repr__(self) -> str:

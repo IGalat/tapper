@@ -32,6 +32,7 @@ class TreeTransformer:
     def transform(self, group: Group) -> SGroup:
         result = SGroup()
         result.original = group
+        result.trigger_if = group.trigger_if
 
         for child in group._children:
             if isinstance(child, Group):
@@ -41,7 +42,7 @@ class TreeTransformer:
             elif isinstance(child, dict):
                 result.add(*self._transform_dict(child, group))
             else:
-                raise TypeError
+                raise TypeError(f"{child}")
         return result
 
     def _transform_tap(self, tap: Tap) -> STap:
@@ -53,6 +54,7 @@ class TreeTransformer:
         action = self.to_action(tap.action)
         result = STap(trigger, action, executor, suppress_trigger)
         result.original = tap
+        result.trigger_if = tap.trigger_if
 
         return result
 

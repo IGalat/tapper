@@ -56,3 +56,6 @@ It must require no arguments. Use `functools.partial` to provide arguments befor
 
 SendFn = Callable[[str], None]
 """Send command type."""
+
+TriggerIfFn = Callable[[], bool]
+"""Tap cannot trigger unless this resolves to True."""

@@ -1,6 +1,6 @@
 import time as _time
 
-from tapper import config
+from tapper import config as _config
 from tapper.boot import initializer as _initializer
 from tapper.command.keyboard.keyboard_commander import (
     KeyboardCmdProxy as _KeyboardCmdProxy,
@@ -21,10 +21,10 @@ Tap = _tap_tree.Tap
 Group = _tap_tree.Group
 """Group of Taps, and/or other Groups."""
 
-root = Group()
+root = Group("root")
 """Root group, the parent to all except control group."""
 
-control_group = Group()
+control_group = Group("control_group")
 """
 A special group, intended to control the flow of tapper - pause, shutdown, reboot.
 Actions of this group have a dedicated executor, to avoid being blocked by other running actions.
@@ -40,6 +40,8 @@ kb = _KeyboardCmdProxy()
 
 mouse = _MouseCmdProxy()
 """Mouse commander."""
+
+config = _config
 
 
 def init() -> None:

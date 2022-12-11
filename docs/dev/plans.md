@@ -35,7 +35,7 @@ By having user configure triggers and corresponding actions, and running a loop 
 1. DONE. tapper api
 1. DONE. SignalProcessor
 1. DONE. Initializer
-1. trigger_if - free-style conditions
+1. DONE. trigger_if - free-style conditions
 1. kwargs map, to make conditions for Taps much easier; TriggerConditions system, WindowTriggerConditionsTracker
 1. hotstring support
 1. Readme

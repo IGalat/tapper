@@ -63,8 +63,8 @@ def f(dummy: Dummy, is_debug: bool) -> Fixture:
 
     # restore default before each
     config.action_runner_executors_threads = [1]
-    tapper.root = Group()
-    tapper.control_group = Group()
+    tapper.root = Group("root")
+    tapper.control_group = Group("control_group")
     tapper._initialized = False
 
     listener = dummy.Listener.get_for_os("")
@@ -168,6 +168,28 @@ class TestSimple:
         f.send_real("$(enter up;  up)")
         assert ends_with(f.actions, [4, 6, 5])
 
+    def test_trigger_if(self, f: Fixture) -> None:
+        conditions = []
+        is_in_conditions = lambda x: x in conditions
+
+        tapper.root.add(
+            {"q": "0"},
+            Group(trigger_if=partial(is_in_conditions, 1)).add({"q": "1"}),
+            Tap("q", "2", trigger_if=partial(is_in_conditions, 2)),
+        )
+        f.start()
+
+        f.send_real("q")
+        assert f.emul_signals == click("0")
+
+        conditions.append(1)
+        f.send_real("q")
+        assert f.emul_signals == click("01")
+
+        conditions.append(2)
+        f.send_real("q")
+        assert f.emul_signals == click("012")
+
 
 class TestTreeOrder:
     """React to the last trigger that matches, depth-first."""
@@ -240,7 +262,6 @@ class TestConcurrentActions:
                 }
             ),
         )
-        tapper.control_group.add({""})
         f.start()
 
         f.send_real("xzhgfdsa")
