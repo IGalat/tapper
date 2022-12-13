@@ -9,7 +9,7 @@ from conftest import Dummy
 from tapper import config
 from tapper import Group
 from tapper import Tap
-from tapper.command.send_processor import SendCommandProcessor
+from tapper.controller.send_processor import SendCommandProcessor
 from tapper.model.constants import KeyDirBool
 from tapper.model.types_ import SendFn
 from tapper.model.types_ import Signal
@@ -98,8 +98,8 @@ def f(dummy: Dummy, is_debug: bool) -> Fixture:
         real_sender.os = sender.os
         real_sender.parser = sender.parser
         real_sender.sleep_fn = partial(sleep_logged, signals=f.real_signals)
-        real_sender.kb_commander = dummy.KbCmd(listener, f.real_signals)
-        real_sender.mouse_commander = dummy.MouseCmd(listener, f.real_signals)
+        real_sender.kb_controller = dummy.KbCmd(listener, f.real_signals)
+        real_sender.mouse_controller = dummy.MouseCmd(listener, f.real_signals)
 
         tapper.start(False)
 

@@ -1,8 +1,8 @@
 import time
 from typing import Callable
 
-from tapper.command.keyboard.keyboard_commander import KeyboardCommander
-from tapper.command.mouse.mouse_commander import MouseCommander
+from tapper.controller.keyboard.api import KeyboardController
+from tapper.controller.mouse.api import MouseController
 from tapper.model import constants
 from tapper.model import keyboard
 from tapper.model import mouse
@@ -19,21 +19,21 @@ class SendCommandProcessor:
 
     os: str
     parser: SendParser
-    kb_commander: KeyboardCommander
-    mouse_commander: MouseCommander
+    kb_controller: KeyboardController
+    mouse_controller: MouseController
     sleep_fn: Callable[[float], None] = time.sleep
 
     def __init__(
         self,
         os: str,
         parser: SendParser,
-        kb_commander: KeyboardCommander,
-        mouse_commander: MouseCommander,
+        kb_controller: KeyboardController,
+        mouse_controller: MouseController,
     ) -> None:
         self.os = os
         self.parser = parser
-        self.kb_commander = kb_commander
-        self.mouse_commander = mouse_commander
+        self.kb_controller = kb_controller
+        self.mouse_controller = mouse_controller
 
     @classmethod
     def from_none(cls) -> "SendCommandProcessor":
@@ -47,7 +47,7 @@ class SendCommandProcessor:
             if isinstance(instruction, KeyInstruction):
                 self._send_key_instruction(instruction)
             elif isinstance(instruction, WheelInstruction):
-                self.mouse_commander.press(instruction.wheel_symbol)
+                self.mouse_controller.press(instruction.wheel_symbol)
             elif isinstance(instruction, SleepInstruction):
                 self.sleep_fn(instruction.time)  # type: ignore  # https://github.com/python/mypy/issues/5485
             else:
@@ -55,11 +55,11 @@ class SendCommandProcessor:
 
     def _send_key_instruction(self, ki: KeyInstruction) -> None:
         symbol = ki.symbol
-        cmd: KeyboardCommander | MouseCommander
+        cmd: KeyboardController | MouseController
         if symbol in keyboard.get_keys(self.os):
-            cmd = self.kb_commander
+            cmd = self.kb_controller
         elif symbol in mouse.get_keys():
-            cmd = self.mouse_commander
+            cmd = self.mouse_controller
         else:
             raise SendError
 

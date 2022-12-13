@@ -10,7 +10,7 @@ from tapper.command.keyboard.keyboard_commander import KeyboardCmdProxy
 from tapper.command.keyboard.keyboard_commander import KeyboardCommander
 from tapper.command.mouse.mouse_commander import MouseCmdProxy
 from tapper.command.mouse.mouse_commander import MouseCommander
-from tapper.command.send_processor import SendCommandProcessor
+from tapper.controller.send_processor import SendCommandProcessor
 from tapper.model import constants
 from tapper.model import keyboard
 from tapper.model import mouse
@@ -102,8 +102,8 @@ def init(
 
     send_processor.os = os
     send_processor.parser = default_send_parser()
-    send_processor.kb_commander = kb_cmd_proxy
-    send_processor.mouse_commander = mouse_cmd_proxy
+    send_processor.kb_controller = kb_cmd_proxy
+    send_processor.mouse_controller = mouse_cmd_proxy
 
     return listeners
 

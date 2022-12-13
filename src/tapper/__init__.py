@@ -6,7 +6,9 @@ from tapper.command.keyboard.keyboard_commander import (
     KeyboardCmdProxy as _KeyboardCmdProxy,
 )
 from tapper.command.mouse.mouse_commander import MouseCmdProxy as _MouseCmdProxy
-from tapper.command.send_processor import SendCommandProcessor as _SendCommandProcessor
+from tapper.controller.send_processor import (
+    SendCommandProcessor as _SendCommandProcessor,
+)
 from tapper.model import tap_tree as _tap_tree
 from tapper.signal.base_listener import SignalListener as _SignalListener
 
