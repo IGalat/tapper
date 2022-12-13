@@ -2,10 +2,12 @@
 from typing import Any
 from typing import Iterable
 from typing import Sequence
+from typing import TypeVar
 
 from tapper.model.types_ import SymbolsWithAliases
 
 SymbolCode = int | tuple[Any, ...]
+T = TypeVar("T")
 
 
 def unique_list(data_structure: Sequence[Any]) -> list[Any]:
@@ -44,3 +46,10 @@ def symbols_to_codes(
         code = symbol_code_map[references[0]]
         symbol_code_map[maybe_alias] = code
     return symbol_code_map
+
+
+def get_first_in(_type: type[T], seq: Sequence[Any]) -> T | None:
+    for s in seq:
+        if isinstance(s, _type):
+            return s
+    return None

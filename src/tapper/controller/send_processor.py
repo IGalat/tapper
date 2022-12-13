@@ -1,8 +1,8 @@
 import time
 from typing import Callable
 
-from tapper.controller.keyboard.api import KeyboardController
-from tapper.controller.mouse.api import MouseController
+from tapper.controller.keyboard.kb_api import KeyboardController
+from tapper.controller.mouse.mouse_api import MouseController
 from tapper.model import constants
 from tapper.model import keyboard
 from tapper.model import mouse

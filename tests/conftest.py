@@ -2,17 +2,16 @@ from __future__ import annotations
 
 import sys
 
-import tapper
-from tapper.controller.keyboard.api import KeyboardTracker
-from tapper.controller.mouse.api import MouseTracker
+from tapper.controller.keyboard.kb_api import KeyboardCommander
+from tapper.controller.keyboard.kb_api import KeyboardTracker
+from tapper.controller.mouse.mouse_api import MouseCommander
+from tapper.controller.mouse.mouse_api import MouseTracker
 
 """This file in tests root is required for pytest path discovery for some reason."""
 from collections import defaultdict
 
 import pytest
 from tapper.action.runner import ActionRunner
-from tapper.command.keyboard.keyboard_commander import KeyboardCommander
-from tapper.command.mouse.mouse_commander import MouseCommander
 from tapper.model import constants
 from tapper.model import types_
 from tapper.model.types_ import Signal
@@ -44,73 +43,7 @@ class DummyListener(SignalListener):
         return dumL
 
 
-class DummyKbCmd(KeyboardCommander):
-    listener: SignalListener
-    all_signals: list[Signal]
-
-    def __init__(self, listener: SignalListener, all_signals: list[Signal]) -> None:
-        self.listener = listener
-        self.all_signals = all_signals
-
-    def press(self, symbol: str) -> None:
-        signal = (symbol, constants.KeyDirBool.DOWN)
-        self.all_signals.append(signal)
-        self.listener.on_signal(signal)
-
-    def release(self, symbol: str) -> None:
-        signal = (symbol, constants.KeyDirBool.UP)
-        self.all_signals.append(signal)
-        self.listener.on_signal(signal)
-
-    def pressed(self, symbol: str) -> bool:
-        pass
-
-    def toggled(self, symbol: str) -> bool:
-        pass
-
-    def pressed_toggled(self, symbol: str) -> tuple[bool, bool]:
-        pass
-
-
-class DummyMouseCmd(MouseCommander):
-    listener: SignalListener
-    all_signals: list[Signal]
-
-    def __init__(self, listener: SignalListener, all_signals: list[Signal]) -> None:
-        self.listener = listener
-        self.all_signals = all_signals
-
-    def press(self, symbol: str) -> None:
-        signal = (symbol, constants.KeyDirBool.DOWN)
-        self.all_signals.append(signal)
-        self.listener.on_signal(signal)
-
-    def release(self, symbol: str) -> None:
-        signal = (symbol, constants.KeyDirBool.UP)
-        self.all_signals.append(signal)
-        self.listener.on_signal(signal)
-
-    def move(
-        self, x: int | None = None, y: int | None = None, relative: bool = False
-    ) -> None:
-        pass
-
-    def pressed(self, symbol: str) -> bool:
-        pass
-
-    def toggled(self, symbol: str) -> bool:
-        pass
-
-    def pressed_toggled(self, symbol: str) -> tuple[bool, bool]:
-        pass
-
-    def get_pos(self) -> tuple[int, int]:
-        pass
-
-
-class DummyKbTrackerCommander(
-    KeyboardTracker, tapper.controller.keyboard.api.KeyboardCommander
-):
+class DummyKbTrackerCommander(KeyboardTracker, KeyboardCommander):
     listener: SignalListener
     all_signals: list[Signal]
 
@@ -144,9 +77,7 @@ class DummyKbTrackerCommander(
         pass
 
 
-class DummyMouseTrackerCommander(
-    MouseTracker, tapper.controller.mouse.api.MouseCommander
-):
+class DummyMouseTrackerCommander(MouseTracker, MouseCommander):
     listener: SignalListener
     all_signals: list[Signal]
 
@@ -206,8 +137,6 @@ class DummyActionRunner(ActionRunner):
 
 class Dummy:
     Listener = DummyListener
-    KbCmd = DummyKbCmd
-    MouseCmd = DummyMouseCmd
     KbTC = DummyKbTrackerCommander
     MouseTC = DummyMouseTrackerCommander
     ActionRunner = DummyActionRunner

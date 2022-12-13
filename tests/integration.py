@@ -9,10 +9,13 @@ from conftest import Dummy
 from tapper import config
 from tapper import Group
 from tapper import Tap
+from tapper.controller.keyboard.kb_api import KeyboardController
+from tapper.controller.mouse.mouse_api import MouseController
 from tapper.controller.send_processor import SendCommandProcessor
 from tapper.model.constants import KeyDirBool
 from tapper.model.types_ import SendFn
 from tapper.model.types_ import Signal
+from tapper.state import keeper
 
 
 def click(symbols: str) -> Signal | list[Signal]:
@@ -76,8 +79,10 @@ def f(dummy: Dummy, is_debug: bool) -> Fixture:
     f.real_signals = []
     f.actions = []
 
-    tapper.kb = dummy.KbCmd(listener, f.emul_signals)
-    tapper.mouse = dummy.MouseCmd(listener, f.emul_signals)
+    kb_tc = dummy.KbTC(listener, f.emul_signals)
+    tapper.kb._tracker, tapper.kb._commander = kb_tc, kb_tc
+    mouse_tc = dummy.MouseTC(listener, f.emul_signals)
+    tapper.mouse._tracker, tapper.mouse._commander = mouse_tc, mouse_tc
 
     def sleep_logged(time_s: float, signals: list[Signal]) -> None:
         signals.append(sleep_signal(time_s))
@@ -98,8 +103,19 @@ def f(dummy: Dummy, is_debug: bool) -> Fixture:
         real_sender.os = sender.os
         real_sender.parser = sender.parser
         real_sender.sleep_fn = partial(sleep_logged, signals=f.real_signals)
-        real_sender.kb_controller = dummy.KbCmd(listener, f.real_signals)
-        real_sender.mouse_controller = dummy.MouseCmd(listener, f.real_signals)
+
+        emul_keeper = keeper.Emul()
+
+        kb_tc2 = dummy.KbTC(listener, f.real_signals)
+        kbc = KeyboardController()
+        kbc._tracker, kbc._commander, kbc._emul_keeper = kb_tc2, kb_tc2, emul_keeper
+
+        mouse_tc2 = dummy.MouseTC(listener, f.real_signals)
+        mc = MouseController()
+        mc._tracker, mc._commander, mc._emul_keeper = mouse_tc2, mouse_tc2, emul_keeper
+
+        real_sender.kb_controller = kbc
+        real_sender.mouse_controller = mc
 
         tapper.start(False)
 
@@ -115,7 +131,6 @@ class TestSimple:
         f.start()
 
         f.send_real("a")
-        time.sleep(0.01)
         assert f.real_signals == click("a")
         assert f.actions == [1]
 

@@ -1,8 +1,8 @@
 from typing import Optional
 
-from tapper import mouse
-from tapper.controller.mouse.api import MouseCommander
-from tapper.controller.mouse.api import MouseTracker
+from tapper.controller.mouse.mouse_api import MouseCommander
+from tapper.controller.mouse.mouse_api import MouseTracker
+from tapper.model import mouse
 from tapper.util import datastructs
 from tapper.validation import report
 from winput import winput
@@ -29,6 +29,9 @@ user32 = winput.user32
 class Win32MouseTrackerCommander(MouseTracker, MouseCommander):
     def start(self) -> None:
         winput.set_DPI_aware(per_monitor=True)
+
+    def stop(self) -> None:
+        pass
 
     def press(self, symbol: str) -> None:
         try:

@@ -1,5 +1,5 @@
-from tapper.controller.keyboard.api import KeyboardCommander
-from tapper.controller.keyboard.api import KeyboardTracker
+from tapper.controller.keyboard.kb_api import KeyboardCommander
+from tapper.controller.keyboard.kb_api import KeyboardTracker
 from tapper.model import keyboard
 from tapper.util import datastructs
 from winput import winput

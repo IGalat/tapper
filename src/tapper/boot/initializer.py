@@ -5,11 +5,8 @@ from tapper import parser
 from tapper.action.runner import ActionRunner
 from tapper.action.runner import ActionRunnerImpl
 from tapper.boot.tree_transformer import TreeTransformer
-from tapper.command.base_commander import Commander
-from tapper.command.keyboard.keyboard_commander import KeyboardCmdProxy
-from tapper.command.keyboard.keyboard_commander import KeyboardCommander
-from tapper.command.mouse.mouse_commander import MouseCmdProxy
-from tapper.command.mouse.mouse_commander import MouseCommander
+from tapper.controller.keyboard.kb_api import KeyboardController
+from tapper.controller.mouse.mouse_api import MouseController
 from tapper.controller.send_processor import SendCommandProcessor
 from tapper.model import constants
 from tapper.model import keyboard
@@ -25,6 +22,7 @@ from tapper.signal.base_listener import SignalListener
 from tapper.signal.processor import SignalProcessor
 from tapper.signal.wrapper import ListenerWrapper
 from tapper.state import keeper
+from tapper.util import datastructs
 
 
 def default_trigger_parser(os: str | None = None) -> TriggerParser:
@@ -67,8 +65,6 @@ def init(
     iroot: Group,
     icontrol: Group,
     send_processor: SendCommandProcessor,
-    kb_cmd_proxy: KeyboardCmdProxy,
-    mouse_cmd_proxy: MouseCmdProxy,
     send: SendFn,
 ) -> list[SignalListener]:
     """Initialize components with config values."""
@@ -93,17 +89,19 @@ def init(
         listener_wrapper.wrap(listener.get_for_os(os)) for listener in config.listeners
     ]
 
-    if not hasattr(kb_cmd_proxy, "_commander"):
-        kb_cmd_proxy._commander = KeyboardCommander.get_for_os(os)
-    kb_cmd_proxy._emul_keeper = emul_keeper
-    if not hasattr(mouse_cmd_proxy, "_commander"):
-        mouse_cmd_proxy._commander = MouseCommander.get_for_os(os)
-    mouse_cmd_proxy._emul_keeper = emul_keeper
+    controllers = config.controllers
+    if kbc := datastructs.get_first_in(KeyboardController, controllers):
+        kbc._os = os
+        kbc._emul_keeper = emul_keeper
+    if mc := datastructs.get_first_in(MouseController, controllers):
+        mc._os = os
+        mc._emul_keeper = emul_keeper
+    [c._init() for c in controllers]
 
     send_processor.os = os
     send_processor.parser = default_send_parser()
-    send_processor.kb_controller = kb_cmd_proxy
-    send_processor.mouse_controller = mouse_cmd_proxy
+    send_processor.kb_controller = kbc
+    send_processor.mouse_controller = mc
 
     return listeners
 
@@ -120,8 +118,9 @@ def _fill_default_properties(group: Group) -> None:
         group.suppress_trigger = constants.ListenerResult.SUPPRESS
 
 
-def start(commanders: list[Commander], listeners: list[SignalListener]) -> None:
+def start(listeners: list[SignalListener]) -> None:
     """Starts the application. Should be called after init"""
-    [commander.start() for commander in commanders]
-    for listener in [*listeners]:
+    for controller in config.controllers:
+        Thread(target=controller._start).start()
+    for listener in listeners:
         Thread(target=listener.start).start()
