@@ -4,8 +4,8 @@ from typing import Callable
 import pytest
 from conftest import Dummy
 from tapper.boot import initializer
-from tapper.controller.keyboard.api import KeyboardController
-from tapper.controller.mouse.api import MouseController
+from tapper.controller.keyboard.kb_api import KeyboardController
+from tapper.controller.mouse.mouse_api import MouseController
 from tapper.controller.send_processor import SendCommandProcessor
 from tapper.model import constants
 from tapper.model.types_ import Signal
@@ -59,11 +59,13 @@ class TestSendCommandProcessor:
         ).wrap(listener)
 
         kb_tc = dummy.KbTC(listener, self.all_signals)
-        kbc = KeyboardController._from_all(kb_tc, kb_tc, emul)
+        kbc = KeyboardController()
+        kbc._tracker, kbc._commander, kbc._emul_keeper = kb_tc, kb_tc, emul
         mouse_tc = dummy.MouseTC(listener, self.all_signals)
-        mousec = MouseController._from_all(mouse_tc, mouse_tc, emul)
+        mc = MouseController()
+        mc._tracker, mc._commander, mc._emul_keeper = mouse_tc, mouse_tc, emul
 
-        self.sender = SendCommandProcessor("", parser, kbc, mousec)
+        self.sender = SendCommandProcessor("", parser, kbc, mc)
         self.sender.sleep_fn = lambda f: self.all_signals.append(sleep(f))
 
         event.subscribe(listener.name, lambda signal: self.real_signals.append(signal))

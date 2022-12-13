@@ -38,6 +38,7 @@ class TestActionRunnerImpl:
             result += 1
 
         simple_runner.run(increment)
+        time.sleep(0.05)
         assert result == 1
 
     @given(exec_number=st.integers(min_value=1))

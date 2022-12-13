@@ -1,5 +1,7 @@
 import sys
 
+from tapper.controller.keyboard.kb_api import KeyboardController
+from tapper.controller.mouse.mouse_api import MouseController
 from tapper.model import keyboard
 from tapper.model import mouse
 from tapper.signal.keyboard.keyboard_listener import KeyboardSignalListener
@@ -30,6 +32,11 @@ SECTION 3: Extending the functionality.
 listeners = [
     KeyboardSignalListener,
     MouseSignalListener,
+]
+
+controllers = [
+    KeyboardController(),
+    MouseController(),
 ]
 
 keys_held_down = lambda os_: [*keyboard.get_key_list(os_), *mouse.regular_buttons]
