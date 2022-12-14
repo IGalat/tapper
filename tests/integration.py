@@ -281,3 +281,21 @@ class TestConcurrentActions:
 
         f.send_real("xzhgfdsa")
         assert f.emul_signals == [sleep_signal(ms / 1000) for ms in [2, 16, 15, 14]]
+
+
+class TestTriggerConditions:
+    def test_trigger_if(self, f: Fixture) -> None:
+        flag = True
+        tapper.root.add(
+            Tap("t", "0"),
+            Tap("t", "1", trigger_if=lambda: not flag),
+            Tap("t", "2", trigger_if=lambda: flag),
+        )
+        f.start()
+
+        f.send_real("t")
+        assert ends_with(f.emul_signals, click("2"))
+
+        flag = False
+        f.send_real("t")
+        assert ends_with(f.emul_signals, click("1"))
