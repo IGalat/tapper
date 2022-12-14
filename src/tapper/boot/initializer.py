@@ -8,7 +8,6 @@ from tapper.boot.tree_transformer import TreeTransformer
 from tapper.controller.keyboard.kb_api import KeyboardController
 from tapper.controller.mouse.mouse_api import MouseController
 from tapper.controller.send_processor import SendCommandProcessor
-from tapper.model import constants
 from tapper.model import keyboard
 from tapper.model import mouse
 from tapper.model.send import KeyInstruction
@@ -70,7 +69,9 @@ def init(
     """Initialize components with config values."""
     os = config.os
 
-    transformer = TreeTransformer(send, default_trigger_parser(os))
+    transformer = TreeTransformer(
+        send, default_trigger_parser(os), config.kw_trigger_conditions
+    )
     _fill_default_properties(iroot)
     root = transformer.transform(iroot)
     _fill_control_if_empty(icontrol)
@@ -115,7 +116,7 @@ def _fill_default_properties(group: Group) -> None:
     if group.executor is None:
         group.executor = 0
     if group.suppress_trigger is None:
-        group.suppress_trigger = constants.ListenerResult.SUPPRESS
+        group.suppress_trigger = config.default_trigger_suppression
 
 
 def start(listeners: list[SignalListener]) -> None:

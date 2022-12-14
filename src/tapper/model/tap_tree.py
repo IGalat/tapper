@@ -1,10 +1,10 @@
 from abc import ABC
 from dataclasses import dataclass
+from typing import Any
 from typing import Optional
 
 from tapper.model.constants import ListenerResult
 from tapper.model.types_ import Action
-from tapper.model.types_ import TriggerIfFn
 from tapper.model.types_ import TriggerStr
 
 
@@ -19,13 +19,8 @@ class TapGeneric(ABC):
     """Which executor to run the action in. see ActionRunner."""
     suppress_trigger: Optional[ListenerResult]
     """Whether to suppress main key when an action is triggered."""
-    trigger_if: Optional[TriggerIfFn]
-    """
-    Cannot trigger unless this resolves to True.
-
-    PERFORMANCE WARNING: no performance optimization, this check will execute every trigger.
-    May significantly impact overall performance of tapper.
-    """
+    trigger_conditions: dict[str, Any]
+    """Keyword trigger conditions that can be used as part of Tap or Group. See config for docs."""
 
 
 @dataclass(init=False)
@@ -47,13 +42,13 @@ class Tap(TapGeneric):
         action: Action | str,
         executor: Optional[int] = None,
         suppress_trigger: Optional[bool] = None,
-        trigger_if: Optional[TriggerIfFn] = None,
+        **trigger_conditions: Any,
     ) -> None:
         self.trigger = trigger
         self.action = action
         self.executor = executor
         self.suppress_trigger = suppress_trigger
-        self.trigger_if = trigger_if
+        self.trigger_conditions = trigger_conditions
 
     def __repr__(self) -> str:
         return f"Tap('{self.trigger}')"
@@ -91,12 +86,12 @@ class Group(TapGeneric):
         name: Optional[str] = None,
         executor: Optional[int] = None,
         suppress_trigger: Optional[ListenerResult] = None,
-        trigger_if: Optional[TriggerIfFn] = None,
+        **trigger_conditions: Any,
     ) -> None:
         self.name = name
         self.executor = executor
         self.suppress_trigger = suppress_trigger
-        self.trigger_if = trigger_if
+        self.trigger_conditions = trigger_conditions
 
         self._children = []
 

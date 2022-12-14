@@ -48,6 +48,8 @@ def ends_with(outer: list[Any], sub: list[Any]) -> bool:
 class Fixture:
     emul_signals: list[Signal]
     real_signals: list[Signal]
+    pressed: list[str]
+    toggled: list[str]
 
     send_real: SendFn
     start: Any  # type:ignore
@@ -73,15 +75,19 @@ def f(dummy: Dummy, is_debug: bool) -> Fixture:
     listener = dummy.Listener.get_for_os("")
     config.listeners = [listener]
 
-    f = Fixture()
-    f._acts = {}
-    f.emul_signals = []
-    f.real_signals = []
-    f.actions = []
+    fixture = Fixture()
+    fixture._acts = {}
+    fixture.emul_signals = []
+    fixture.real_signals = []
+    fixture.pressed = []
+    fixture.toggled = []
+    fixture.actions = []
 
-    kb_tc = dummy.KbTC(listener, f.emul_signals)
+    kb_tc = dummy.KbTC(listener, fixture.emul_signals, fixture.pressed, fixture.toggled)
     tapper.kb._tracker, tapper.kb._commander = kb_tc, kb_tc
-    mouse_tc = dummy.MouseTC(listener, f.emul_signals)
+    mouse_tc = dummy.MouseTC(
+        listener, fixture.emul_signals, fixture.pressed, fixture.toggled
+    )
     tapper.mouse._tracker, tapper.mouse._commander = mouse_tc, mouse_tc
 
     def sleep_logged(time_s: float, signals: list[Signal]) -> None:
@@ -89,28 +95,32 @@ def f(dummy: Dummy, is_debug: bool) -> Fixture:
         time.sleep(time_s)
 
     sender = tapper._send_processor
-    sender.sleep_fn = partial(sleep_logged, signals=f.emul_signals)
+    sender.sleep_fn = partial(sleep_logged, signals=fixture.emul_signals)
 
     def send_and_sleep(send: SendFn, command: str) -> None:
         send(command)
         time.sleep(0.01 * debug_sleep_mult)  # so actions can run their course
 
     real_sender = SendCommandProcessor.from_none()
-    f.send_real = partial(send_and_sleep, real_sender.send)
+    fixture.send_real = partial(send_and_sleep, real_sender.send)
 
     def start() -> None:
         tapper.init()  # this will init sender
         real_sender.os = sender.os
         real_sender.parser = sender.parser
-        real_sender.sleep_fn = partial(sleep_logged, signals=f.real_signals)
+        real_sender.sleep_fn = partial(sleep_logged, signals=fixture.real_signals)
 
         emul_keeper = keeper.Emul()
 
-        kb_tc2 = dummy.KbTC(listener, f.real_signals)
+        kb_tc2 = dummy.KbTC(
+            listener, fixture.real_signals, fixture.pressed, fixture.toggled
+        )
         kbc = KeyboardController()
         kbc._tracker, kbc._commander, kbc._emul_keeper = kb_tc2, kb_tc2, emul_keeper
 
-        mouse_tc2 = dummy.MouseTC(listener, f.real_signals)
+        mouse_tc2 = dummy.MouseTC(
+            listener, fixture.real_signals, fixture.pressed, fixture.toggled
+        )
         mc = MouseController()
         mc._tracker, mc._commander, mc._emul_keeper = mouse_tc2, mouse_tc2, emul_keeper
 
@@ -119,9 +129,9 @@ def f(dummy: Dummy, is_debug: bool) -> Fixture:
 
         tapper.start(False)
 
-    f.start = start  # type: ignore
+    fixture.start = start  # type: ignore
 
-    return f
+    return fixture
 
 
 class TestSimple:
@@ -299,3 +309,75 @@ class TestTriggerConditions:
         flag = False
         f.send_real("t")
         assert ends_with(f.emul_signals, click("1"))
+
+    def test_toggled(self, f: Fixture) -> None:
+        tapper.root.add(
+            Tap("t", "0"),
+            Tap("t", "1", toggled_on="caps"),
+            Tap("t", "2", toggled_on="num_lock"),
+            Tap("p", "9"),
+            Tap("p", "8", toggled_off="q"),
+            Tap("p", "7", toggled_off="w"),
+        )
+        f.start()
+
+        tp = lambda: f.send_real("t$(50ms)p")
+
+        tp()
+        assert ends_with(f.emul_signals, click("07"))
+
+        f.toggled.extend(["caps", "w"])
+        tp()
+        assert ends_with(f.emul_signals, click("18"))
+
+        f.toggled.extend(["num_lock", "q"])
+        tp()
+        assert ends_with(f.emul_signals, click("29"))
+
+        f.toggled.clear()
+        tp()
+        assert ends_with(f.emul_signals, click("07"))
+
+    def test_cursor_near(self, f: Fixture) -> None:
+        tapper.root.add(
+            Tap("\n", "0"),
+            Tap("\n", "1", cursor_near=((500, 500), 200)),
+            Tap("\n", "2", cursor_near=((500, 500), 50)),
+        )
+        f.start()
+
+        tapper.mouse.move(1, 1)
+        f.send_real("\n")
+        assert ends_with(f.emul_signals, click("0"))
+
+        tapper.mouse.move(400, 400)
+        f.send_real("\n")
+        assert ends_with(f.emul_signals, click("1"))
+
+        tapper.mouse.move(510, 490)
+        f.send_real("\n")
+        assert ends_with(f.emul_signals, click("2"))
+
+    def test_cursor_in(self, f: Fixture) -> None:
+        tapper.root.add(
+            Tap("a", "0"),
+            Tap("a", "1", cursor_in=((10, 10), (20, 20))),
+            Tap("a", "2", cursor_in=((500, 500), (600, 600))),
+        )
+        f.start()
+
+        tapper.mouse.move(1, 1)
+        f.send_real("a")
+        assert ends_with(f.emul_signals, click("0"))
+
+        tapper.mouse.move(10, 10)
+        f.send_real("a")
+        tapper.mouse.move(15, 15)
+        f.send_real("a")
+        tapper.mouse.move(20, 20)
+        f.send_real("a")
+        assert ends_with(f.emul_signals, click("111"))
+
+        tapper.mouse.move(500, 600)
+        f.send_real("a")
+        assert ends_with(f.emul_signals, click("2"))

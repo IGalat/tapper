@@ -51,12 +51,9 @@ class SignalProcessor:
         """Find first Tap that matches, recursive."""
         if symbol not in group.get_main_triggers(direction):
             return None
-        if (
-            hasattr(group, "trigger_if")
-            and group.trigger_if is not None
-            and not group.trigger_if()
-        ):
+        if not all(bool(fn()) for fn in group.trigger_conditions):
             return None
+
         for child in reversed(group.children):
             if isinstance(child, SGroup):
                 if found := self.match(child, symbol, direction, state):
@@ -76,11 +73,7 @@ class SignalProcessor:
             return False
         if len(state) < len(tap.trigger.aux):
             return False
-        if (
-            hasattr(tap, "trigger_if")
-            and tap.trigger_if is not None
-            and not tap.trigger_if()
-        ):
+        if not all(bool(fn()) for fn in tap.trigger_conditions):
             return False
 
         for aux in tap.trigger.aux:

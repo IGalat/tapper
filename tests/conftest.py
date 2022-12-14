@@ -46,6 +46,8 @@ class DummyListener(SignalListener):
 class DummyKbTrackerCommander(KeyboardTracker, KeyboardCommander):
     listener: SignalListener
     all_signals: list[Signal]
+    pressed_symbols: list[str]
+    toggled_symbols: list[str]
 
     def start(self) -> None:
         pass
@@ -53,9 +55,23 @@ class DummyKbTrackerCommander(KeyboardTracker, KeyboardCommander):
     def stop(self) -> None:
         pass
 
-    def __init__(self, listener: SignalListener, all_signals: list[Signal]) -> None:
+    def __init__(
+        self,
+        listener: SignalListener,
+        all_signals: list[Signal],
+        pressed_symbols: list[str] | None = None,
+        toggled_symbols: list[str] | None = None,
+    ) -> None:
         self.listener = listener
         self.all_signals = all_signals
+        if pressed_symbols is not None:
+            self.pressed_symbols = pressed_symbols
+        else:
+            self.pressed_symbols = []
+        if toggled_symbols is not None:
+            self.toggled_symbols = toggled_symbols
+        else:
+            self.toggled_symbols = []
 
     def press(self, symbol: str) -> None:
         signal = (symbol, constants.KeyDirBool.DOWN)
@@ -68,18 +84,19 @@ class DummyKbTrackerCommander(KeyboardTracker, KeyboardCommander):
         self.listener.on_signal(signal)
 
     def pressed(self, symbol: str) -> bool:
-        pass
+        return symbol in self.pressed_symbols
 
     def toggled(self, symbol: str) -> bool:
-        pass
-
-    def pressed_toggled(self, symbol: str) -> tuple[bool, bool]:
-        pass
+        return symbol in self.toggled_symbols
 
 
 class DummyMouseTrackerCommander(MouseTracker, MouseCommander):
     listener: SignalListener
     all_signals: list[Signal]
+    pressed_symbols: list[str]
+    toggled_symbols: list[str]
+    x: int = 0
+    y: int = 0
 
     def start(self) -> None:
         pass
@@ -87,9 +104,23 @@ class DummyMouseTrackerCommander(MouseTracker, MouseCommander):
     def stop(self) -> None:
         pass
 
-    def __init__(self, listener: SignalListener, all_signals: list[Signal]) -> None:
+    def __init__(
+        self,
+        listener: SignalListener,
+        all_signals: list[Signal],
+        pressed_symbols: list[str] | None = None,
+        toggled_symbols: list[str] | None = None,
+    ) -> None:
         self.listener = listener
         self.all_signals = all_signals
+        if pressed_symbols is not None:
+            self.pressed_symbols = pressed_symbols
+        else:
+            self.pressed_symbols = []
+        if toggled_symbols is not None:
+            self.toggled_symbols = toggled_symbols
+        else:
+            self.toggled_symbols = []
 
     def press(self, symbol: str) -> None:
         signal = (symbol, constants.KeyDirBool.DOWN)
@@ -104,19 +135,23 @@ class DummyMouseTrackerCommander(MouseTracker, MouseCommander):
     def move(
         self, x: int | None = None, y: int | None = None, relative: bool = False
     ) -> None:
-        pass
+        if not x or x < 0:
+            x = 0
+        if not y or y < 0:
+            y = 0
+        if not relative:
+            self.x, self.y = x, y
+        else:
+            self.x, self.y = max(0, self.x + x), max(0, self.y + y)
 
     def pressed(self, symbol: str) -> bool:
-        pass
+        return symbol in self.pressed_symbols
 
     def toggled(self, symbol: str) -> bool:
-        pass
-
-    def pressed_toggled(self, symbol: str) -> tuple[bool, bool]:
-        pass
+        return symbol in self.toggled_symbols
 
     def get_pos(self) -> tuple[int, int]:
-        pass
+        return self.x, self.y
 
 
 class DummyActionRunner(ActionRunner):

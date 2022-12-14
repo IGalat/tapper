@@ -40,7 +40,9 @@ def tap(
     main = MainKey(keys[-1], time_main, direction=direction)
     aux = keys[:-1] if len(keys) > 1 else []
     trigger = Trigger(main, [AuxiliaryKey(arr) for arr in aux])
-    return STap(trigger, action, ordinal, result)
+    stap = STap(trigger, action, ordinal, result)
+    stap.trigger_conditions = {}
+    return stap
 
 
 def down(symbol: str) -> Signal:
@@ -61,7 +63,9 @@ class TestSignalProcessor:
     @pytest.fixture(autouse=True)
     def setup(self, dummy: Dummy) -> None:
         self.root = SGroup()
+        self.root.trigger_conditions = {}
         self.control = SGroup()
+        self.control.trigger_conditions = {}
         pressed = initializer.default_keeper_pressed()
         self.state_keeper = pressed
         self.runner = dummy.ActionRunner()
@@ -152,7 +156,9 @@ class TestSignalProcessor:
         assert self.runner.actions_ran[0] == [generic_action]
 
     def test_nested_simplest(self) -> None:
-        self.root.add(SGroup().add(tap([["a"]])))
+        sg = SGroup().add(tap([["a"]]))
+        sg.trigger_conditions = {}
+        self.root.add(sg)
         assert self.processor.on_signal(down("a")) == ListenerResult.SUPPRESS
         assert self.runner.actions_ran[0] == [generic_action]
 

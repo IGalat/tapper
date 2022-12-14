@@ -2,6 +2,7 @@ from functools import partial
 from typing import Callable
 
 import pytest
+from tapper import config
 from tapper.boot import initializer
 from tapper.boot.tree_transformer import TreeTransformer
 from tapper.model.constants import KeyDirBool
@@ -25,7 +26,9 @@ class TestTreeTransformer:
 
     @pytest.fixture(scope="class")
     def transform(self) -> TransformFn:
-        return TreeTransformer(send, initializer.default_trigger_parser()).transform
+        return TreeTransformer(
+            send, initializer.default_trigger_parser(), config.kw_trigger_conditions
+        ).transform
 
     @pytest.fixture
     def group(self) -> Group:

@@ -10,7 +10,9 @@ from tapper.model.tap_tree import Tap
 from tapper.model.tap_tree_shadow import SGroup
 from tapper.model.tap_tree_shadow import STap
 from tapper.model.types_ import Action
+from tapper.model.types_ import KwTriggerConditions
 from tapper.model.types_ import SendFn
+from tapper.model.types_ import TriggerConditionFn
 from tapper.model.types_ import TriggerStr
 from tapper.parser.trigger_parser import TriggerParser
 
@@ -21,18 +23,41 @@ def find_property(prop_name: str, group: Group) -> Any:
     return find_property(prop_name, group._parent)
 
 
+def transform_trigger_conditions(
+    possible_conditions: KwTriggerConditions, trigger_conditions: dict[str, Any]
+) -> list[TriggerConditionFn]:
+    result = []
+    for name, user_supplied_value in trigger_conditions.items():
+        if name not in possible_conditions:
+            raise ValueError(
+                f"Condition '{name}' not recognised. Add it to config.kw_trigger_conditions"
+            )
+        fn = possible_conditions[name]
+        result.append(partial(fn, user_supplied_value))
+    return result
+
+
 class TreeTransformer:
     send: SendFn
     trigger_parser: TriggerParser
+    possible_trigger_conditions: KwTriggerConditions
 
-    def __init__(self, send: SendFn, trigger_parser: TriggerParser) -> None:
+    def __init__(
+        self,
+        send: SendFn,
+        trigger_parser: TriggerParser,
+        conditions: KwTriggerConditions,
+    ) -> None:
         self.send = send  # type: ignore
         self.trigger_parser = trigger_parser
+        self.possible_trigger_conditions = conditions
 
     def transform(self, group: Group) -> SGroup:
         result = SGroup()
         result.original = group
-        result.trigger_if = group.trigger_if
+        result.trigger_conditions = transform_trigger_conditions(
+            self.possible_trigger_conditions, group.trigger_conditions
+        )
 
         for child in group._children:
             if isinstance(child, Group):
@@ -54,7 +79,9 @@ class TreeTransformer:
         action = self.to_action(tap.action)
         result = STap(trigger, action, executor, suppress_trigger)
         result.original = tap
-        result.trigger_if = tap.trigger_if
+        result.trigger_conditions = transform_trigger_conditions(
+            self.possible_trigger_conditions, tap.trigger_conditions
+        )
 
         return result
 
@@ -67,7 +94,9 @@ class TreeTransformer:
         for trigger_str, action in taps.items():
             trigger = self.trigger_parser.parse(trigger_str)
             action = self.to_action(action)
-            result.append(STap(trigger, action, executor, suppress_trigger))
+            stap = STap(trigger, action, executor, suppress_trigger)
+            stap.trigger_conditions = []
+            result.append(stap)
         return result
 
     def to_action(self, action: Action | str) -> Action:

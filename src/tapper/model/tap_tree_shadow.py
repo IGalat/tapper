@@ -9,8 +9,7 @@ from tapper.model import constants
 from tapper.model.tap_tree import TapGeneric
 from tapper.model.trigger import Trigger
 from tapper.model.types_ import Action
-from tapper.model.types_ import TriggerIfFn
-from tapper.model.types_ import TriggerStr
+from tapper.model.types_ import TriggerConditionFn
 from tapper.util.cache import lru_cache
 from tapper.util.datastructs import to_flat_list
 from tapper.util.datastructs import unique_list
@@ -21,16 +20,16 @@ class STapGeneric(ABC):
     All fields and methods in case of group refer to children's.
     """
 
-    original: TapGeneric | tuple[TriggerStr, Action | str]
+    original: Optional[TapGeneric]
     """Item based on which this shadow is created."""
-    trigger_if: Optional[TriggerIfFn]
+    trigger_conditions: list[TriggerConditionFn]
 
     @abstractmethod
     def get_main_triggers(self, direction: constants.KeyDirBool) -> list[str]:
         """All main keys. If group - all children's main keys."""
 
 
-@dataclass(slots=False)
+@dataclass
 class STap(STapGeneric):
     """Shadow tap: used during runtime."""
 
@@ -46,7 +45,7 @@ class STap(STapGeneric):
             return []
 
 
-@dataclass(slots=False)
+@dataclass
 class SGroup(STapGeneric):
     """Shadow group: used during runtime."""
 

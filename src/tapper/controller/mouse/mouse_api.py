@@ -26,10 +26,6 @@ class MouseTracker(ABC):
         pass
 
     @abstractmethod
-    def pressed_toggled(self, symbol: str) -> tuple[bool, bool]:
-        pass
-
-    @abstractmethod
     def get_pos(self) -> tuple[int, int]:
         pass
 
@@ -84,10 +80,6 @@ class MouseController(ResourceController):
     def toggled(self, symbol: str) -> bool:
         """Is key toggled. Not applicable to wheel."""
         return self._tracker.toggled(symbol)
-
-    def pressed_toggled(self, symbol: str) -> tuple[bool, bool]:
-        """Is key pressed; toggled. Not applicable to wheel."""
-        return self._tracker.pressed_toggled(symbol)
 
     def get_pos(self) -> tuple[int, int]:
         """Coordinates (x, y) of current mouse position."""

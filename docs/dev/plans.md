@@ -26,7 +26,7 @@ By having user configure triggers and corresponding actions, and running a loop 
 1. DONE. keyboard and mouse dataclasses
 1. DONE. Parent SignalListener+Commander for kb and mouse; factories; Windows impl
 1. DONE. Action runner
-1. DONE. Command parser
+1. DONE. Send Command parser
 1. DONE. Trigger parser
 1. DONE. State(logger/keeper/whatever);
 1. DONE. Wrapper for commanders and listeners(state keeper calls, publish event, bounce fake signal)
@@ -36,7 +36,8 @@ By having user configure triggers and corresponding actions, and running a loop 
 1. DONE. SignalProcessor
 1. DONE. Initializer
 1. DONE. trigger_if - free-style conditions
-1. kwargs map, to make conditions for Taps much easier; TriggerConditions system, WindowTriggerConditionsTracker
+1. DONE. kwargs map, to make conditions for Taps much easier; TriggerConditions system
+1. WindowTriggerConditionsTracker
 1. hotstring support
 1. Readme
 1. Linux impl

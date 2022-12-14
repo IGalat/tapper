@@ -59,3 +59,9 @@ SendFn = Callable[[str], None]
 
 TriggerIfFn = Callable[[], bool]
 """Tap cannot trigger unless this resolves to True."""
+
+TriggerConditionFn = Callable[[], Any]
+"""Actual trigger condition."""
+
+KwTriggerConditions = dict[str, Callable[[Any], Any]]
+"""Keyword trigger conditions that can be used as part of Tap or Group. See config for docs."""

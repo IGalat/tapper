@@ -26,6 +26,10 @@ symbol_wheel_map = datastructs.symbols_to_codes(
 user32 = winput.user32
 
 
+def button_state(symbol: str) -> int:
+    return user32.GetKeyState(symbol_button_map[symbol])
+
+
 class Win32MouseTrackerCommander(MouseTracker, MouseCommander):
     def start(self) -> None:
         winput.set_DPI_aware(per_monitor=True)
@@ -38,7 +42,7 @@ class Win32MouseTrackerCommander(MouseTracker, MouseCommander):
             winput.press_mouse_button(symbol_button_map[symbol])
         except KeyError:
             amount, horizontal = symbol_wheel_map[symbol]
-            self.scroll_wheel(amount, horizontal)
+            winput.move_mousewheel(amount, horizontal)
 
     def release(self, symbol: str) -> None:
         try:
@@ -46,9 +50,6 @@ class Win32MouseTrackerCommander(MouseTracker, MouseCommander):
         except KeyError:
             if symbol not in symbol_wheel_map:
                 raise KeyError
-
-    def scroll_wheel(self, amount: int, horizontal: bool = False) -> None:
-        winput.move_mousewheel(amount, horizontal)
 
     def move(
         self, x: Optional[int] = None, y: Optional[int] = None, relative: bool = False
@@ -74,16 +75,10 @@ class Win32MouseTrackerCommander(MouseTracker, MouseCommander):
         winput.set_mouse_pos(x, y)
 
     def pressed(self, symbol: str) -> bool:
-        return self.pressed_toggled(symbol)[0]
+        return button_state(symbol) >> 15 == 1
 
     def toggled(self, symbol: str) -> bool:
-        return self.pressed_toggled(symbol)[1]
-
-    def pressed_toggled(self, symbol: str) -> tuple[bool, bool]:
-        key_state = user32.GetKeyState(symbol_button_map[symbol])
-        pressed = key_state >> 15 == 1
-        toggled = key_state & 1 == 1
-        return pressed, toggled
+        return button_state(symbol) & 1 == 1
 
     def get_pos(self) -> tuple[int, int]:
         return winput.get_mouse_pos()

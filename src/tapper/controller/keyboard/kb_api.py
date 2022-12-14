@@ -24,10 +24,6 @@ class KeyboardTracker(ABC):
     def toggled(self, symbol: str) -> bool:
         pass
 
-    @abstractmethod
-    def pressed_toggled(self, symbol: str) -> tuple[bool, bool]:
-        pass
-
 
 class KeyboardCommander(ABC):
     @abstractmethod
@@ -73,10 +69,6 @@ class KeyboardController(ResourceController):
     def toggled(self, symbol: str) -> bool:
         """Is key toggled."""
         return self._tracker.toggled(symbol)
-
-    def pressed_toggled(self, symbol: str) -> tuple[bool, bool]:
-        """Is key pressed; toggled."""
-        return self._tracker.pressed_toggled(symbol)
 
     def press(self, symbol: str) -> None:
         """Presses down one key."""
