@@ -47,8 +47,10 @@ By having user configure triggers and corresponding actions, and running a loop 
 1. Tray icon
 1. Tree and config validation with tkinter warnings, Error handling, Logging
 1. Moar trackers: kb lang, process, device connect/disconnect, service/daemon, file, resource(cpu/gpu/network) load
-1. Group actions when it goes on/off, timer for checking group states?
-1. Helpers galore: picture assist, on repeat/hold,
+1. Group actions when it goes on/off, timer for checking group states? Tap without trigger, only for on/off active
+1. Helpers galore: picture assist, on repeat/hold, ?
+1. Optimization: profile everything, make caching, active tracking, for window controller in particular
+
 
 ## Limitations of the current design
 
