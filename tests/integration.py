@@ -402,23 +402,23 @@ class TestTriggerConditions:
         kj()
         assert f.actions == [0, 10]
 
-        tapper.window.to_fore("foozzy")
+        tapper.window.to_active("foozzy")
         kj()
         assert f.actions[-2:] == [1, 10]
 
-        tapper.window.to_fore("barium")
+        tapper.window.to_active("barium")
         kj()
         assert f.actions[-2:] == [2, 10]
 
-        tapper.window.to_fore("foobar")
+        tapper.window.to_active("foobar")
         kj()
         assert f.actions[-2:] == [2, 10]
 
-        tapper.window.to_fore("foo")
+        tapper.window.to_active("foo")
         kj()
         assert f.actions[-2:] == [1, 11]
 
-        tapper.window.to_fore("bar")
+        tapper.window.to_active("bar")
         kj()
         assert f.actions[-2:] == [2, 12]
 

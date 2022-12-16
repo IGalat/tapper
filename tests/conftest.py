@@ -192,7 +192,7 @@ class DummyWindowTrackerCommander(WindowTracker, WindowCommander):
             Window(w) for w in self.open_windows if str_match(exec_or_title, w, strict)
         ]
 
-    def is_fore(
+    def active(
         self,
         exec_or_title: str | None = None,
         title: str | None = None,
@@ -206,7 +206,7 @@ class DummyWindowTrackerCommander(WindowTracker, WindowCommander):
             return Window(exec_or_title)
         return None
 
-    def to_fore(
+    def to_active(
         self,
         window_or_exec_or_title: Window | str | None = None,
         title: str | None = None,

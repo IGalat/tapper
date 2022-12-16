@@ -156,7 +156,7 @@ class Win32WindowTrackerCommander(WindowTracker, WindowCommander):
         )
         return result
 
-    def is_fore(
+    def active(
         self,
         exec_or_title: Optional[str] = None,
         title: Optional[str] = None,
@@ -168,7 +168,7 @@ class Win32WindowTrackerCommander(WindowTracker, WindowCommander):
         fore = self.to_window(win32gui.GetForegroundWindow())
         return win_filter(fore, exec_or_title, title, exec, strict, process_id, handle)
 
-    def to_fore(
+    def to_active(
         self,
         window_or_exec_or_title: Optional[Window | str] = None,
         title: Optional[str] = None,
@@ -287,6 +287,15 @@ class Win32WindowTrackerCommander(WindowTracker, WindowCommander):
         handle: Any = None,
     ) -> bool:
         """Looks up the window handle and applies commands to it."""
+        if (
+            window_or_exec_or_title is None
+            and title is None
+            and exec is None
+            and process_id is None
+            and handle is None
+        ):
+            handle = win32gui.GetForegroundWindow()
+
         exec_or_title = None
         if isinstance(window_or_exec_or_title, Window):
             handle = window_or_exec_or_title.handle

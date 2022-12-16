@@ -32,7 +32,7 @@ class WindowTracker(ABC):
         pass
 
     @abstractmethod
-    def is_fore(
+    def active(
         self,
         exec_or_title: Optional[str] = None,
         title: Optional[str] = None,
@@ -54,7 +54,7 @@ class WindowCommander(ABC):
         pass
 
     @abstractmethod
-    def to_fore(
+    def to_active(
         self,
         window_or_exec_or_title: Optional[Window | str] = None,
         title: Optional[str] = None,
@@ -201,7 +201,7 @@ class WindowController(ResourceController):
         except IndexError:
             return None
 
-    def is_fore(
+    def active(
         self,
         exec_or_title: Optional[str] = None,
         title: Optional[str] = None,
@@ -221,11 +221,11 @@ class WindowController(ResourceController):
         # if is_fore("notepad"):
         #     do_my_thing()
         """
-        return self._tracker.is_fore(
+        return self._tracker.active(
             exec_or_title, title, exec, strict, process_id, handle
         )
 
-    def to_fore(
+    def to_active(
         self,
         window_or_exec_or_title: Optional[Window | str] = None,
         title: Optional[str] = None,
@@ -249,7 +249,7 @@ class WindowController(ResourceController):
 
         :return: True if found and successfully set as foreground, else False.
         """
-        return self._commander.to_fore(
+        return self._commander.to_active(
             window_or_exec_or_title, title, exec, strict, process_id, handle
         )
 
@@ -265,6 +265,8 @@ class WindowController(ResourceController):
         """
         Close(destroy) a window, if found.
         See to_fore above for param docs.
+
+        If no params supplied, the foreground window will be closed.
 
         :return: True if found and successfully closed, else False.
         """
@@ -285,6 +287,8 @@ class WindowController(ResourceController):
         Minimize a window, if found.
         See to_fore above for param docs.
 
+        If no params supplied, the foreground window will be minimized.
+
         :return: True if found and successfully minimized, else False.
         """
         return self._commander.minimize(
@@ -304,6 +308,8 @@ class WindowController(ResourceController):
         Maximize a window, if found.
         See to_fore above for param docs.
 
+        If no params supplied, the foreground window will be maximized.
+
         :return: True if found and successfully minimized, else False.
         """
         return self._commander.maximize(
@@ -322,6 +328,9 @@ class WindowController(ResourceController):
         """
         Restore a minimized or maximized window to previous size and position, if found.
         See to_fore above for param docs.
+
+        If no params supplied, the foreground window will be
+        restored (de-maximized, as foreground window cannot be minimized).
 
         :return: True if found and successfully restore, else False.
         """
