@@ -9,9 +9,9 @@ from tapper.controller.window.window_api import WindowCommander
 from tapper.controller.window.window_api import WindowTracker
 from tapper.model.window import Window
 
-user32 = ctypes.windll.user32
-ole32 = ctypes.windll.ole32
-kernel32 = ctypes.windll.kernel32
+user32 = ctypes.windll.user32  # noqa
+ole32 = ctypes.windll.ole32  # noqa
+kernel32 = ctypes.windll.kernel32  # noqa
 
 # https://learn.microsoft.com/en-us/windows/win32/menurc/wm-syscommand
 
