@@ -1,11 +1,15 @@
 from __future__ import annotations
 
 import sys
+from typing import Any
 
 from tapper.controller.keyboard.kb_api import KeyboardCommander
 from tapper.controller.keyboard.kb_api import KeyboardTracker
 from tapper.controller.mouse.mouse_api import MouseCommander
 from tapper.controller.mouse.mouse_api import MouseTracker
+from tapper.controller.window.window_api import WindowCommander
+from tapper.controller.window.window_api import WindowTracker
+from tapper.model.window import Window
 
 """This file in tests root is required for pytest path discovery for some reason."""
 from collections import defaultdict
@@ -135,14 +139,10 @@ class DummyMouseTrackerCommander(MouseTracker, MouseCommander):
     def move(
         self, x: int | None = None, y: int | None = None, relative: bool = False
     ) -> None:
-        if not x or x < 0:
-            x = 0
-        if not y or y < 0:
-            y = 0
         if not relative:
             self.x, self.y = x, y
         else:
-            self.x, self.y = max(0, self.x + x), max(0, self.y + y)
+            self.x, self.y = self.x + x, self.y + y
 
     def pressed(self, symbol: str) -> bool:
         return symbol in self.pressed_symbols
@@ -152,6 +152,119 @@ class DummyMouseTrackerCommander(MouseTracker, MouseCommander):
 
     def get_pos(self) -> tuple[int, int]:
         return self.x, self.y
+
+
+def str_match(filtered: str | None, iterated: str | None, strict: bool) -> bool:
+    if not filtered or not iterated:
+        return False
+    if strict:
+        return filtered == iterated
+    else:
+        return filtered.casefold() in iterated.casefold()
+
+
+class DummyWindowTrackerCommander(WindowTracker, WindowCommander):
+    open_windows: list[str]
+    fore_window: str
+
+    def __init__(self, open_windows: list[str]) -> None:
+        self.open_windows = open_windows
+        self.fore_window = ""
+
+    def start(self) -> None:
+        pass
+
+    def stop(self) -> None:
+        pass
+
+    def get_open(
+        self,
+        exec_or_title: str | None = None,
+        title: str | None = None,
+        exec: str | None = None,
+        strict: bool = False,
+        process_id: int | None = None,
+        handle: Any = None,
+        limit: int | None = None,
+    ) -> list[Window]:
+        exec_or_title = exec_or_title or exec or title
+        return [
+            Window(w) for w in self.open_windows if str_match(exec_or_title, w, strict)
+        ]
+
+    def is_fore(
+        self,
+        exec_or_title: str | None = None,
+        title: str | None = None,
+        exec: str | None = None,
+        strict: bool = False,
+        process_id: int | None = None,
+        handle: Any = None,
+    ) -> Window | None:
+        exec_or_title = exec_or_title or exec or title
+        if str_match(exec_or_title, self.fore_window, strict):
+            return Window(exec_or_title)
+        return None
+
+    def to_fore(
+        self,
+        window_or_exec_or_title: Window | str | None = None,
+        title: str | None = None,
+        exec: str | None = None,
+        strict: bool = False,
+        process_id: int | None = None,
+        handle: Any = None,
+    ) -> bool:
+        self.fore_window = window_or_exec_or_title  # type: ignore
+        if window_or_exec_or_title not in self.open_windows:
+            self.open_windows.append(window_or_exec_or_title)  # type: ignore
+        return True
+
+    def close(
+        self,
+        window_or_exec_or_title: Window | str | None = None,
+        title: str | None = None,
+        exec: str | None = None,
+        strict: bool = False,
+        process_id: int | None = None,
+        handle: Any = None,
+    ) -> bool:
+        pass
+
+    def minimize(
+        self,
+        window_or_exec_or_title: Window | str | None = None,
+        title: str | None = None,
+        exec: str | None = None,
+        strict: bool = False,
+        process_id: int | None = None,
+        handle: Any = None,
+    ) -> bool:
+        pass
+
+    def maximize(
+        self,
+        window_or_exec_or_title: Window | str | None = None,
+        title: str | None = None,
+        exec: str | None = None,
+        strict: bool = False,
+        process_id: int | None = None,
+        handle: Any = None,
+    ) -> bool:
+        if window_or_exec_or_title not in self.open_windows:
+            self.open_windows.append(window_or_exec_or_title)  # type: ignore
+        return True
+
+    def restore(
+        self,
+        window_or_exec_or_title: Window | str | None = None,
+        title: str | None = None,
+        exec: str | None = None,
+        strict: bool = False,
+        process_id: int | None = None,
+        handle: Any = None,
+    ) -> bool:
+        pass
 
 
 class DummyActionRunner(ActionRunner):
@@ -174,6 +287,7 @@ class Dummy:
     Listener = DummyListener
     KbTC = DummyKbTrackerCommander
     MouseTC = DummyMouseTrackerCommander
+    WinTC = DummyWindowTrackerCommander
     ActionRunner = DummyActionRunner
 
 

@@ -8,6 +8,7 @@ from tapper.boot.tree_transformer import TreeTransformer
 from tapper.controller.keyboard.kb_api import KeyboardController
 from tapper.controller.mouse.mouse_api import MouseController
 from tapper.controller.send_processor import SendCommandProcessor
+from tapper.controller.window.window_api import WindowController
 from tapper.model import keyboard
 from tapper.model import mouse
 from tapper.model.send import KeyInstruction
@@ -97,6 +98,9 @@ def init(
     if mc := datastructs.get_first_in(MouseController, controllers):
         mc._os = os
         mc._emul_keeper = emul_keeper
+    if wc := datastructs.get_first_in(WindowController, controllers):
+        wc._os = os
+        wc._only_visible_windows = config.only_visible_windows
     [c._init() for c in controllers]
 
     send_processor.os = os

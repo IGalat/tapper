@@ -3,6 +3,7 @@ import sys
 from tapper import trigger_conditions
 from tapper.controller.keyboard.kb_api import KeyboardController
 from tapper.controller.mouse.mouse_api import MouseController
+from tapper.controller.window.window_api import WindowController
 from tapper.model import keyboard
 from tapper.model import mouse
 from tapper.model.constants import ListenerResult
@@ -19,6 +20,10 @@ SECTION 1: Most likely to be tweaked.
 
 default_trigger_suppression = ListenerResult.SUPPRESS
 """Will the triggering signal be suppressed for other apps, when a Tap triggers?"""
+
+only_visible_windows = True
+"""Limit windows to visible - ones that are open on the taskbar.
+Reduces WindowController lag, and junk windows caught into filters."""
 
 """
 ------------------------------------
@@ -51,12 +56,14 @@ listeners = [
 controllers = [
     KeyboardController(),
     MouseController(),
+    WindowController(),
 ]
 
 kw_trigger_conditions: KwTriggerConditions = {
     **trigger_conditions.generic(),
     **trigger_conditions.keyboard(get_first_in(KeyboardController, controllers)),
     **trigger_conditions.mouse(get_first_in(MouseController, controllers)),
+    **trigger_conditions.window(get_first_in(WindowController, controllers)),
 }
 """
 Keyword trigger conditions that can be used as part of Tap or Group.

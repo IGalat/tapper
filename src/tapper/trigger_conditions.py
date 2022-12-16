@@ -1,10 +1,10 @@
 """See config.tree_possible_kwargs for docs."""
-from functools import partial
 from typing import Any
 from typing import Callable
 
 from tapper.controller.keyboard.kb_api import KeyboardController
 from tapper.controller.mouse.mouse_api import MouseController
+from tapper.controller.window.window_api import WindowController
 
 
 def generic() -> dict[str, Callable[[Any], Any]]:
@@ -42,7 +42,7 @@ def mouse(controller: MouseController) -> dict[str, Callable[[Any], Any]]:
         x, y = controller.get_pos()
         return (x - target_x) ** 2 + (y - target_y) ** 2 <= precision**2
 
-    kwargs["cursor_near"] = partial(is_cursor_near)
+    kwargs["cursor_near"] = is_cursor_near
 
     def is_cursor_in_rect(
         up_down_coords: tuple[tuple[int, int], tuple[int, int]]
@@ -54,5 +54,21 @@ def mouse(controller: MouseController) -> dict[str, Callable[[Any], Any]]:
         return x1 <= x <= x2 and y1 <= y <= y2
 
     kwargs["cursor_in"] = is_cursor_in_rect
+
+    return kwargs
+
+
+def window(controller: WindowController) -> dict[str, Callable[[Any], Any]]:
+    kwargs: dict[str, Callable[[Any], Any]] = {}
+    if not controller:
+        return kwargs
+
+    kwargs["win"] = controller.is_fore
+    kwargs["win_title"] = lambda title: controller.is_fore(title=title)
+    kwargs["win_exec"] = lambda ex: controller.is_fore(exec=ex, strict=True)
+
+    kwargs["open_win"] = controller.is_open
+    kwargs["open_win_title"] = lambda title: controller.is_open(title=title)
+    kwargs["open_win_exec"] = lambda ex: controller.is_open(exec=ex, strict=True)
 
     return kwargs

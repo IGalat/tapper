@@ -7,6 +7,7 @@ from tapper.controller.mouse.mouse_api import MouseController as _MouseControlle
 from tapper.controller.send_processor import (
     SendCommandProcessor as _SendCommandProcessor,
 )
+from tapper.controller.window.window_api import WindowController as _WindowController
 from tapper.model import tap_tree as _tap_tree
 from tapper.signal.base_listener import SignalListener as _SignalListener
 from tapper.util import datastructs as _datastructs
@@ -44,6 +45,10 @@ if _mc := _datastructs.get_first_in(_MouseController, config.controllers):
     """Mouse controller. Primarily for moving the cursor and getting the state."""
     mouse = _mc
 
+if _wc := _datastructs.get_first_in(_WindowController, config.controllers):
+    """Window controller. Primarily for moving the cursor and getting the state."""
+    window = _wc
+
 
 def init() -> None:
     """Initializes all underlying tools."""
@@ -59,7 +64,6 @@ def start(blocking: bool = True) -> None:
     No changes by user in any elements of tapper are expected after this command,
     it should be the last in your script.
     """
-    global _controllers
     global _listeners
     global _initialized
 

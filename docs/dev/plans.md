@@ -37,7 +37,7 @@ By having user configure triggers and corresponding actions, and running a loop 
 13. DONE. Initializer
 14. DONE. trigger_if - free-style conditions
 15. DONE. kwargs map, to make conditions for Taps much easier; TriggerConditions system
-16. WindowTriggerConditionsTracker
+16. DONE. WindowTriggerConditionsTracker
 17. hotstring support
 18. Readme
 19. Linux impl

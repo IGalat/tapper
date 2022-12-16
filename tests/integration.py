@@ -89,6 +89,8 @@ def f(dummy: Dummy, is_debug: bool) -> Fixture:
         listener, fixture.emul_signals, fixture.pressed, fixture.toggled
     )
     tapper.mouse._tracker, tapper.mouse._commander = mouse_tc, mouse_tc
+    wtc = dummy.WinTC([])
+    tapper.window._tracker, tapper.window._commander = wtc, wtc
 
     def sleep_logged(time_s: float, signals: list[Signal]) -> None:
         signals.append(sleep_signal(time_s))
@@ -381,3 +383,68 @@ class TestTriggerConditions:
         tapper.mouse.move(500, 600)
         f.send_real("a")
         assert ends_with(f.emul_signals, click("2"))
+
+    def test_win(self, f: Fixture) -> None:
+        """Relies on dummy winTC impl."""
+        tapper.root.add(
+            Tap("k", f.act(0)),
+            Tap("k", f.act(1), win="foo"),
+            Tap("k", f.act(2), win="bar"),
+            # execs are strict
+            Tap("j", f.act(10)),
+            Tap("j", f.act(11), win_exec="foo"),
+            Tap("j", f.act(12), win_exec="bar"),
+        )
+        f.start()
+
+        kj = lambda: f.send_real("k$(50ms)j")
+
+        kj()
+        assert f.actions == [0, 10]
+
+        tapper.window.to_fore("foozzy")
+        kj()
+        assert f.actions[-2:] == [1, 10]
+
+        tapper.window.to_fore("barium")
+        kj()
+        assert f.actions[-2:] == [2, 10]
+
+        tapper.window.to_fore("foobar")
+        kj()
+        assert f.actions[-2:] == [2, 10]
+
+        tapper.window.to_fore("foo")
+        kj()
+        assert f.actions[-2:] == [1, 11]
+
+        tapper.window.to_fore("bar")
+        kj()
+        assert f.actions[-2:] == [2, 12]
+
+    def test_win_open(self, f: Fixture) -> None:
+        """Relies on dummy winTC impl."""
+        tapper.root.add(
+            Tap("k", f.act(0)),
+            Tap("k", f.act(1), open_win="foo"),
+            Tap("k", f.act(2), open_win="bar"),
+            # execs are strict
+            Tap("j", f.act(10)),
+            Tap("j", f.act(11), open_win_exec="foo"),
+            Tap("j", f.act(12), open_win_exec="bar"),
+        )
+        f.start()
+
+        kj = lambda: f.send_real("k$(50ms)j")
+
+        tapper.window.maximize("foos")
+        kj()
+        assert f.actions[-2:] == [1, 10]
+
+        tapper.window.maximize("foo")
+        kj()
+        assert f.actions[-2:] == [1, 11]
+
+        tapper.window.maximize("bar")
+        kj()
+        assert f.actions[-2:] == [2, 12]

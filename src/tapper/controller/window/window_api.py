@@ -21,6 +21,7 @@ class WindowTracker(ABC):
     @abstractmethod
     def get_open(
         self,
+        exec_or_title: Optional[str] = None,
         title: Optional[str] = None,
         exec: Optional[str] = None,
         strict: bool = False,
@@ -33,6 +34,7 @@ class WindowTracker(ABC):
     @abstractmethod
     def is_fore(
         self,
+        exec_or_title: Optional[str] = None,
         title: Optional[str] = None,
         exec: Optional[str] = None,
         strict: bool = False,
@@ -52,9 +54,9 @@ class WindowCommander(ABC):
         pass
 
     @abstractmethod
-    def set_fore(
+    def to_fore(
         self,
-        window: Optional[Window] = None,
+        window_or_exec_or_title: Optional[Window | str] = None,
         title: Optional[str] = None,
         exec: Optional[str] = None,
         strict: bool = False,
@@ -66,7 +68,43 @@ class WindowCommander(ABC):
     @abstractmethod
     def close(
         self,
-        window: Optional[Window] = None,
+        window_or_exec_or_title: Optional[Window | str] = None,
+        title: Optional[str] = None,
+        exec: Optional[str] = None,
+        strict: bool = False,
+        process_id: Optional[int] = None,
+        handle: Any = None,
+    ) -> bool:
+        pass
+
+    @abstractmethod
+    def minimize(
+        self,
+        window_or_exec_or_title: Optional[Window | str] = None,
+        title: Optional[str] = None,
+        exec: Optional[str] = None,
+        strict: bool = False,
+        process_id: Optional[int] = None,
+        handle: Any = None,
+    ) -> bool:
+        pass
+
+    @abstractmethod
+    def maximize(
+        self,
+        window_or_exec_or_title: Optional[Window | str] = None,
+        title: Optional[str] = None,
+        exec: Optional[str] = None,
+        strict: bool = False,
+        process_id: Optional[int] = None,
+        handle: Any = None,
+    ) -> bool:
+        pass
+
+    @abstractmethod
+    def restore(
+        self,
+        window_or_exec_or_title: Optional[Window | str] = None,
         title: Optional[str] = None,
         exec: Optional[str] = None,
         strict: bool = False,
@@ -80,13 +118,15 @@ class WindowController(ResourceController):
     """Allows checking window status and giving commands."""
 
     _os: str
+    _only_visible_windows: bool
     """Provided before init."""
+
     _tracker: WindowTracker
     _commander: WindowCommander
 
     def _init(self) -> None:
         if not hasattr(self, "_tracker") or not hasattr(self, "_commander"):
-            self._tracker, self._commander = by_os[self._os]()
+            self._tracker, self._commander = by_os[self._os](self._only_visible_windows)
 
     def _start(self) -> None:
         self._commander.start()
@@ -98,6 +138,7 @@ class WindowController(ResourceController):
 
     def get_open(
         self,
+        exec_or_title: Optional[str] = None,
         title: Optional[str] = None,
         exec: Optional[str] = None,
         strict: bool = False,
@@ -110,6 +151,7 @@ class WindowController(ResourceController):
 
         If no params are specified, fetches all, otherwise filters.
 
+        :param exec_or_title: Will try to match either exec or title.
         :param title: Window title, what you see on upper border or on mouseover in taskbar.
         :param exec: Executable name, on win32 something like "notepad.exe".
         :param strict: If this is true, title or exec (if specified)
@@ -120,10 +162,13 @@ class WindowController(ResourceController):
 
         :param limit: Search will stop after getting this many results.
         """
-        return self._tracker.get_open(title, exec, strict, process_id, handle, limit)
+        return self._tracker.get_open(
+            exec_or_title, title, exec, strict, process_id, handle, limit
+        )
 
     def is_open(
         self,
+        exec_or_title: Optional[str] = None,
         title: Optional[str] = None,
         exec: Optional[str] = None,
         strict: bool = False,
@@ -141,17 +186,24 @@ class WindowController(ResourceController):
         # if is_open("notepad"):
         #     do_my_thing()
         """
-        if title is None and exec is None and process_id is None and handle is None:
-            raise ValueError(
-                "Must specify at least one param for window.is_open method."
-            )
+        if (
+            exec_or_title is None
+            and title is None
+            and exec is None
+            and process_id is None
+            and handle is None
+        ):
+            raise ValueError("Specify at least one param for window.is_open method.")
         try:
-            return self.get_open(title, exec, strict, process_id, handle, 1)[0]
+            return self.get_open(
+                exec_or_title, title, exec, strict, process_id, handle, 1
+            )[0]
         except IndexError:
             return None
 
     def is_fore(
         self,
+        exec_or_title: Optional[str] = None,
         title: Optional[str] = None,
         exec: Optional[str] = None,
         strict: bool = False,
@@ -169,11 +221,13 @@ class WindowController(ResourceController):
         # if is_fore("notepad"):
         #     do_my_thing()
         """
-        return self._tracker.is_fore(title, exec, strict, process_id, handle)
+        return self._tracker.is_fore(
+            exec_or_title, title, exec, strict, process_id, handle
+        )
 
-    def set_fore(
+    def to_fore(
         self,
-        window: Optional[Window] = None,
+        window_or_exec_or_title: Optional[Window | str] = None,
         title: Optional[str] = None,
         exec: Optional[str] = None,
         strict: bool = False,
@@ -183,16 +237,25 @@ class WindowController(ResourceController):
         """
         Set an open window as foreground window, if found.
 
-        See get_open above for param docs.
+        :param window_or_exec_or_title:
+            Object obtained by running one of get operations above, or name of exec or title.
+        :param title: Window title, what you see on upper border or on mouseover in taskbar.
+        :param exec: Executable name, on win32 something like "notepad.exe".
+        :param strict: If this is true, title or exec (if specified)
+            are filtered with == , otherwise substring ignore case.
 
-        :param window: Object obtained by running one of get operations above.
+        :param process_id: Unique, changes each launch.
+        :param handle: OS-specific window ID. Unique, changes each launch.
+
         :return: True if found and successfully set as foreground, else False.
         """
-        return self._commander.set_fore(window, title, exec, strict, process_id, handle)
+        return self._commander.to_fore(
+            window_or_exec_or_title, title, exec, strict, process_id, handle
+        )
 
     def close(
         self,
-        window: Optional[Window] = None,
+        window_or_exec_or_title: Optional[Window | str] = None,
         title: Optional[str] = None,
         exec: Optional[str] = None,
         strict: bool = False,
@@ -200,23 +263,82 @@ class WindowController(ResourceController):
         handle: Any = None,
     ) -> bool:
         """
-        Close an open window, if found.
+        Close(destroy) a window, if found.
+        See to_fore above for param docs.
 
-        See get_open above for param docs.
-
-        :param window: Object obtained by running one of get operations above.
         :return: True if found and successfully closed, else False.
         """
-        return self._commander.close(window, title, exec, strict, process_id, handle)
+        return self._commander.close(
+            window_or_exec_or_title, title, exec, strict, process_id, handle
+        )
+
+    def minimize(
+        self,
+        window_or_exec_or_title: Optional[Window | str] = None,
+        title: Optional[str] = None,
+        exec: Optional[str] = None,
+        strict: bool = False,
+        process_id: Optional[int] = None,
+        handle: Any = None,
+    ) -> bool:
+        """
+        Minimize a window, if found.
+        See to_fore above for param docs.
+
+        :return: True if found and successfully minimized, else False.
+        """
+        return self._commander.minimize(
+            window_or_exec_or_title, title, exec, strict, process_id, handle
+        )
+
+    def maximize(
+        self,
+        window_or_exec_or_title: Optional[Window | str] = None,
+        title: Optional[str] = None,
+        exec: Optional[str] = None,
+        strict: bool = False,
+        process_id: Optional[int] = None,
+        handle: Any = None,
+    ) -> bool:
+        """
+        Maximize a window, if found.
+        See to_fore above for param docs.
+
+        :return: True if found and successfully minimized, else False.
+        """
+        return self._commander.maximize(
+            window_or_exec_or_title, title, exec, strict, process_id, handle
+        )
+
+    def restore(
+        self,
+        window_or_exec_or_title: Optional[Window | str] = None,
+        title: Optional[str] = None,
+        exec: Optional[str] = None,
+        strict: bool = False,
+        process_id: Optional[int] = None,
+        handle: Any = None,
+    ) -> bool:
+        """
+        Restore a minimized or maximized window to previous size and position, if found.
+        See to_fore above for param docs.
+
+        :return: True if found and successfully restore, else False.
+        """
+        return self._commander.restore(
+            window_or_exec_or_title, title, exec, strict, process_id, handle
+        )
 
 
-def win32_impl() -> tuple[WindowTracker, WindowCommander]:
+def win32_impl(
+    only_visible_windows: bool = True,
+) -> tuple[WindowTracker, WindowCommander]:
     from tapper.controller.window.window_win32_impl import Win32WindowTrackerCommander
 
-    r = Win32WindowTrackerCommander()
+    r = Win32WindowTrackerCommander(only_visible_windows)
     return r, r
 
 
-by_os: dict[str, Callable[[], tuple[WindowTracker, WindowCommander]]] = {
+by_os: dict[str, Callable[[bool], tuple[WindowTracker, WindowCommander]]] = {
     constants.OS.win32: win32_impl
 }

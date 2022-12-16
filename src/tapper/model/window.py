@@ -11,3 +11,6 @@ class Window:
     exec: Optional[str] = None
     process_id: Optional[int] = None
     handle: Any = None
+
+    def __repr__(self) -> str:
+        return f"Win({self.exec} | {self.title})"
