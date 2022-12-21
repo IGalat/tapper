@@ -20,7 +20,7 @@ _subscribers: dict[str, list[SubscribedFunction]] = dict()
 
 
 def subscribe(topic: str, subscribed_function: SubscribedFunction) -> None:
-    """Subscribes a function to messages from a topic
+    """Subscribes a function to messages from a topic.
 
     :param topic: predefined string
     :param subscribed_function: function that will receive messages.
@@ -30,6 +30,16 @@ def subscribe(topic: str, subscribed_function: SubscribedFunction) -> None:
     if topic not in _subscribers:
         _subscribers[topic] = []
     _subscribers[topic].append(subscribed_function)
+
+
+def unsubscribe(topic: str, subscribed_function: SubscribedFunction) -> None:
+    """Unsubscribes a function to stop receiving messages from a topic.
+
+    :param topic: same as subscribed.
+    :param subscribed_function: the same function that was subscribed.
+    """
+    if subscribed_function in _subscribers[topic]:
+        _subscribers[topic].remove(subscribed_function)
 
 
 def publish(topic: str, message: Any) -> None:
