@@ -65,7 +65,7 @@ class TestSendCommandProcessor:
         mc = MouseController()
         mc._tracker, mc._commander, mc._emul_keeper = mouse_tc, mouse_tc, emul
 
-        self.sender = SendCommandProcessor("", parser, kbc, mc)
+        self.sender = SendCommandProcessor("", parser, kbc, mc, 0)
         self.sender.sleep_fn = lambda f: self.all_signals.append(sleep(f))
 
         event.subscribe(listener.name, lambda signal: self.real_signals.append(signal))
