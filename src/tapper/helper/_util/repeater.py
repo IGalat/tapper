@@ -3,6 +3,8 @@ from concurrent.futures import ThreadPoolExecutor
 from typing import Any
 from typing import Callable
 
+"""For actions.toggle_repeat"""
+
 executor = ThreadPoolExecutor(max_workers=1)
 
 registered_repeatables: dict[Callable[[], Any], tuple[float, int]] = {}
