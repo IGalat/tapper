@@ -37,18 +37,20 @@ By having user configure triggers and corresponding actions, and running a loop 
 13. DONE. Initializer
 14. DONE. trigger_if - free-style conditions
 15. DONE. kwargs map, to make conditions for Taps much easier; TriggerConditions system
-16. DONE. WindowTriggerConditionsTracker\
-17. Readme
-18. Linux impl
-19. Make sure it catches signals before other programs on OS
-20. Helper: one keyboard variation(ua) to make sure it's multi-lang
-21. (input/output multi-lang) ehhh, just hepler function here
-22. Tray icon
-23. Tree and config validation with tkinter warnings, Error handling, Logging
-24. Moar trackers: kb lang, process, device connect/disconnect, service/daemon, file, resource(cpu/gpu/network) load
-25. Group actions when it goes on/off, timer for checking group states? Tap without trigger, only for on/off active
-26. Helpers galore: picture assist, on repeat/hold, ?
-27. Optimization: profile everything, make caching, active tracking, for window controller in particular
+16. DONE. WindowTriggerConditionsTracker
+17. Helper: controls, do while pressed/held, recorder
+18. Basic Readme
+19. Linux impl
+20. Make sure it catches signals before other programs on OS
+21. Helper: one keyboard variation(ua) to make sure it's multi-lang
+22. (input/output multi-lang) ehhh, just hepler function here
+23. Tray icon
+24. Tree and config validation with tkinter warnings, Error handling, Logging
+25. Moar trackers: kb lang, process, device connect/disconnect, service/daemon, file, resource(cpu/gpu/network) load
+26. Group actions when it goes on/off, timer for checking group states? Tap without trigger, only for on/off active
+27. Helpers galore: picture assist, on repeat/hold, ?
+28. Good docs, with sphinx/readthedocs/doctest
+29. Optimization: profile everything, make caching, active tracking, for window controller in particular
 
 
 ## Limitations of the current design
