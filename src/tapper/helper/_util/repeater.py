@@ -5,6 +5,8 @@ from typing import Callable
 
 """For actions.toggle_repeat"""
 
+TIME_SPLIT = 0.1
+
 executor = ThreadPoolExecutor(max_workers=1)
 
 registered_repeatables: dict[Callable[[], Any], tuple[float, int]] = {}
@@ -26,13 +28,13 @@ def run_task(repeatable: Callable[[], Any]) -> None:
         if end_run():
             return
 
-        if to_wait <= 0.2:
+        if to_wait <= TIME_SPLIT:
             time.sleep(to_wait)
         else:
             started_at = time.perf_counter()
             elapsed = 0.0
             while to_wait - elapsed > 0:
-                time.sleep(min(0.2, to_wait - elapsed))
+                time.sleep(min(TIME_SPLIT, to_wait - elapsed))
                 elapsed = time.perf_counter() - started_at
                 if end_run():
                     return

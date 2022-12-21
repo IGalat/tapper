@@ -34,13 +34,19 @@ def toggle_repeat(
 
     Notes:
         - runs in one separate thread, so cannot launch multiple toggle_repeats
-        - execution is immediately overridden by triggering another toggle_repeat
-        - execution immediately stops on second toggle
+        - if another toggle_repeat is triggered, the current execution stops immediately
+        - execution immediately stops on second toggle of toggle_repeat
 
     :param action: what to repeat
     :param period_s: how often to repeat, seconds
     :param max_repeats: optional limit
     :return: callable toggle, to be set into a Tap
+
+    Example:
+        {"a": toggle_repeat(lambda: print("p")) }
+
+        When you press 'a', 'p' will be pressed every 0.1 sec until you
+        press 'a' again or press another button which triggers a different toggle_repeat.
     """
     max_repeats_int = max_repeats or 999999999999999
     repeater.registered_repeatables[action] = period_s, max_repeats_int
