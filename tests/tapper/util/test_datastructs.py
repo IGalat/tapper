@@ -43,7 +43,7 @@ def tuple_for_sym_to_codes(
 def test_symbols_to_codes(in_tuple: tuple[dict[int, str], SymbolsWithAliases]) -> None:
     code_symbol_map, symbols = in_tuple
     symbol_code_map = datastructs.symbols_to_codes(code_symbol_map, symbols)
-    assert len(symbol_code_map) == len(symbols), "len diff"
+    assert len(symbol_code_map) == len(symbols)
     for symbol, code in symbol_code_map.items():
-        assert code in code_symbol_map, "code not in"
-        assert symbol in symbols, "symbol not in"
+        assert code[0] in code_symbol_map
+        assert symbol in symbols

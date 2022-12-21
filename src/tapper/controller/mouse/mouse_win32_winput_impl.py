@@ -26,8 +26,8 @@ symbol_wheel_map = datastructs.symbols_to_codes(
 user32 = winput.user32
 
 
-def button_state(symbol: str) -> int:
-    return user32.GetKeyState(symbol_button_map[symbol])
+def button_state(code: int) -> int:
+    return user32.GetKeyState(code)
 
 
 class Win32MouseTrackerCommander(MouseTracker, MouseCommander):
@@ -39,14 +39,14 @@ class Win32MouseTrackerCommander(MouseTracker, MouseCommander):
 
     def press(self, symbol: str) -> None:
         try:
-            winput.press_mouse_button(symbol_button_map[symbol])
+            winput.press_mouse_button(symbol_button_map[symbol][0])
         except KeyError:
             amount, horizontal = symbol_wheel_map[symbol]
             winput.move_mousewheel(amount, horizontal)
 
     def release(self, symbol: str) -> None:
         try:
-            winput.release_mouse_button(symbol_button_map[symbol])
+            winput.release_mouse_button(symbol_button_map[symbol][0])
         except KeyError:
             if symbol not in symbol_wheel_map:
                 raise KeyError
@@ -75,10 +75,10 @@ class Win32MouseTrackerCommander(MouseTracker, MouseCommander):
         winput.set_mouse_pos(x, y)
 
     def pressed(self, symbol: str) -> bool:
-        return button_state(symbol) >> 15 == 1
+        return any(button_state(code) >> 15 == 1 for code in symbol_button_map[symbol])
 
     def toggled(self, symbol: str) -> bool:
-        return button_state(symbol) & 1 == 1
+        return any(button_state(code) & 1 == 1 for code in symbol_button_map[symbol])
 
     def get_pos(self) -> tuple[int, int]:
         return winput.get_mouse_pos()

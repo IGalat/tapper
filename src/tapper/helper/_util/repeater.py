@@ -28,7 +28,7 @@ def run_task(repeatable: Callable[[], Any]) -> None:
             time.sleep(to_wait)
         else:
             started_at = time.perf_counter()
-            elapsed = 0
+            elapsed = 0.0
             while to_wait - elapsed > 0:
                 time.sleep(min(0.2, to_wait - elapsed))
                 elapsed = time.perf_counter() - started_at

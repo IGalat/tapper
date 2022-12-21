@@ -11,8 +11,8 @@ symbol_code_map = datastructs.symbols_to_codes(
 user32 = winput.user32
 
 
-def key_state(symbol: str) -> int:
-    return user32.GetKeyState(symbol_code_map[symbol])
+def key_state(code: int) -> int:
+    return user32.GetKeyState(code)
 
 
 class Win32KeyboardTrackerCommander(KeyboardTracker, KeyboardCommander):
@@ -23,13 +23,13 @@ class Win32KeyboardTrackerCommander(KeyboardTracker, KeyboardCommander):
         pass
 
     def press(self, symbol: str) -> None:
-        winput.press_key(symbol_code_map[symbol])
+        winput.press_key(symbol_code_map[symbol][0])
 
     def release(self, symbol: str) -> None:
-        winput.release_key(symbol_code_map[symbol])
+        winput.release_key(symbol_code_map[symbol][0])
 
     def pressed(self, symbol: str) -> bool:
-        return key_state(symbol) >> 15 == 1
+        return any(key_state(code) >> 15 == 1 for code in symbol_code_map[symbol])
 
     def toggled(self, symbol: str) -> bool:
-        return key_state(symbol) & 1 == 1
+        return any(key_state(code) & 1 == 1 for code in symbol_code_map[symbol])

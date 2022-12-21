@@ -36,16 +36,16 @@ def _flatten(xs: Sequence[Any]) -> Iterable[Any]:
 
 def symbols_to_codes(
     code_symbol_map: dict[SymbolCode, str], symbols: SymbolsWithAliases
-) -> dict[str, SymbolCode]:
-    """Maps all symbols, including aliases, to codes. In case of alias, it's the first reference.
+) -> dict[str, list[SymbolCode]]:
+    """Maps all symbols, including aliases, to codes.
 
     Assumes every symbol except aliases is in code_symbol_map.
     """
     symbol_code_map = {v: k for (k, v) in code_symbol_map.items()}
+    result = {}
     for maybe_alias, references in symbols.items():
-        code = symbol_code_map[references[0]]
-        symbol_code_map[maybe_alias] = code
-    return symbol_code_map
+        result[maybe_alias] = [symbol_code_map[r] for r in references]
+    return result
 
 
 def get_first_in(_type: type[T], seq: Sequence[Any]) -> T | None:
