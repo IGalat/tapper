@@ -7,9 +7,11 @@ import sys
 def restart() -> None:
     print("Restarting tapper...")
     sys.stdout.flush()
-    subprocess.Popen(
-        [sys.executable] + sys.argv, creationflags=subprocess.DETACHED_PROCESS
-    )
+    popen_args = [sys.executable] + sys.argv
+    if sys.platform == "win32":
+        subprocess.Popen(popen_args, creationflags=subprocess.DETACHED_PROCESS)
+    else:
+        subprocess.Popen(popen_args, start_new_session=True)
     _terminate()
 
 
