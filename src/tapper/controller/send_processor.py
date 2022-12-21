@@ -23,6 +23,7 @@ class SendCommandProcessor:
     kb_controller: KeyboardController
     mouse_controller: MouseController
     sleep_fn: Callable[[float], None] = time.sleep
+    default_interval: float
 
     def __init__(
         self,
@@ -30,29 +31,42 @@ class SendCommandProcessor:
         parser: SendParser,
         kb_controller: KeyboardController,
         mouse_controller: MouseController,
+        default_interval: float,
     ) -> None:
         self.os = os
         self.parser = parser
         self.kb_controller = kb_controller
         self.mouse_controller = mouse_controller
+        self.default_interval = default_interval
 
     @classmethod
     def from_none(cls) -> "SendCommandProcessor":
         """To be filled during init."""
-        return SendCommandProcessor(None, None, None, None)  # type: ignore
+        return SendCommandProcessor(None, None, None, None, None)  # type: ignore
 
-    def send(self, command: str, speed: float = 1) -> None:
+    def send(
+        self, command: str, interval: float | None = None, speed: float = 1
+    ) -> None:
         """
         Entry point, processes the command and sends instructions.
 
         :param command: What to send.
-        :param speed: All sleep commands are divided by this number.
+        :param interval: Time before each key/button press.
+        :param speed: All sleep commands are divided by this number. Does not influence interval.
         """
+        interval_ = self.default_interval
+        if interval is not None:
+            interval_ = interval
         instructions: list[SendInstruction] = self.parser.parse(
             command, self.shift_down()
         )
         for instruction in instructions:
             if isinstance(instruction, KeyInstruction):
+                if (
+                    instruction.dir in [constants.KeyDir.DOWN, constants.KeyDir.CLICK]
+                    and interval_
+                ):
+                    self.sleep_fn(interval_)  # type: ignore
                 self._send_key_instruction(instruction)
             elif isinstance(instruction, WheelInstruction):
                 self.mouse_controller.press(instruction.wheel_symbol)
