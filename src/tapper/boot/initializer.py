@@ -12,6 +12,7 @@ from tapper.controller.window.window_api import WindowController
 from tapper.helper import controls
 from tapper.model import keyboard
 from tapper.model import mouse
+from tapper.model.send import CursorMoveInstruction
 from tapper.model.send import KeyInstruction
 from tapper.model.send import SleepInstruction
 from tapper.model.send import WheelInstruction
@@ -48,15 +49,20 @@ def default_send_parser() -> SendParser:
         send_parser.symbols[symbol] = KeyInstruction
     for wheel in [*mouse.wheel_buttons, *mouse.wheel_aliases.keys()]:
         send_parser.symbols[wheel] = WheelInstruction
+    for alias, references in [*keyboard.aliases.items(), *mouse.aliases.items()]:
+        send_parser.aliases[alias] = references[0]
+
     send_parser.regexes[parser.common.SECONDS.regex] = (
         SleepInstruction,
         parser.common.SECONDS.fn,
     )
-    for alias, references in [*keyboard.aliases.items(), *mouse.aliases.items()]:
-        send_parser.aliases[alias] = references[0]
     send_parser.regexes[parser.common.MILLIS.regex] = (
         SleepInstruction,
         parser.common.MILLIS.fn,
+    )
+    send_parser.regexes[parser.common.CURSOR_MOVE.regex] = (
+        CursorMoveInstruction,
+        parser.common.CURSOR_MOVE.fn,
     )
 
     return send_parser

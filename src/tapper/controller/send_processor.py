@@ -7,6 +7,7 @@ from tapper.model import constants
 from tapper.model import keyboard
 from tapper.model import mouse
 from tapper.model.errors import SendError
+from tapper.model.send import CursorMoveInstruction
 from tapper.model.send import KeyInstruction
 from tapper.model.send import SendInstruction
 from tapper.model.send import SleepInstruction
@@ -50,6 +51,8 @@ class SendCommandProcessor:
                 self._send_key_instruction(instruction)
             elif isinstance(instruction, WheelInstruction):
                 self.mouse_controller.press(instruction.wheel_symbol)
+            elif isinstance(instruction, CursorMoveInstruction):
+                self.mouse_controller.move(*instruction.xy)
             elif isinstance(instruction, SleepInstruction):
                 self.sleep_fn(instruction.time)  # type: ignore  # https://github.com/python/mypy/issues/5485
             else:

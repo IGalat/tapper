@@ -32,6 +32,16 @@ class MILLIS(ParsedProp):
     fn = parse_millis
 
 
+class CURSOR_MOVE(ParsedProp):
+    @staticmethod
+    def parse_xy(xy_str: str) -> tuple[int, int]:
+        y_pos = xy_str.find("y")
+        return int(xy_str[1:y_pos]), int(xy_str[y_pos + 1 :])
+
+    regex = re.compile(r"^x-?\d+y-?\d+$")
+    fn = parse_xy
+
+
 def split(text: str, delimiter: str) -> list[str]:
     """Split str, with minimum length of tokens same as delimiter.
 

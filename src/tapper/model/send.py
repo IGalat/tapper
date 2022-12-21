@@ -32,6 +32,13 @@ class WheelInstruction(SendInstruction):
 
 
 @dataclass
+class CursorMoveInstruction(SendInstruction):
+    """Move mouse cursor. Absolute."""
+
+    xy: tuple[int, int]
+
+
+@dataclass
 class SleepInstruction(SendInstruction):
     time: float
     """Seconds."""
