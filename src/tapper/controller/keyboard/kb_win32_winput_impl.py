@@ -1,11 +1,19 @@
+import sys
+
 from tapper.controller.keyboard.kb_api import KeyboardCommander
 from tapper.controller.keyboard.kb_api import KeyboardTracker
 from tapper.model import keyboard
 from tapper.util import datastructs
 from winput import winput
 
+keys_wo_upper = {
+    k: v
+    for k, v in keyboard.get_keys(sys.platform).items()
+    if k not in keyboard.chars_en_upper
+}
+
 symbol_code_map = datastructs.symbols_to_codes(
-    keyboard.win32_vk_code_to_symbol_map, keyboard.aliases
+    keyboard.win32_vk_code_to_symbol_map, keys_wo_upper
 )
 
 user32 = winput.user32
