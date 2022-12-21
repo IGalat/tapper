@@ -41,8 +41,13 @@ class SendCommandProcessor:
         """To be filled during init."""
         return SendCommandProcessor(None, None, None, None)  # type: ignore
 
-    def send(self, command: str) -> None:
-        """Entry point, processes the command and sends instructions."""
+    def send(self, command: str, speed: float = 1) -> None:
+        """
+        Entry point, processes the command and sends instructions.
+
+        :param command: What to send.
+        :param speed: All sleep commands are divided by this number.
+        """
         instructions: list[SendInstruction] = self.parser.parse(
             command, self.shift_down()
         )
@@ -54,7 +59,7 @@ class SendCommandProcessor:
             elif isinstance(instruction, CursorMoveInstruction):
                 self.mouse_controller.move(*instruction.xy)
             elif isinstance(instruction, SleepInstruction):
-                self.sleep_fn(instruction.time)  # type: ignore  # https://github.com/python/mypy/issues/5485
+                self.sleep_fn(instruction.time / speed)  # type: ignore  # https://github.com/python/mypy/issues/5485
             else:
                 raise SendError
 
