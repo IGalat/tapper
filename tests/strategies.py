@@ -33,7 +33,10 @@ primitives = (
 
 """Dictionaries not included."""
 primitives_and_seq = (
-    primitives | st.lists(primitives) | st.tuples(primitives) | st.sets(primitives)
+    primitives
+    | st.lists(primitives, max_size=50)
+    | st.tuples(primitives)
+    | st.sets(primitives, max_size=50)
 )
 
 
