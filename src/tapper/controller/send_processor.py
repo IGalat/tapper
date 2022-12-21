@@ -42,7 +42,9 @@ class SendCommandProcessor:
 
     def send(self, command: str) -> None:
         """Entry point, processes the command and sends instructions."""
-        instructions: list[SendInstruction] = self.parser.parse(command)
+        instructions: list[SendInstruction] = self.parser.parse(
+            command, self.shift_down()
+        )
         for instruction in instructions:
             if isinstance(instruction, KeyInstruction):
                 self._send_key_instruction(instruction)
@@ -52,6 +54,13 @@ class SendCommandProcessor:
                 self.sleep_fn(instruction.time)  # type: ignore  # https://github.com/python/mypy/issues/5485
             else:
                 raise SendError
+
+    def shift_down(self) -> str | None:
+        """Determines which shift is down, if any."""
+        for shift in ["left_shift", "right_shift"]:
+            if self.kb_controller.pressed(shift):
+                return shift
+        return None
 
     def _send_key_instruction(self, ki: KeyInstruction) -> None:
         symbol = ki.symbol

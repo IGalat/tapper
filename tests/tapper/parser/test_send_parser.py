@@ -3,12 +3,12 @@ from typing import Callable
 import pytest
 from tapper.boot import initializer
 from tapper.model import constants
-from tapper.model import keyboard
 from tapper.model.errors import SendParseError
 from tapper.model.send import KeyInstruction
 from tapper.model.send import SendInstruction
 from tapper.model.send import SleepInstruction
 from tapper.model.send import WheelInstruction
+from tapper.parser.send_parser import shift
 from tapper.util import datastructs
 
 down = constants.KeyDir.DOWN
@@ -18,8 +18,8 @@ off = constants.KeyDir.OFF
 
 KI = KeyInstruction
 
-shift_down = KI(keyboard.shift, down)
-shift_up = KI(keyboard.shift, up)
+shift_down = KI(shift, down)
+shift_up = KI(shift, up)
 
 ParseFn = Callable[[str], list[SendInstruction]]
 

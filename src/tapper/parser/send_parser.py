@@ -24,8 +24,10 @@ PROPERTY_DELIMITER = " "
 COMMA_DELIMITER = ","
 COMBO_DELIMITER = ";"
 
-ki_shift_down = KeyInstruction(keyboard.shift, constants.KeyDir.DOWN)
-ki_shift_up = KeyInstruction(keyboard.shift, constants.KeyDir.UP)
+shift = "left_shift"
+
+ki_shift_down = lambda: KeyInstruction(shift, constants.KeyDir.DOWN)
+ki_shift_up = lambda: KeyInstruction(shift, constants.KeyDir.UP)
 
 
 def parse_wrap(combo_wrap: str) -> tuple[str, str, re.Pattern[str]]:
@@ -148,12 +150,15 @@ class SendParser:
         self.combo_prefix, self.combo_suffix, self.pattern = parse_wrap(combo_wrap)
 
     @cache
-    def parse(self, command: str) -> list[SendInstruction]:
+    def parse(self, command: str, shift_in: str | None = None) -> list[SendInstruction]:
         """Parse send command into sequential instructions."""
+        global shift
         if not self.pattern:
             self.set_wrap(COMBO_WRAP)
 
-        shift_down = False
+        if shift_in:
+            shift = shift_in
+        shift_down = bool(shift_in)
         result = []
         combos = self.match_combos(command)
 
@@ -178,18 +183,20 @@ class SendParser:
             if symbol in keyboard.chars_en_upper:
                 symbol = keyboard.chars_en_upper_to_lower[symbol]
                 if not shift_down:
-                    result.append(ki_shift_down)
+                    result.append(ki_shift_down())
                     shift_down = True
                 result.append(KeyInstruction(symbol))
             else:
                 if shift_down:
-                    result.append(ki_shift_up)
+                    result.append(ki_shift_up())
                     shift_down = False
                 result.append(KeyInstruction(symbol))
             i += 1
 
-        if shift_down:
-            result.append(KeyInstruction(keyboard.shift, constants.KeyDir.UP))
+        if shift_down and not shift_in:
+            result.append(KeyInstruction(shift, constants.KeyDir.UP))
+        elif shift_in and not shift_down:
+            result.append(KeyInstruction(shift_in, constants.KeyDir.DOWN))
         return result
 
     @cache
@@ -211,8 +218,8 @@ class SendParser:
         """
         result = self._parse_combo(content)
         if shift_down:
-            result.insert(0, ki_shift_up)
-            result.append(ki_shift_down)
+            result.insert(0, ki_shift_up())
+            result.append(ki_shift_down())
         return result
 
     @cache
