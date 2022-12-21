@@ -9,6 +9,7 @@ from tapper.controller.keyboard.kb_api import KeyboardController
 from tapper.controller.mouse.mouse_api import MouseController
 from tapper.controller.send_processor import SendCommandProcessor
 from tapper.controller.window.window_api import WindowController
+from tapper.helper import controls
 from tapper.model import keyboard
 from tapper.model import mouse
 from tapper.model.send import KeyInstruction
@@ -113,6 +114,13 @@ def init(
 
 def _fill_control_if_empty(icontrol: Group) -> None:
     """Sets default controls if none."""
+    if not icontrol._children:
+        icontrol.add(
+            {
+                "f3": controls.restart,
+                "alt+f3": controls.terminate,
+            }
+        )
 
 
 def _fill_default_properties(group: Group) -> None:
