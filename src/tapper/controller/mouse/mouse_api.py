@@ -8,6 +8,10 @@ from tapper.model import constants
 from tapper.state import keeper
 
 
+def is_near(current_x: int, current_y: int, x: int, y: int, precision: int) -> bool:
+    return (current_x - x) ** 2 + (current_y - y) ** 2 <= precision**2
+
+
 class MouseTracker(ABC):
     @abstractmethod
     def start(self) -> None:
@@ -84,6 +88,10 @@ class MouseController(ResourceController):
     def get_pos(self) -> tuple[int, int]:
         """Coordinates (x, y) of current mouse position."""
         return self._tracker.get_pos()
+
+    def is_near(self, x: int, y: int, precision: int = 50) -> bool:
+        """Circle with "precision" radius."""
+        return is_near(*self.get_pos(), x, y, precision)
 
     def press(self, symbol: str) -> None:
         """Presses down one key."""

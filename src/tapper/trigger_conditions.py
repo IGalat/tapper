@@ -35,12 +35,17 @@ def mouse(mouse_c: MouseController) -> dict[str, Callable[[Any], Any]]:
     kwargs["mouse_key_pressed"] = mouse_c.pressed
     kwargs["mouse_key_not_pressed"] = lambda symbol: not mouse_c.pressed(symbol)
 
-    def is_cursor_near(target_xy_precision: tuple[tuple[int, int], int]) -> bool:
-        """Circle with "precision" radius."""
-        target_xy, precision = target_xy_precision
-        target_x, target_y = target_xy
-        x, y = mouse_c.get_pos()
-        return (x - target_x) ** 2 + (y - target_y) ** 2 <= precision**2
+    def is_cursor_near(
+        xy_precision: tuple[int, int] | tuple[tuple[int, int], int]
+    ) -> bool:
+        """
+        Circle with "precision" radius.
+        Could be supplied ((x, y), precision) or (x, y) with default(50) precision.
+        """
+        param1, param2 = xy_precision
+        if isinstance(param1, tuple):
+            return mouse_c.is_near(*param1, precision=param2)
+        return mouse_c.is_near(x=param1, y=param2)
 
     kwargs["cursor_near"] = is_cursor_near
 

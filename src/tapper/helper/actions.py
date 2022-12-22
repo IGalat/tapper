@@ -5,6 +5,7 @@ from typing import Callable
 
 from tapper.helper import _util
 from tapper.helper._util import repeater
+from tapper.helper.helper_model import RecordConfig
 
 
 def repeat_while(
@@ -51,3 +52,20 @@ def toggle_repeat(
     max_repeats_int = max_repeats or 999999999999999
     repeater.registered_repeatables[action] = period_s, max_repeats_int
     return partial(_util.repeater.toggle_repeatable, action)
+
+
+def record(
+    callback: Callable[[str], Any], config: RecordConfig = RecordConfig()
+) -> Callable[[], None]:
+    """
+    Gives a callable, that:
+    On first stroke, starts recording keystrokes and mouse clicks, and position of the mouse during these actions.
+    On second stroke, stops recording, transforms recorded actions into a string that can be supplied to tapper.send
+        and calls the callback with this string.
+
+    :param callback: What to do with resulting string
+    :param config: config settings
+    :return: callable toggle, to be set into a Tap
+    """
+
+    return partial(_util.recorder.toggle_recording, callback, config)
