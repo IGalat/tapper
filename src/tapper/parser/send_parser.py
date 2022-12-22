@@ -126,6 +126,13 @@ def dir_prop(prop: str) -> Optional[str]:
         return None
 
 
+def has_chars(instructions: list[SendInstruction]) -> bool:
+    return any(
+        isinstance(ins, KeyInstruction) and ins.symbol in keyboard.chars_en
+        for ins in instructions
+    )
+
+
 @dataclass
 class SendParser:
     """Parses the 'send' command."""
@@ -216,7 +223,7 @@ class SendParser:
         :return: parsed instructions
         """
         result = self._parse_combo(content).copy()
-        if shift_down:
+        if shift_down and has_chars(result):
             result.insert(0, ki_shift_up())
             result.append(ki_shift_down())
         return result
