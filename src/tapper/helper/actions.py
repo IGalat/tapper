@@ -3,7 +3,7 @@ from functools import partial
 from typing import Any
 from typing import Callable
 
-from tapper.helper import _util
+from tapper.helper._util import recorder
 from tapper.helper._util import repeater
 from tapper.helper.helper_model import RecordConfig
 
@@ -51,7 +51,7 @@ def toggle_repeat(
     """
     max_repeats_int = max_repeats or 999999999999999
     repeater.registered_repeatables[action] = period_s, max_repeats_int
-    return partial(_util.repeater.toggle_repeatable, action)
+    return partial(repeater.toggle_repeatable, action)
 
 
 def record(
@@ -68,4 +68,4 @@ def record(
     :return: callable toggle, to be set into a Tap
     """
 
-    return partial(_util.recorder.toggle_recording, callback, config)
+    return partial(recorder.toggle_recording, callback, config)
