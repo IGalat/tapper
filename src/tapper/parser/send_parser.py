@@ -160,7 +160,7 @@ class SendParser:
             shift = shift_in
         shift_down = bool(shift_in)
         result = []
-        combos = self.match_combos(command)
+        combos = self.match_combos(command).copy()
 
         i = 0
         while i < len(command):
@@ -194,9 +194,9 @@ class SendParser:
             i += 1
 
         if shift_down and not shift_in:
-            result.append(KeyInstruction(shift, constants.KeyDir.UP))
+            result.append(ki_shift_up())
         elif shift_in and not shift_down:
-            result.append(KeyInstruction(shift_in, constants.KeyDir.DOWN))
+            result.append(ki_shift_down())
         return result
 
     @cache
@@ -208,7 +208,6 @@ class SendParser:
             start = match.end()
         return matches
 
-    @cache
     def parse_combo(self, content: str, shift_down: bool) -> list[SendInstruction]:
         """
         Parse a combo from content string
@@ -216,7 +215,7 @@ class SendParser:
         :param shift_down: if shift is down before combo
         :return: parsed instructions
         """
-        result = self._parse_combo(content)
+        result = self._parse_combo(content).copy()
         if shift_down:
             result.insert(0, ki_shift_up())
             result.append(ki_shift_down())
@@ -238,7 +237,7 @@ class SendParser:
                 combo_delim_index += sum(len(s) for s in symbols_split[:i])
 
                 parsed_combos = [
-                    self._parse_combo(combo)
+                    self._parse_combo(combo).copy()
                     for combo in [
                         content[: combo_delim_index - 1],
                         content[combo_delim_index:],
