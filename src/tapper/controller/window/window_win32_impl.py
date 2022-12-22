@@ -1,4 +1,6 @@
 import ctypes.wintypes
+import os
+import time
 from typing import Any
 from typing import Callable
 from typing import Optional
@@ -195,16 +197,36 @@ class Win32WindowTrackerCommander(WindowTracker, WindowCommander):
         strict: bool = False,
         process_id: Optional[int] = None,
         handle: Any = None,
+        force: bool = True,
     ) -> bool:
-        return self.window_commands(
-            [destroy_command],
-            window_or_exec_or_title,
-            title,
-            exec,
-            strict,
-            process_id,
-            handle,
-        )
+        if (
+            window_or_exec_or_title is None
+            and title is None
+            and exec is None
+            and process_id is None
+            and handle is None
+        ):
+            win = self.get_open(handle=win32gui.GetForegroundWindow(), limit=1)
+            window = win[0] if win else None
+        elif window_or_exec_or_title is not None and isinstance(
+            window_or_exec_or_title, Window
+        ):
+            window = window_or_exec_or_title
+        else:
+            win = self.get_open(
+                window_or_exec_or_title, title, exec, strict, process_id, handle, 1
+            )
+            window = win[0] if win else None
+
+        if not window:
+            return False
+
+        self.window_commands([destroy_command], handle=window.handle)
+        time.sleep(0.1)
+        if self.get_open(handle=window.handle):
+            print(f"Found open window: {window.title}")
+            os.system(f"taskkill /f /pid {window.process_id}")
+        return True
 
     def minimize(
         self,

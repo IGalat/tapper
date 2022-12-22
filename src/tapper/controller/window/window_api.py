@@ -74,6 +74,7 @@ class WindowCommander(ABC):
         strict: bool = False,
         process_id: Optional[int] = None,
         handle: Any = None,
+        force: bool = True,
     ) -> bool:
         pass
 
@@ -261,6 +262,7 @@ class WindowController(ResourceController):
         strict: bool = False,
         process_id: Optional[int] = None,
         handle: Any = None,
+        force: bool = True,
     ) -> bool:
         """
         Close(destroy) a window, if found.
@@ -268,10 +270,11 @@ class WindowController(ResourceController):
 
         If no params supplied, the foreground window will be closed.
 
+        :param force: if window does not close politely, will kill it.
         :return: True if found and successfully closed, else False.
         """
         return self._commander.close(
-            window_or_exec_or_title, title, exec, strict, process_id, handle
+            window_or_exec_or_title, title, exec, strict, process_id, handle, force
         )
 
     def minimize(
