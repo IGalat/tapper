@@ -60,6 +60,11 @@ Would probably need multiprocessing for that.
 
 No hotstrings: made the decision to not implement them.
 
+On win32, shift+insert is not emulatable, shift is raised before insert is pressed.
+
+Cannot do mass things, like lock all buttons until something is pressed.
+
+
 ## Possible extensions to think about for the future
 
 send command arg "key_cleanup" - to lift keys that remain pressed.
