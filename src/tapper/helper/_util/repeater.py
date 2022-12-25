@@ -1,7 +1,12 @@
 import time
 from concurrent.futures import ThreadPoolExecutor
+from dataclasses import dataclass
 from typing import Any
 from typing import Callable
+
+from tapper.model.constants import KeyDirBool
+from tapper.model.types_ import Signal
+from tapper.util import event
 
 """For actions.toggle_repeat"""
 
@@ -49,3 +54,26 @@ def toggle_repeatable(action: Callable[[], Any]) -> None:
         executor.submit(run_task, action)
     else:
         running_repeatable = None
+
+
+@dataclass
+class Sub:
+    symbol: str
+    action: Callable[[], Any]
+
+    def unsub(self, signal: Signal) -> None:
+        global running_repeatable
+        if signal[1] == KeyDirBool.UP and signal[0] == self.symbol:
+            if running_repeatable == self.action:
+                running_repeatable = None
+            event.unsubscribe("keyboard", self.unsub)
+            event.unsubscribe("mouse", self.unsub)
+
+
+def while_pressed(symbol: str, action: Callable[[], Any]) -> None:
+    if action == running_repeatable:
+        return
+    toggle_repeatable(action)
+    sub = Sub(symbol, action)
+    event.subscribe("keyboard", sub.unsub)
+    event.subscribe("mouse", sub.unsub)

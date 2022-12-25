@@ -27,6 +27,24 @@ def repeat_while(
     return fn
 
 
+def repeat_while_pressed(
+    symbol: str,
+    action: Callable[[], Any],
+    period_s: float = 0.1,
+    max_repeats: int | None = None,
+) -> Callable[[], None]:
+    """
+    Repeats action in a separate thread until key is released.
+
+    Warning: if key up is suppressed (used in another Tap), action will be
+    repeated forever(or until overridden by another toggle_repeat or repeat_while_pressed)
+    """
+    max_repeats_int = max_repeats or 999999999999999
+
+    repeater.registered_repeatables[action] = period_s, max_repeats_int
+    return partial(repeater.while_pressed, symbol, action)
+
+
 def toggle_repeat(
     action: Callable[[], Any], period_s: float = 0.1, max_repeats: int | None = None
 ) -> Callable[[], None]:

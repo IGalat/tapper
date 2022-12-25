@@ -73,9 +73,9 @@ def transform_recording(records: list[SignalRecord], config: RecordConfig) -> st
         return ""
 
     reduce_time(records, config.non_compress_action_delay)
-    records = records[start_buttons_number:-inverted_stop]
-    reduce_mouse_moves(records, config.min_mouse_movement)
-    instructions = to_instructions(records)
+    records_cut = records[start_buttons_number:-inverted_stop]
+    reduce_mouse_moves(records_cut, config.min_mouse_movement)
+    instructions = to_instructions(records_cut)
     if config.down_up_as_click:
         compress_down_ups(instructions)
     strs = to_strings(instructions)
@@ -85,7 +85,7 @@ def transform_recording(records: list[SignalRecord], config: RecordConfig) -> st
 
 def first_with_dir(records: list[SignalRecord], dir: KeyDirBool) -> int:
     """First record with dir. Or -1 if not found."""
-    return next((i + 1 for i in range(len(records)) if records[i].signal[1] == dir), -1)
+    return next((i for i in range(len(records)) if records[i].signal[1] == dir), -1)
 
 
 def reduce_time(records: list[SignalRecord], non_compress_action_delay: float) -> None:
