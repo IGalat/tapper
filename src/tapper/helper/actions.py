@@ -54,11 +54,37 @@ def toggle_repeat(
     return partial(repeater.toggle_repeatable, action)
 
 
-def record(
+def record_start() -> Callable[[], None]:
+    """
+    Gives a function, that:
+    Starts recording keystrokes and mouse clicks, and position of the mouse during these actions.
+    If recording in progress, destroys it and starts a new one.
+
+    :return: callable start, to be set into a Tap
+    """
+    return partial(recorder.start_recording)
+
+
+def record_stop(
     callback: Callable[[str], Any], config: RecordConfig = RecordConfig()
 ) -> Callable[[], None]:
     """
-    Gives a callable, that:
+    Gives a function, that:
+    Stops recording, and if there was a recording, transforms recorded actions into a string
+        that can be supplied to tapper.send and calls the callback with this string.
+
+    :param callback: What to do with resulting string
+    :param config: config settings
+    :return: callable stop, to be set into a Tap
+    """
+    return partial(recorder.stop_recording, callback, config)
+
+
+def record_toggle(
+    callback: Callable[[str], Any], config: RecordConfig = RecordConfig()
+) -> Callable[[], None]:
+    """
+    Gives a function, that:
     On first stroke, starts recording keystrokes and mouse clicks, and position of the mouse during these actions.
     On second stroke, stops recording, transforms recorded actions into a string that can be supplied to tapper.send
         and calls the callback with this string.
@@ -67,5 +93,4 @@ def record(
     :param config: config settings
     :return: callable toggle, to be set into a Tap
     """
-
     return partial(recorder.toggle_recording, callback, config)

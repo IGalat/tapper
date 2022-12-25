@@ -25,6 +25,7 @@ class SignalRecord:
 
 
 recording: list[SignalRecord] | None = None
+rconfig: RecordConfig | None = None
 
 record_signal = lambda signal: recording.append(  # type: ignore
     SignalRecord(signal, time.perf_counter(), tapper.mouse.get_pos())
@@ -36,31 +37,43 @@ def toggle_recording(callback: Callable[[str], Any], config: RecordConfig) -> No
     timeout = lambda time2: time.perf_counter() - time2 > config.max_recording_time
 
     if recording is None or (recording and timeout(recording[0].time)):
-        recording = []
         start_recording()
     else:
-        stop_recording()
-        rec = recording
-        recording = None
-        callback(transform_recording(rec, config))
+        stop_recording(callback, config)
 
 
 def start_recording() -> None:
+    global recording
+    recording = []
+
     time.sleep(0.001)  # or it sometimes records DOWN of trigger
     event.subscribe("keyboard", record_signal)
     event.subscribe("mouse", record_signal)
 
 
-def stop_recording() -> None:
+def stop_recording(callback: Callable[[str], Any], config: RecordConfig) -> None:
+    global recording
+
     event.unsubscribe("keyboard", record_signal)
     event.unsubscribe("mouse", record_signal)
 
+    if recording:
+        rec = recording
+        recording = None
+        callback(transform_recording(rec, config))
+
 
 def transform_recording(records: list[SignalRecord], config: RecordConfig) -> str:
-    if len(records) < config.hotkey_buttons * 2 + 1:
+    start_buttons_number = first_with_dir(records, KeyDirBool.DOWN)
+    inverted_stop = first_with_dir(list(reversed(records)), KeyDirBool.UP)
+
+    if start_buttons_number == -1 or inverted_stop == -1:
+        raise ValueError("No start/stop buttons detected.")
+    if len(records) < start_buttons_number + inverted_stop + 1:
         return ""
+
     reduce_time(records, config.non_compress_action_delay)
-    records = records[config.hotkey_buttons : -config.hotkey_buttons]
+    records = records[start_buttons_number:-inverted_stop]
     reduce_mouse_moves(records, config.min_mouse_movement)
     instructions = to_instructions(records)
     if config.down_up_as_click:
@@ -68,6 +81,11 @@ def transform_recording(records: list[SignalRecord], config: RecordConfig) -> st
     strs = to_strings(instructions)
     result = "$(" + ";".join(strs) + ")"
     return result
+
+
+def first_with_dir(records: list[SignalRecord], dir: KeyDirBool) -> int:
+    """First record with dir. Or -1 if not found."""
+    return next((i + 1 for i in range(len(records)) if records[i].signal[1] == dir), -1)
 
 
 def reduce_time(records: list[SignalRecord], non_compress_action_delay: float) -> None:
@@ -84,7 +102,7 @@ def reduce_mouse_moves(records: list[SignalRecord], min_movement: int) -> None:
     pos = records[0].mouse_pos
     for i in range(len(records) - 1):
         r = records[i + 1]
-        if mouse_api.is_near(*r.mouse_pos, *pos, min_movement):
+        if mouse_api.is_near(*r.mouse_pos, *pos, min_movement):  # noqa
             r.mouse_pos = None
         else:
             pos = r.mouse_pos

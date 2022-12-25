@@ -29,7 +29,8 @@ def subscribe(topic: str, subscribed_function: SubscribedFunction) -> None:
     """
     if topic not in _subscribers:
         _subscribers[topic] = []
-    _subscribers[topic].append(subscribed_function)
+    if subscribed_function not in _subscribers[topic]:
+        _subscribers[topic].append(subscribed_function)
 
 
 def unsubscribe(topic: str, subscribed_function: SubscribedFunction) -> None:
