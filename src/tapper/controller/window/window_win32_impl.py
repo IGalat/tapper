@@ -66,6 +66,8 @@ def get_process_exec(pid: Optional[int]) -> Optional[str]:
 
 
 def str_match(filtered: str, iterated: str, strict: bool) -> bool:
+    if not filtered or not iterated:
+        return False
     if strict:
         return filtered == iterated
     else:
@@ -95,7 +97,7 @@ def win_filter(
         return None
     if exec and not str_match(exec, win.exec, strict):
         return None
-    if title and not str_match(title, win.exec, strict):
+    if title and not str_match(title, win.title, strict):
         return None
     return win
 

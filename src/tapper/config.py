@@ -1,4 +1,5 @@
 import sys
+import time
 
 from tapper import trigger_conditions
 from tapper.controller.keyboard.kb_api import KeyboardController
@@ -49,8 +50,6 @@ action_runner_executors_threads: list[int] = [1]
 Setting value to N will allow N actions to execute simultaneously for a given executor.
 """
 
-os = sys.platform
-
 """
 ------------------------------------
 SECTION 3: Extending the functionality.
@@ -97,3 +96,13 @@ Example:
     - the value function is called with positional-1 arg "paint", and bool(result):
     Tap's action "b" will be executed!
 """
+
+"""
+------------------------------------
+SECTION 4: Testing.
+------------------------------------
+"""
+
+os = sys.platform
+
+sleep_fn = time.sleep

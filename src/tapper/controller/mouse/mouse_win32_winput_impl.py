@@ -61,6 +61,11 @@ class Win32MouseTrackerCommander(MouseTracker, MouseCommander):
     def move(
         self, x: Optional[int] = None, y: Optional[int] = None, relative: bool = False
     ) -> None:
+        winput.set_mouse_pos(*self.calc_move(x, y, relative))
+
+    def calc_move(
+        self, x: Optional[int], y: Optional[int], relative: bool
+    ) -> tuple[int, int]:
         if x is None and y is None:
             report.error("Win32MouseCommander move with no coordinates specified.")
 
@@ -79,7 +84,7 @@ class Win32MouseTrackerCommander(MouseTracker, MouseCommander):
                 y = current_y
             else:
                 y += current_y
-        winput.set_mouse_pos(x, y)
+        return x, y
 
     def pressed(self, symbol: str) -> bool:
         return any(button_state(code) >> 15 == 1 for code in symbol_button_map[symbol])
