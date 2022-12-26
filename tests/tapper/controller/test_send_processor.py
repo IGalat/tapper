@@ -1,5 +1,4 @@
 import time
-from typing import Callable
 
 import pytest
 from tapper.boot import initializer
@@ -33,7 +32,7 @@ def sleep(time_s: float) -> Signal:
 
 
 class TestSendCommandProcessor:
-    send: Callable[[str], None]
+    sender: SendCommandProcessor
     pressed: keeper.Pressed
     all_signals: list[Signal]
     real_signals: list[Signal]
@@ -110,4 +109,48 @@ class TestSendCommandProcessor:
             up("tab"),
             up("left_alt"),
             sleep(1.0),
+        ]
+
+    def test_default_interval(self) -> None:
+        self.sender.default_interval = 0.5
+        self.sender.send("hello")
+        result = []
+        for letter in "hello":
+            result.append(sleep(0.5))
+            result.extend(click(letter))
+        assert self.all_signals == result
+
+    def test_interval_variable(self) -> None:
+        self.sender.default_interval = 0.1
+        self.sender.send("hi")
+        self.sender.send("q", interval=10)
+        assert self.all_signals == [
+            sleep(0.1),
+            *click("h"),
+            sleep(0.1),
+            *click("i"),
+            sleep(10),
+            *click("q"),
+        ]
+
+    def test_speed(self) -> None:
+        self.sender.send("w$(10ms)e", speed=0.02)
+        self.sender.send("z$(20s)x", speed=5)
+        assert self.all_signals == [
+            *click("w"),
+            sleep(0.5),
+            *click("e"),
+            *click("z"),
+            sleep(4.0),
+            *click("x"),
+        ]
+
+    def test_speed_and_interval(self) -> None:
+        self.sender.send("h$(1s)k", interval=0.1, speed=2)
+        assert self.all_signals == [
+            sleep(0.1),
+            *click("h"),
+            sleep(0.5),
+            sleep(0.1),
+            *click("k"),
         ]
