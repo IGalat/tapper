@@ -1,8 +1,15 @@
+import pytest
 import tapper
 from integration.conftest import click
 from integration.conftest import ends_with
 from integration.conftest import Fixture
 from tapper import Tap
+
+
+def test_nonexistent_condition(f: Fixture) -> None:
+    tapper.root.add(Tap("u", "1", made_up_kwarg="blah"))
+    with pytest.raises(ValueError):
+        f.start()
 
 
 def test_trigger_if(f: Fixture) -> None:

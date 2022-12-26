@@ -125,6 +125,14 @@ class TestTreeOrder:
         f.send_real("$(alt+ctrl 50ms+shift+1)")
         assert ends_with(f.emul_signals, click("flip" + "last"))
 
+    def test_control(self, f: Fixture) -> None:
+        tapper.root.add({"1": "ordinary"})
+        tapper.control_group.add({"1": "ctrlgr"})
+        f.start()
+
+        f.send_real("1")
+        assert f.emul_signals == click("ctrlgr")
+
 
 class TestConcurrentActions:
     def test_simplest(self, f: Fixture) -> None:

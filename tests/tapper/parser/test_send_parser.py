@@ -4,22 +4,24 @@ import pytest
 from tapper.boot import initializer
 from tapper.model import constants
 from tapper.model.errors import SendParseError
+from tapper.model.send import CursorMoveInstruction
 from tapper.model.send import KeyInstruction
 from tapper.model.send import SendInstruction
 from tapper.model.send import SleepInstruction
 from tapper.model.send import WheelInstruction
-from tapper.parser.send_parser import shift
+from tapper.parser.send_parser import default_shift
+from tapper.parser.send_parser import ki_shift_down
+from tapper.parser.send_parser import ki_shift_up
+from tapper.parser.send_parser import SendParser
 from tapper.util import datastructs
 
 down = constants.KeyDir.DOWN
 up = constants.KeyDir.UP
+click = constants.KeyDir.CLICK
 on = constants.KeyDir.ON
 off = constants.KeyDir.OFF
 
 KI = KeyInstruction
-
-shift_down = KI(shift, down)
-shift_up = KI(shift, up)
 
 ParseFn = Callable[[str], list[SendInstruction]]
 
@@ -27,6 +29,11 @@ ParseFn = Callable[[str], list[SendInstruction]]
 @pytest.fixture(scope="module")
 def parse() -> ParseFn:
     return initializer.default_send_parser().parse
+
+
+@pytest.fixture(scope="module")
+def parser() -> SendParser:
+    return initializer.default_send_parser()
 
 
 def key_ins(symbols: str | list[str]) -> list[KeyInstruction]:
@@ -45,26 +52,26 @@ class TestNonCombos:
         assert parse("zxcvbn") == key_ins("zxcvbn")
 
     def test_shift_simplest(self, parse: ParseFn) -> None:
-        assert parse("Q") == [shift_down, KI("q"), shift_up]
+        assert parse("Q") == [ki_shift_down(), KI("q"), ki_shift_up()]
 
     def test_shift_multi(self, parse: ParseFn) -> None:
         assert parse("P%I") == [
-            shift_down,
+            ki_shift_down(),
             *key_ins("p5i"),
-            shift_up,
+            ki_shift_up(),
         ]
 
     def test_shift_mixed(self, parse: ParseFn) -> None:
         assert parse("2007 Ahoy!") == [
             *key_ins("2007"),
             KI("space"),
-            shift_down,
+            ki_shift_down(),
             KI("a"),
-            shift_up,
+            ki_shift_up(),
             *key_ins("hoy"),
-            shift_down,
+            ki_shift_down(),
             KI("1"),
-            shift_up,
+            ki_shift_up(),
         ]
 
     def test_control_chars(self, parse: ParseFn) -> None:
@@ -91,9 +98,9 @@ class TestSimplestCombosAndMix:
 
     def test_combo_after_text(self, parse: ParseFn) -> None:
         assert parse("Hi\n$(ctrl+c,v down)") == [
-            shift_down,
+            ki_shift_down(),
             KI("h"),
-            shift_up,
+            ki_shift_up(),
             KI("i"),
             KI("enter"),
             KI("left_control", down),
@@ -114,7 +121,7 @@ class TestSimplestCombosAndMix:
         )
 
     def test_empty_combo_is_not_combo(self, parse: ParseFn) -> None:
-        assert parse("$()") == [shift_down, *key_ins("490"), shift_up]
+        assert parse("$()") == [ki_shift_down(), *key_ins("490"), ki_shift_up()]
 
     def test_sleep_s(self, parse: ParseFn) -> None:
         assert parse("$(2s)") == [SleepInstruction(2)]
@@ -192,6 +199,9 @@ class TestCombosWithoutProps:
             KI("c"),
         ]
 
+    def test_mouse_move(self, parse: ParseFn) -> None:
+        assert parse("$(x340y980)") == [CursorMoveInstruction(xy=(340, 980))]
+
 
 class TestCombosWithOneProp:
     def test_prop_invalid(self, parse: ParseFn) -> None:
@@ -248,10 +258,10 @@ class TestCombosWithOneProp:
 
     def test_mult_chain_end(self, parse: ParseFn) -> None:
         assert parse("$(shift+lmb 2x)") == [
-            shift_down,
+            ki_shift_down(),
             KI("left_mouse_button"),
             KI("left_mouse_button"),
-            shift_up,
+            ki_shift_up(),
         ]
 
     def test_dir_simplest(self, parse: ParseFn) -> None:
@@ -315,3 +325,43 @@ class TestCombosWithManyProps:
     def test_off_mult(self, parse: ParseFn) -> None:
         with pytest.raises(SendParseError):
             parse("$(caps off 4x)")
+
+
+class TestShiftIn:
+    def test_no_chars(self, parser: SendParser) -> None:
+        assert parser.parse("$(esc)", default_shift) == [KI("escape", click)]
+
+    def test_simplest(self, parser: SendParser) -> None:
+        assert parser.parse("a", default_shift) == [
+            ki_shift_up(),
+            KI("a", click),
+            ki_shift_down(),
+        ]
+
+    def test_uppercase(self, parser: SendParser) -> None:
+        assert parser.parse("!", default_shift) == [KI("1", click)]
+
+    def test_mixed_chars_non_chars(self, parser: SendParser) -> None:
+        assert parser.parse("y\no", default_shift) == [
+            ki_shift_up(),
+            KI("y", click),
+            KI("enter", click),
+            KI("o", click),
+            ki_shift_down(),
+        ]
+
+    def test_mixed_case(self, parser: SendParser) -> None:
+        assert parser.parse("Hi", default_shift) == [
+            KI("h", click),
+            ki_shift_up(),
+            KI("i", click),
+            ki_shift_down(),
+        ]
+
+    def test_different_shift(self, parser: SendParser) -> None:
+        rshift = "right_shift"
+        assert parser.parse("u", rshift) == [
+            KI(rshift, up),
+            KI("u", click),
+            KI(rshift, down),
+        ]

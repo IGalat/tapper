@@ -45,3 +45,7 @@ class ListenerResult(Flag):
     """Signal will be received by other apps."""
     SUPPRESS = False
     """Signal will be suppressed and will not be received by other apps."""
+
+
+WinputListenerResult = {ListenerResult.SUPPRESS: 4, ListenerResult.PROPAGATE: 0}
+"""Corresponding result for winput, win32 low-level adapter."""

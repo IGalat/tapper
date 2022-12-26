@@ -1,20 +1,9 @@
-from typing import Final
-
 import winput
 from tapper.model.constants import KeyDirBool
 from tapper.model.constants import ListenerResult
+from tapper.model.constants import WinputListenerResult
 from tapper.signal.mouse.mouse_listener import MouseSignalListener
 from winput import MouseEvent
-
-WINPUT_PROPAGATE: Final[int] = 0
-WINPUT_SUPPRESS: Final[int] = 4
-
-
-def to_callback_result(inner_func_result: ListenerResult) -> int:
-    if inner_func_result:
-        return WINPUT_PROPAGATE
-    else:
-        return WINPUT_SUPPRESS
 
 
 class Win32MouseSignalListener(MouseSignalListener):
@@ -28,7 +17,7 @@ class Win32MouseSignalListener(MouseSignalListener):
         winput.unhook_mouse()
 
     def mouse_callback(self, event: MouseEvent) -> int:
-        return to_callback_result(self._mouse_callback(event))
+        return WinputListenerResult[self._mouse_callback(event)]
 
     def _mouse_callback(self, event: MouseEvent) -> ListenerResult:
         action = event.action

@@ -55,13 +55,11 @@ class ActionRunnerImpl(ActionRunner):
     _control_runnable: Future[Any]
     """Currently running or done task for control executor."""
 
-    def __init__(self, executors_threads: list[int] | None = None) -> None:
+    def __init__(self, executors_threads: list[int]) -> None:
         """
         :param executors_threads: see ActionRunner doc for general explanation.
             If this is None, 1 executor with 1 thread is generated.
         """
-        if not executors_threads:
-            executors_threads = [1]
         self.ex_threads = executors_threads
         self.executors = [
             ThreadPoolExecutor(max_workers=threads) for threads in executors_threads

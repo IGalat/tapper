@@ -13,13 +13,16 @@ class Subscriber:
 
 
 subscriber = Subscriber()
+topic_name = "test_topic"
 
 
 @hypothesis.given(strategies.primitives)
 @hypothesis.settings(max_examples=20)
 def test_pubsub(message: Any) -> None:
     event.publish("non-existing topic doesn't break anything", 123)
-    event.subscribe("topic_name", subscriber.receive_message)
-    event.publish("topic_name", message)
+    event.subscribe(topic_name, subscriber.receive_message)
+    event.publish(topic_name, message)
+    event.unsubscribe(topic_name, subscriber.receive_message)
+    event.publish(topic_name, "new message")
 
     assert subscriber.received_message is message

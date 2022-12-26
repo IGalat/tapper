@@ -24,10 +24,10 @@ PROPERTY_DELIMITER = " "
 COMMA_DELIMITER = ","
 COMBO_DELIMITER = ";"
 
-shift = "left_shift"
+default_shift = "left_shift"
 
-ki_shift_down = lambda: KeyInstruction(shift, constants.KeyDir.DOWN)
-ki_shift_up = lambda: KeyInstruction(shift, constants.KeyDir.UP)
+ki_shift_down = lambda: KeyInstruction(default_shift, constants.KeyDir.DOWN)
+ki_shift_up = lambda: KeyInstruction(default_shift, constants.KeyDir.UP)
 
 
 def parse_wrap(combo_wrap: str) -> tuple[str, str, re.Pattern[str]]:
@@ -159,12 +159,12 @@ class SendParser:
     @cache
     def parse(self, command: str, shift_in: str | None = None) -> list[SendInstruction]:
         """Parse send command into sequential instructions."""
-        global shift
+        global default_shift
         if not self.pattern:
             self.set_wrap(COMBO_WRAP)
 
         if shift_in:
-            shift = shift_in
+            default_shift = shift_in
         shift_down = bool(shift_in)
         result = []
         combos = self.match_combos(command).copy()

@@ -2,21 +2,14 @@ from typing import Final
 
 from tapper.model import constants
 from tapper.model import keyboard
+from tapper.model.constants import KeyDirBool
+from tapper.model.constants import ListenerResult
+from tapper.model.constants import WinputListenerResult
 from tapper.signal.keyboard.keyboard_listener import KeyboardSignalListener
 from winput import winput
 
-WINPUT_PROPAGATE: Final[int] = 0
-WINPUT_SUPPRESS: Final[int] = 4
-
 EVENT_PRESS: Final[set[int]] = {256, 260}
 EVENT_RELEASE: Final[set[int]] = {257, 261}
-
-
-def to_callback_result(inner_func_result: constants.ListenerResult) -> int:
-    if inner_func_result:
-        return WINPUT_PROPAGATE
-    else:
-        return WINPUT_SUPPRESS
 
 
 class Win32KeyboardSignalListener(KeyboardSignalListener):
@@ -36,8 +29,8 @@ class Win32KeyboardSignalListener(KeyboardSignalListener):
     def keyboard_callback(self, event: winput.KeyboardEvent) -> int:
         key = keyboard.win32_vk_code_to_symbol_map[event.key]
         if event.action in EVENT_PRESS:
-            return to_callback_result(self.on_signal((key, constants.KeyDirBool.DOWN)))
+            return WinputListenerResult[self.on_signal((key, KeyDirBool.DOWN))]
         elif event.action in EVENT_RELEASE:
-            return to_callback_result(self.on_signal((key, constants.KeyDirBool.UP)))
+            return WinputListenerResult[self.on_signal((key, KeyDirBool.UP))]
         else:
-            return WINPUT_PROPAGATE
+            return WinputListenerResult[ListenerResult.PROPAGATE]

@@ -37,6 +37,8 @@ class TestSendCommandProcessor:
     all_signals: list[Signal]
     real_signals: list[Signal]
     """Should be empty in this test: send means emul only."""
+    mc: MouseController
+    toggled: list[str]
 
     @pytest.fixture(autouse=True)
     def setup(self, dummy: Dummy) -> None:
@@ -47,6 +49,8 @@ class TestSendCommandProcessor:
         self.pressed = pressed
 
         emul = keeper.Emul()
+        toggled = []
+        self.toggled = toggled
 
         parser = initializer.default_send_parser()
 
@@ -57,12 +61,14 @@ class TestSendCommandProcessor:
             pressed,
         ).wrap(listener)
 
-        kb_tc = dummy.KbTC(listener, self.all_signals)
+        kb_tc = dummy.KbTC(listener, self.all_signals, None, toggled)
         kbc = KeyboardController()
         kbc._tracker, kbc._commander, kbc._emul_keeper = kb_tc, kb_tc, emul
-        mouse_tc = dummy.MouseTC(listener, self.all_signals)
+
+        mouse_tc = dummy.MouseTC(listener, self.all_signals, None, toggled)
         mc = MouseController()
         mc._tracker, mc._commander, mc._emul_keeper = mouse_tc, mouse_tc, emul
+        self.mc = mc
 
         self.sender = SendCommandProcessor("", parser, kbc, mc, 0)
         self.sender.sleep_fn = lambda f: self.all_signals.append(sleep(f))
@@ -98,16 +104,16 @@ class TestSendCommandProcessor:
         ]
 
     def test_sleep(self) -> None:
-        self.sender.send("$(alt 1ms+\t 20ms;1s)")
+        self.sender.send("$(lmb 1ms+\t 20ms;1s)")
         assert not self.real_signals
         assert not self.pressed.get_state(now)
         assert self.all_signals == [
-            down("left_alt"),
+            down("left_mouse_button"),
             sleep(0.001),
             down("tab"),
             sleep(0.02),
             up("tab"),
-            up("left_alt"),
+            up("left_mouse_button"),
             sleep(1.0),
         ]
 
@@ -154,3 +160,16 @@ class TestSendCommandProcessor:
             sleep(0.1),
             *click("k"),
         ]
+
+    def test_wheel_and_cursor(self) -> None:
+        self.sender.send("$(x230y340;wheel_up)")
+        assert self.all_signals == [down("scroll_wheel_up")]
+        assert self.mc.get_pos() == (230, 340)
+
+    def test_on_off(self) -> None:
+        self.toggled.append("scroll_lock")
+        self.sender.send("$(scroll_lock on;caps off)")
+        assert not self.all_signals
+
+        self.sender.send("$(scroll_lock off;caps on)")
+        assert self.all_signals == [*click("scroll_lock"), *click("caps_lock")]
