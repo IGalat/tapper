@@ -61,8 +61,7 @@ def init() -> None:
 def start(blocking: bool = True) -> None:
     """
     Initializes all underlying tools, and starts listeners.
-    No changes by user in any elements of tapper are expected after this command,
-    it should be the last in your script.
+    No changes by user in any elements of tapper are expected after this command.
     """
     global _listeners
     global _initialized

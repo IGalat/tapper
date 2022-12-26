@@ -80,7 +80,7 @@ def record_start() -> Callable[[], None]:
 
     :return: callable start, to be set into a Tap
     """
-    return partial(recorder.start_recording)
+    return recorder.start_recording
 
 
 def record_stop(
