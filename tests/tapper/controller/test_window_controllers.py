@@ -1,15 +1,15 @@
-import sys
 from functools import partial
 from typing import Any
 from typing import Callable
 from typing import Optional
 
 import pytest
-from tapper.model import constants
 from tapper.model.window import Window
 
 
-@pytest.mark.skipif(sys.platform != constants.OS.win32, reason="")
+@pytest.mark.skip(
+    reason="tox does not recognise win32con, some bug in pywin32? only manual for now"
+)
 class TestWin32WindowController:
     test_window = Window("title", "exec", 123, 456)
     handles_commanded: list[Any] = []

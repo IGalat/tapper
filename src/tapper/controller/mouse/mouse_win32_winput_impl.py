@@ -84,7 +84,7 @@ class Win32MouseTrackerCommander(MouseTracker, MouseCommander):
                 y = current_y
             else:
                 y += current_y
-        return x, y
+        return x, y  # type: ignore
 
     def pressed(self, symbol: str) -> bool:
         return any(button_state(code) >> 15 == 1 for code in symbol_button_map[symbol])
