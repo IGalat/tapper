@@ -2,7 +2,6 @@ import time
 from typing import Callable
 
 import pytest
-from conftest import Dummy
 from tapper.boot import initializer
 from tapper.controller.keyboard.kb_api import KeyboardController
 from tapper.controller.mouse.mouse_api import MouseController
@@ -12,6 +11,7 @@ from tapper.model.types_ import Signal
 from tapper.signal.wrapper import ListenerWrapper
 from tapper.state import keeper
 from tapper.util import event
+from testutil_model import Dummy
 
 now = time.perf_counter()
 

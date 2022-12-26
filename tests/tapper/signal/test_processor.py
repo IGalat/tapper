@@ -1,8 +1,6 @@
 import time
 
 import pytest
-from conftest import Dummy
-from conftest import DummyActionRunner
 from tapper.boot import initializer
 from tapper.model.constants import KeyDirBool
 from tapper.model.constants import ListenerResult
@@ -15,6 +13,8 @@ from tapper.model.types_ import Action
 from tapper.model.types_ import Signal
 from tapper.signal.processor import SignalProcessor
 from tapper.state import keeper
+from testutil_model import Dummy
+from testutil_model import DummyActionRunner
 
 generic_action = lambda: "Will check if this was scheduled to run."
 
