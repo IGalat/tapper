@@ -9,7 +9,6 @@ from tapper.model.constants import ListenerResult
 from tapper.model.constants import WinputListenerResult
 from tapper.model.types_ import Signal
 from tapper.signal.mouse.mouse_listener import MouseSignalListener
-from winput import MouseEvent
 
 
 @pytest.mark.skipif(sys.platform != constants.OS.win32, reason="")
@@ -30,19 +29,22 @@ class TestWin32Listener:
 
     def test_all_keys(self) -> None:
         from tapper.signal.mouse import win32_mouse_listener
+        from winput import MouseEvent
 
         listener: win32_mouse_listener.Win32MouseSignalListener = self.get_listener()
 
         last_signal: Signal | None = None
         callback_result: int = 4
 
-        def on_signal(signal: Signal) -> bool:
+        def on_signal(signal: Signal) -> ListenerResult:
             nonlocal last_signal
             nonlocal callback_result
             last_signal = signal
-            result = random.choice([ListenerResult.SUPPRESS, ListenerResult.PROPAGATE])
-            callback_result = WinputListenerResult[result]
-            return result
+            random_result = random.choice(
+                [ListenerResult.SUPPRESS, ListenerResult.PROPAGATE]
+            )
+            callback_result = WinputListenerResult[random_result]
+            return random_result
 
         listener.on_signal = on_signal
 
