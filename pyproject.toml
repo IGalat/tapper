@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "tapper"
 version = "0.1.0"
-description = "Modern hotkey automation tool"
+description = "Modern Hotkey and Macro Tool"
 authors = [{ name = "IGalat", email = "author_email@example.com" }]
 license = { file = "LICENSE" }
 readme = "README.md"
