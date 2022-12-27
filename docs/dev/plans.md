@@ -81,3 +81,5 @@ action on press 2s, not on release after 2s (see parser spec)
 
 
 ### Limitations of implementation / Backlog
+
+While action is running and concurrency not allowed, other taps will still have blocked trigger keys.
