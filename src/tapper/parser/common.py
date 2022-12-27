@@ -34,11 +34,13 @@ class MILLIS(ParsedProp):
 
 class CURSOR_MOVE(ParsedProp):
     @staticmethod
-    def parse_xy(xy_str: str) -> tuple[int, int]:
-        y_pos = xy_str.find("y")
-        return int(xy_str[1:y_pos]), int(xy_str[y_pos + 1 :])
+    def parse_xy(coord_str: str) -> tuple[tuple[int, int], bool]:
+        y_pos = coord_str.find("y")
+        relative = coord_str[-1] == "r"
+        last_pos = len(coord_str) - 1 if relative else len(coord_str)
+        return (int(coord_str[1:y_pos]), int(coord_str[y_pos + 1 : last_pos])), relative
 
-    regex = re.compile(r"^x-?\d+y-?\d+$")
+    regex = re.compile(r"^x-?\d+y-?\d+r?$")
     fn = parse_xy
 
 

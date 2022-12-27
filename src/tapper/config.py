@@ -39,6 +39,11 @@ only_visible_windows = True
 Reduces WindowController lag, and junk windows caught into filters."""
 
 send_combo_wrap = r"\$\(_\)"
+"""
+Wrap for send command.
+Must have "_" placeholder in the middle, and something before and after that.
+Screen special symbols, this is a regex.
+"""
 
 """
 ------------------------------------

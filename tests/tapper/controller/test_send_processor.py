@@ -166,6 +166,12 @@ class TestSendCommandProcessor:
         assert self.all_signals == [down("scroll_wheel_up")]
         assert self.mc.get_pos() == (230, 340)
 
+    def test_mouse_move(self) -> None:
+        self.sender.send("$(x555y777)")
+        assert self.mc.get_pos() == (555, 777)
+        self.sender.send("$(x-55y-77r)")
+        assert self.mc.get_pos() == (500, 700)
+
     def test_on_off(self) -> None:
         self.toggled.append("scroll_lock")
         self.sender.send("$(scroll_lock on;caps off)")

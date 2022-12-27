@@ -200,7 +200,10 @@ class TestCombosWithoutProps:
         ]
 
     def test_mouse_move(self, parse: ParseFn) -> None:
-        assert parse("$(x340y980)") == [CursorMoveInstruction(xy=(340, 980))]
+        assert parse("$(x340y980)") == [CursorMoveInstruction((340, 980))]
+
+    def test_mouse_move_relative(self, parse: ParseFn) -> None:
+        assert parse("$(x123y456r)") == [CursorMoveInstruction(((123, 456), True))]
 
 
 class TestCombosWithOneProp:

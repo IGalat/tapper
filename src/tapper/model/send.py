@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from abc import ABC
 from dataclasses import dataclass
 from dataclasses import field
@@ -36,6 +38,11 @@ class CursorMoveInstruction(SendInstruction):
     """Move mouse cursor. Absolute."""
 
     xy: tuple[int, int]
+    relative: bool = field(default=False)
+
+    def __init__(self, xy_rel: tuple[int, int] | tuple[tuple[int, int], bool]) -> None:
+        self.xy = xy_rel if isinstance(xy_rel[0], int) else xy_rel[0]
+        self.relative = isinstance(xy_rel[1], bool) and xy_rel[1]
 
 
 @dataclass
