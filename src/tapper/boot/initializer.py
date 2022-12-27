@@ -41,6 +41,7 @@ def default_keeper_pressed(os: str | None = None) -> keeper.Pressed:
 
 def default_send_parser() -> SendParser:
     send_parser = SendParser()
+    send_parser.set_wrap(config.send_combo_wrap)
     for symbol in [
         *keyboard.get_keys().keys(),
         *mouse.regular_buttons,

@@ -38,6 +38,8 @@ only_visible_windows = True
 """Limit windows to visible - ones that are open on the taskbar.
 Reduces WindowController lag, and junk windows caught into filters."""
 
+send_combo_wrap = r"\$\(_\)"
+
 """
 ------------------------------------
 SECTION 2: Advanced usage.
