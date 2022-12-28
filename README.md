@@ -1,24 +1,5 @@
 **tapper** is a Python package that allows for convenient, versatile, cross-platform hotkeys, macros and key remaps.
 
-### Example
-
----
-```python
-from tapper import root, Group, Tap, start, helper
-
-root.add(
-    {"a": "b", "b": "a",  # remap "a" and "b"
-    "h": "Hello,$(50ms) world!"},  # Sleeps for 0.05 sec in the middle
-    Group(win="notepad").add({"alt+enter": "$(f11)"}),  # fullscreen toggle
-    Group(win_exec="chrome.exe").add(
-        Tap("=", "$(mmb)", cursor_in=((0, 0), (1700, 45)))  # close tabs with "="
-    ),
-    {"shift+caps": helper.actions.record_toggle(print)}  # record actions, print when done
-)
-start()
-
-```
-
 ## Functionality
 
 On the tin, **tapper** might remind you of `pynput`, `autohotkey` and similar tools - and indeed, they were an inspiration.
@@ -35,9 +16,27 @@ In practice it aims to do a lot more and is more flexible. Here are some of the 
 
 Planned features *
 
+## Example
+
+```python
+from tapper import root, Group, Tap, start, helper
+
+root.add(
+    {"a": "b", "b": "a",  # remap "a" and "b"
+    "h": "Hello,$(50ms) world!"},  # Sleeps for 0.05 sec in the middle
+    Group(win="notepad").add({"alt+enter": "$(f11)"}),  # fullscreen toggle
+    Group(win_exec="chrome.exe").add(
+        Tap("=", "$(mmb)", cursor_in=((0, 0), (1700, 45)))  # close tabs with "="
+    ),
+    {"shift+caps": helper.actions.record_toggle(print)}  # record actions, print when done
+)
+start()
+
+```
+
 # How to use
 
-Let's look at simple example: making the `backtick` key type `underscore` instead.
+Here's a simple example: making the `backtick` key type `underscore` instead.
 
 ```python
 from tapper import root, start
@@ -49,9 +48,9 @@ start()
 
 This tells **tapper** to click (press and release) "_" when "`" is pressed.
 
-On `tapper.start`, the supplied dictionary gets transformed into `Tap`s, and text action into `send(text)`.
+On `tapper.start`, the supplied dictionary gets transformed into a `Tap`, and text action into `send(text)`.
 
-Let's rewrite it into another valid form:
+It can be written like this:
 
 ```python
 root.add(Tap("`", send("_")))
@@ -63,18 +62,12 @@ Writing it out like this is more verbose, but has additional versatility:
 root.add(Tap("`", "_", win="notepad", toggled_off="caps"))
 ```
 
-Now we specified the conditions when this Tap can trigger: only when `notepad` is the foreground window,
+Now this Tap can trigger only when `notepad` is the foreground window,
 and only if `caps_lock` is off.
 
 ---
 
-For `send` most of the versatility is in text, but an explicit invoke allows you to set an interval between clicks:
-
-```python
-root.add(Tap("`", send("_", interval=0.5)))
-```
-
-In this case, not much will change since we only press one key. But
+For `send` most of the versatility is in text, but an explicit invoke allows to set an interval between clicks:
 
 ```python
 send("hello", interval=0.5)
@@ -93,10 +86,10 @@ root.add(Group(win="notepad").add({
   }))
 ```
 
-Now we also remapped `print screen` to press `enter` when in notepad.
+Now `print screen` will click `enter` when in `notepad`.
 
-Wait, why is `enter` in a weird `$()` brackets? Well, otherwise letters e,n,t,e,r would be sent -
-any non single-character key should be inside `$()` for the send command.
+`enter` has to be in brackets `$()`, otherwise letters e,n,t,e,r would be sent -
+any non single-character key must be inside `$()` for the send command.
 
 Actually, for `enter` and `tab` there are one-char equivalents:`\n` and `\t`. So this would work:
 
@@ -120,9 +113,11 @@ control_group.add({"f3": helper.controls.restart,
 "alt+f3": helper.controls.terminate})
 ```
 
+These are only added if you didn't add any Taps to `control_group`.
+
 ---
 
-Alternatively, call to `tapper.init()` gives you the access to commands but `Taps` won't be listened to:
+Alternatively, call to `tapper.init()` gives access to the commands but `Taps` won't be listened to:
 
 ```python
 from tapper import init, send, window
@@ -131,16 +126,13 @@ send("Immediately on launch type this text.")
 print(f"Currently active window: {window.active()}")
 ```
 
-You can `start` **tapper** after this. It allows you to do **tapper**-related actions on script startup.
+You can `start` **tapper** after this. It allows for **tapper**-related actions on script startup.
 
 Before `init` or `start` components are not initialized.
 
-
-These are only added if you didn't add any Taps to `control_group`.
-
 ### Usage philosophy
 
-A single script is all you need. `Group` your `Taps` and `dict`s for convenience and performance, add them to the `root` Group.
+A single script is all you need. `Group` the `Tap`s and `dict`s for convenience and performance, add them to the `root` Group.
 
 Add conditions (keyword args) to Groups and Taps to make them only trigger in a specific context.
 
@@ -148,9 +140,9 @@ Use either functions or text as actions - text will be parsed and corresponding 
 
 Customize your `control_group` or use existing controls to always have a way to control the flow of **tapper**. It has the highest priority and will be triggered before root.
 
-Speaking of priority - set your more general Taps/Groups first, and more specific last.
+Within `root`, priority is last-to-first, so set more general Taps/Groups first, and more specific last.
 
-Select which actions can be executed concurrently, and which cannot - by default if an action is running, others cannot trigger.
+Configure which actions can be executed concurrently, and which cannot - by default if an action is running, others cannot trigger.
 
 # Reference
 
@@ -166,6 +158,7 @@ Select which actions can be executed concurrently, and which cannot - by default
 - `Tap`, `Group`, `root`, `control_group`.
 - Conditions for `Tap` and `Group`: only if all conditions work, will triggering actions be possible.
 - `send` - a versatile text-to-command tool.
+- Concurrency control for actions.
 - Events pub/sub: subscribe to device to get all non-emulated signals.
 - Convenience functions:
   - repeat actions while key is pressed, until toggled or custom condition.
@@ -242,9 +235,42 @@ and [mouse](https://github.com/IGalat/tapper/blob/master/src/tapper/model/mouse.
 
 You can call `get_possible_signal_symbols()` for `kb`/`mouse` to get them as well.
 
+### Concurrency of actions
+
+By default, a running action will block triggering of other actions.
+
+You can configure it differently:
+
+```python
+tapper.config.action_runner_executors_threads = [1, 20]
+
+root.add({"a": "$(1s)1", "b": "$(1s)2"}, Tap("c", "$(1s)3", executor=1), Tap("d", "$(1s)4", executor=1))
+```
+
+Clicking `a` and `b` will result in `1` but not `2` being typed. But `c` and `d` have a separate queue of 20 threads,
+so you can trigger them many times concurrently.
+
+### Suppression of trigger key
+
+By default, trigger key is suppressed:
+
+```python
+Tap("a+b", "hoy")
+```
+
+This will result in `ahoy`, as `b` is suppressed. You can modify this per-Tap/Group, or default in config:
+
+```python
+default_trigger_suppression = ListenerResult.PROPAGATE
+# or
+Tap("h+e", "llo", suppress_trigger=ListenerResult.PROPAGATE)
+```
+
+This will result in `hello` not `hllo`.
+
 ### Pub/sub
 
-This is not main use of **tapper**, but you will receive [Signal](https://github.com/IGalat/tapper/blob/master/src/tapper/model/types_.py#L6)s
+This is not main use of **tapper**, but you will receive [Signals](https://github.com/IGalat/tapper/blob/master/src/tapper/model/types_.py#L6)
 when subscribing to devices:
 
 ```python
@@ -275,7 +301,7 @@ from tapper.helper import actions, controls
 ### Actions repeat
 
 [helpers.action.repeat_while](https://github.com/IGalat/tapper/blob/master/src/tapper/helper/actions.py#L11)
-repeats while your supplied function returns something that gets bool(result) == True.
+repeats while the condition function returns something that gets bool(result) == True.
 
 ```python
 Tap("t", repeat_while(lambda: datetime.datetime.now().hour >= 22,
