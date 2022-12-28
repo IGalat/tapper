@@ -184,15 +184,6 @@ def get_keys(os: str | None = None) -> SymbolsWithAliases:
     return all_keys
 
 
-"""Dev note
-Use cases:
-    User looking up all keys
-    Input parsing with aliases. Need to count any alias as target (e.g. lshift and rshift counts as shift)
-    Output parsing with aliases. Can use first alias(shift -> lshift)
-    Multilang. Whether caps matters to char depends on language(is char a symbol or letter?)
-        @cache fn-> is char a symbol? use on english as well as other lang
-"""
-
 """All VK codes that Windows keyboard may output or take and corresponding symbols."""
 win32_vk_code_to_symbol_map: dict[int, str] = {
     # chars_en
