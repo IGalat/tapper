@@ -5,16 +5,23 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "tapper"
-version = "0.1.0"
+version = "2022.12.001"
 description = "Modern Hotkey and Macro Tool"
 authors = [{ name = "IGalat", email = "author_email@example.com" }]
 license = { file = "LICENSE" }
 readme = "README.md"
 requires-python = ">=3.10"
 classifiers = [
+    "Development Status :: 4 - Beta",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3 :: Only",
     "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Software Development :: Libraries :: Python Modules",
+    "Topic :: System :: Monitoring",
+    "Operating System :: Microsoft :: Windows",
+    "Operating System :: POSIX",
+    "Typing :: Typed",
 ]
 
 
