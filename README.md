@@ -53,7 +53,7 @@ On `tapper.start`, the supplied dictionary gets transformed into a `Tap`, and te
 It can be written like this:
 
 ```python
-root.add(Tap("`", send("_")))
+root.add(Tap("`", lambda: send("_")))
 ```
 
 Writing it out like this is more verbose, but has additional versatility:
