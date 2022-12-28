@@ -1,6 +1,7 @@
 import time as _time
 
 from tapper import config
+from tapper import helper
 from tapper.boot import initializer as _initializer
 from tapper.controller.keyboard.kb_api import KeyboardController as _KeyboardController
 from tapper.controller.mouse.mouse_api import MouseController as _MouseController
