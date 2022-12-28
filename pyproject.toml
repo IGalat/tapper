@@ -17,7 +17,6 @@ classifiers = [
     "Programming Language :: Python :: 3 :: Only",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
-    "Software Development :: Libraries :: Python Modules",
     "Topic :: System :: Monitoring",
     "Operating System :: Microsoft :: Windows",
     "Operating System :: POSIX",
