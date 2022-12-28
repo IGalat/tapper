@@ -29,7 +29,7 @@ class KeyDirBool(Flag):
     UP = False
     """Key released."""
     DOWN = True
-    """Key pressed."""
+    """Key pressed. Always this for actions that don't have direction, like scroll."""
 
     def __repr__(self) -> str:
         return self.name if self.name else ""

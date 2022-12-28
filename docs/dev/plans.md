@@ -39,7 +39,7 @@ By having user configure triggers and corresponding actions, and running a loop 
 15. DONE. kwargs map, to make conditions for Taps much easier; TriggerConditions system
 16. DONE. WindowTriggerConditionsTracker
 17. DONE. Helper: controls, do while pressed/held, recorder
-18. Basic Readme
+18. DONE. Basic Readme
 19. Linux impl
 20. Make sure it catches signals before other programs on OS
 21. Helper: one keyboard variation(ua) to make sure it's multi-lang
