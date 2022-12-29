@@ -34,6 +34,12 @@ start()
 
 ```
 
+## Installation
+
+```
+pip install git+https://github.com/IGalat/tapper.git#egg=tapper[all]
+```
+
 # How to use
 
 Here's a simple example: making the `backtick` key type `underscore` instead.
