@@ -378,4 +378,4 @@ to `record_toggle` or `record_stop` to modify details about the string you get.
 
 ## Config
 
-See [config file](https://github.com/IGalat/tapper/blob/master/src/tapper/config.py) for good docs on what you can configure.
+See [config file](https://github.com/IGalat/tapper/blob/master/src/tapper/config.py) for information on what you can configure.
