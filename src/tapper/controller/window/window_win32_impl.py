@@ -65,7 +65,7 @@ def get_process_exec(pid: Optional[int]) -> Optional[str]:
         kernel32.CloseHandle(h_process)
 
 
-def str_match(filtered: str, iterated: str, strict: bool) -> bool:
+def str_match(filtered: str, iterated: str | None, strict: bool) -> bool:
     if not filtered or not iterated:
         return False
     if strict:
@@ -111,9 +111,11 @@ def add_win_if_required(
     process_id: Optional[int] = None,
     handle: Any = None,
     limit: Optional[int] = None,
-    win_to_add: Window = None,  # type: ignore
+    win_to_add: Optional[Window] = None,
 ) -> None:
     if limit and len(result) >= limit:
+        return
+    if not win_to_add:
         return
     if not hasattr(win_to_add, "exec") and not hasattr(win_to_add, "title"):
         return

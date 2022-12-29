@@ -79,9 +79,9 @@ controllers = [
 
 kw_trigger_conditions: KwTriggerConditions = {
     **trigger_conditions.generic(),
-    **trigger_conditions.keyboard(get_first_in(KeyboardController, controllers)),
-    **trigger_conditions.mouse(get_first_in(MouseController, controllers)),
-    **trigger_conditions.window(get_first_in(WindowController, controllers)),
+    **trigger_conditions.keyboard(get_first_in(KeyboardController, controllers)),  # type: ignore
+    **trigger_conditions.mouse(get_first_in(MouseController, controllers)),  # type: ignore
+    **trigger_conditions.window(get_first_in(WindowController, controllers)),  # type: ignore
 }
 """
 Keyword trigger conditions that can be used as part of Tap or Group.

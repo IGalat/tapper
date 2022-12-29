@@ -13,7 +13,7 @@ keys_wo_upper = {
 }
 
 symbol_code_map = datastructs.symbols_to_codes(
-    keyboard.win32_vk_code_to_symbol_map, keys_wo_upper
+    keyboard.win32_vk_code_to_symbol_map, keys_wo_upper  # type: ignore
 )
 
 user32 = winput.user32
@@ -37,7 +37,7 @@ class Win32KeyboardTrackerCommander(KeyboardTracker, KeyboardCommander):
         winput.release_key(symbol_code_map[symbol][0])
 
     def pressed(self, symbol: str) -> bool:
-        return any(key_state(code) >> 15 == 1 for code in symbol_code_map[symbol])
+        return any(key_state(code) >> 15 == 1 for code in symbol_code_map[symbol])  # type: ignore
 
     def toggled(self, symbol: str) -> bool:
-        return any(key_state(code) & 1 == 1 for code in symbol_code_map[symbol])
+        return any(key_state(code) & 1 == 1 for code in symbol_code_map[symbol])  # type: ignore

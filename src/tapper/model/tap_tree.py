@@ -47,7 +47,9 @@ class Tap(TapGeneric):
         self.trigger = trigger
         self.action = action
         self.executor = executor
-        self.suppress_trigger = suppress_trigger
+        self.suppress_trigger = (
+            ListenerResult(suppress_trigger) if suppress_trigger else None
+        )
         self.trigger_conditions = trigger_conditions
 
     def __repr__(self) -> str:

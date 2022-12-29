@@ -20,7 +20,7 @@ from tapper.parser.trigger_parser import TriggerParser
 def find_property(prop_name: str, group: Group) -> Any:
     if (result := getattr(group, prop_name)) is not None:
         return result
-    return find_property(prop_name, group._parent)
+    return find_property(prop_name, group._parent)  # type: ignore
 
 
 def transform_trigger_conditions(
@@ -101,5 +101,5 @@ class TreeTransformer:
 
     def to_action(self, action: Action | str) -> Action:
         if isinstance(action, str):
-            action = partial(self.send, action)
+            action = partial(self.send, action)  # type: ignore
         return action

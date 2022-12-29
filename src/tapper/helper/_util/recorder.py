@@ -102,21 +102,23 @@ def reduce_mouse_moves(records: list[SignalRecord], min_movement: int) -> None:
     pos = records[0].mouse_pos
     for i in range(len(records) - 1):
         r = records[i + 1]
-        if mouse_api.is_near(*r.mouse_pos, *pos, min_movement):  # noqa
+        if r.mouse_pos and mouse_api.is_near(
+            r.mouse_pos[0], r.mouse_pos[1], pos[0], pos[1], min_movement  # type: ignore
+        ):
             r.mouse_pos = None
         else:
             pos = r.mouse_pos
 
 
 def to_instructions(records: list[SignalRecord]) -> list[SendInstruction]:
-    result = []
+    result: list[SendInstruction] = []
     for r in records:
         if r.time:
             result.append(SleepInstruction(r.time))
         if r.mouse_pos:
             result.append(CursorMoveInstruction(r.mouse_pos))
         symbol = r.signal[0]
-        instruction = tapper._send_processor.parser.symbols[symbol](symbol)
+        instruction = tapper._send_processor.parser.symbols[symbol](symbol)  # type: ignore
         if isinstance(instruction, KeyInstruction):
             if r.signal[1] == KeyDirBool.DOWN:
                 instruction.dir = KeyDir.DOWN

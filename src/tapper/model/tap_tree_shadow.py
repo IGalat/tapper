@@ -51,8 +51,8 @@ class SGroup(STapGeneric):
 
     children: list[STapGeneric] = field(default_factory=list)
 
-    @lru_cache
-    def get_main_triggers(self, direction: constants.KeyDirBool) -> list[str]:
+    @lru_cache  # type: ignore
+    def get_main_triggers(self, direction: constants.KeyDirBool) -> list[str]:  # type: ignore
         nested_non_unique = [
             child.get_main_triggers(direction) for child in self.children
         ]

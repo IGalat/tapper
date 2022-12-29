@@ -1,3 +1,4 @@
+from functools import partial
 from typing import Any
 from typing import Callable
 
@@ -60,7 +61,7 @@ SendFn = Callable[[str], None]
 TriggerIfFn = Callable[[], bool]
 """Tap cannot trigger unless this resolves to True."""
 
-TriggerConditionFn = Callable[[], Any]
+TriggerConditionFn = partial[Any]
 """Actual trigger condition."""
 
 KwTriggerConditions = dict[str, Callable[[Any], Any]]

@@ -113,8 +113,8 @@ def init(
 
     send_processor.os = os
     send_processor.parser = default_send_parser()
-    send_processor.kb_controller = kbc
-    send_processor.mouse_controller = mc
+    send_processor.kb_controller = kbc  # type: ignore
+    send_processor.mouse_controller = mc  # type: ignore
     send_processor.default_interval = config.default_send_interval
 
     return listeners

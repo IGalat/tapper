@@ -61,10 +61,14 @@ def resolve_last_with_props(
     result = [base_ins]
     for prop in props:
         if sleep := sleep_prop(prop):
-            if result[-1].dir == constants.KeyDir.CLICK:
+            if (
+                isinstance(result[-1], KeyInstruction)
+                and result[-1].dir == constants.KeyDir.CLICK
+            ):
                 result[-1].dir = constants.KeyDir.DOWN
+                sym = result[-1].symbol
                 result.append(sleep)
-                result.append(KeyInstruction(result[-2].symbol, constants.KeyDir.UP))
+                result.append(KeyInstruction(sym, constants.KeyDir.UP))
                 dir_allowed = False
             else:
                 result.append(sleep)
@@ -81,7 +85,7 @@ def resolve_last_with_props(
                 raise SendParseError
             else:
                 last = copy.deepcopy(ins)
-                last.dir = dir
+                last.dir = constants.KeyDir(dir)
                 result[-1] = last
                 if constants.KeyDir.DOWN != dir:
                     mult_allowed = False
@@ -296,8 +300,10 @@ class SendParser:
         instruction_type = self.symbols[key.symbol]
         if instruction_type == KeyInstruction:
             base_ins = KeyInstruction(key.symbol)
+        elif instruction_type == WheelInstruction:
+            base_ins = WheelInstruction(key.symbol)  # type: ignore
         else:
-            base_ins = WheelInstruction(key.symbol)
+            raise SendParseError
 
         opening = copy.deepcopy(base_ins)
         opening.dir = constants.KeyDir.DOWN
@@ -337,8 +343,10 @@ class SendParser:
         instruction_type = self.symbols[key.symbol]
         if instruction_type == KeyInstruction:
             base_ins = KeyInstruction(key.symbol)
+        elif instruction_type == WheelInstruction:
+            base_ins = WheelInstruction(key.symbol)  # type: ignore
         else:
-            base_ins = WheelInstruction(key.symbol)
+            raise SendParseError
 
         if key.props:
             try:

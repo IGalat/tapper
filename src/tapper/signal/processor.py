@@ -49,7 +49,7 @@ class SignalProcessor:
         self, group: SGroup, symbol: str, direction: KeyDirBool, state: dict[str, float]
     ) -> STap | None:
         """Find first Tap that matches, recursive."""
-        if symbol not in group.get_main_triggers(direction):
+        if symbol not in group.get_main_triggers(direction):  # type: ignore
             return None
         if not all(bool(fn()) for fn in group.trigger_conditions):
             return None
