@@ -1,12 +1,15 @@
 import sys
 
+from tapper.model.constants import KeyDirBool
 from tapper.model.constants import ListenerResult
 from tapper.model.types_ import Signal
 from tapper.signal.keyboard.keyboard_listener import KeyboardSignalListener
 
 
 def on_signal(signal: Signal) -> ListenerResult:
-    print(signal)
+    if signal[1] == KeyDirBool.UP:
+        return ListenerResult.SUPPRESS
+    print(signal[0])
     return ListenerResult.SUPPRESS
 
 
