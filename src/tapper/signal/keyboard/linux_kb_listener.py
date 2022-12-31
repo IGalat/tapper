@@ -3,7 +3,6 @@ from functools import partial
 from threading import Thread
 
 import evdev
-from evdev import InputEvent
 from evdev import UInput
 from tapper.model import constants
 from tapper.model import keyboard
@@ -46,7 +45,8 @@ def uinput_action(
 
 
 def key_action(virtual_kb: UInput, code: int, evdev_direction: int) -> None:
-    uinput_action(virtual_kb, evdev.ecodes.EV_KEY, code, evdev_direction)
+    virtual_kb.write(evdev.ecodes.EV_KEY, code, evdev_direction)
+    virtual_kb.syn()
     if EvdevKeyDir[evdev_direction] == KeyDirBool.UP:
         time.sleep(0.001)  # else lock fails to be acquired sometimes.
 
@@ -79,11 +79,8 @@ class LinuxKeyboardSignalListener(KeyboardSignalListener):
                     symbol = keyboard.linux_evdev_code_to_symbol_map[event.code]
                     result_on = self.on_signal((symbol, EvdevKeyDir[event.value]))
                     if result_on == ListenerResult.PROPAGATE:
-                        self.propagate(event)
+                        self.virtual_kb.write_event(event)
                 except KeyError:
-                    self.propagate(event)
+                    self.virtual_kb.write_event(event)
             else:
-                uinput_action(self.virtual_kb, event.type, event.code, event.value)
-
-    def propagate(self, event: InputEvent) -> None:
-        key_action(self.virtual_kb, event.code, event.value)
+                self.virtual_kb.write_event(event)
