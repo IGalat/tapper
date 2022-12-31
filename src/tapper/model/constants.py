@@ -38,6 +38,7 @@ class KeyDirBool(Flag):
 class OS(str, Enum):
     dummy = "dummy"
     win32 = "win32"
+    linux = "linux"
 
 
 class ListenerResult(Flag):
