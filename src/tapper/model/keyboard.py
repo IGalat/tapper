@@ -22,7 +22,6 @@ numpad_keys = [
     "numpad_minus",
     "numpad_plus",
     "numpad_dot",  # vk_decimal
-    "numpad_separator",  # ?
 ]
 
 lock_keys = ["caps_lock", "scroll_lock", "num_lock"]
@@ -266,7 +265,6 @@ win32_vk_code_to_symbol_map: dict[int, str] = {
     109: "numpad_minus",
     107: "numpad_plus",
     110: "numpad_dot",
-    108: "numpad_separator",
     # lock_keys
     20: "caps_lock",
     145: "scroll_lock",
