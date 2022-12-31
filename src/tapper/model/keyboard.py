@@ -53,7 +53,6 @@ special_chars = [
     "left_os",  # 'win' on windows, 'super' or 'meta' on linux, 'command' on mac
     "right_os",
     "apps",  # opens the menu like right mouse button. Near rctrl usually
-    "clear",  # num5 when num lock off
     "backspace",
     "delete",
     "insert",
@@ -124,6 +123,7 @@ platform_specific_keys: dict[str, list[str]] = {
         "launch_app1",
         "launch_app2",
         "pause",
+        "clear",  # num5 when num lock off
         #
         "attn",
         "crsel",
@@ -376,7 +376,6 @@ linux_evdev_code_to_symbol_map = {
     114: "volume_down",
     115: "volume_up",
     164: "play_pause_media",
-    355: "clear",
     14: "backspace",
     111: "delete",
     110: "insert",
