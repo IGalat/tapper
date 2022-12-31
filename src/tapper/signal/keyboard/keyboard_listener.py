@@ -26,6 +26,13 @@ def _get_win32_impl() -> type[KeyboardSignalListener]:
     return win32_kb_listener.Win32KeyboardSignalListener
 
 
+def _get_linux_impl() -> type[KeyboardSignalListener]:
+    from tapper.signal.keyboard import linux_kb_listener
+
+    return linux_kb_listener.LinuxKeyboardSignalListener
+
+
 _os_impl_list: dict[str, Callable[[], type[KeyboardSignalListener]]] = {
-    constants.OS.win32: _get_win32_impl
+    constants.OS.win32: _get_win32_impl,
+    constants.OS.linux: _get_linux_impl,
 }
