@@ -17,7 +17,7 @@ class TriggerKey(ABC):
         Example:
             For 'a' it's just ['a']
             For 'lmb' it's ['left_mouse_button']
-            For 'alt' it's ['right_alt', 'left_alt', 'virtual_alt']
+            For 'alt' it's ['right_alt', 'left_alt']
     """
 
 

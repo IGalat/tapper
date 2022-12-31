@@ -20,13 +20,11 @@ generic_action = lambda: "Will check if this was scheduled to run."
 
 left_control = "left_control"
 right_control = "right_control"
-virtual_control = "virtual_control"
-ctrl = [left_control, right_control, virtual_control]
+ctrl = [left_control, right_control]
 
 left_alt = "left_alt"
 right_alt = "right_alt"
-virtual_alt = "virtual_alt"
-alt = [left_alt, right_alt, virtual_alt]
+alt = [left_alt, right_alt]
 
 
 def tap(

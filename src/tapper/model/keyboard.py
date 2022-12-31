@@ -30,16 +30,10 @@ lock_keys = ["caps_lock", "scroll_lock", "num_lock"]
 modifiers = [
     "left_shift",
     "right_shift",
-    # Windows OS defines separate shift, control, alt as separate keys. Their purpose is
-    # tracking the state: if any of two shifts is pressed, this will be pressed. It is
-    # not very useful in tapper, as users can inquire .pressed("shift") to get the same result.
-    "virtual_shift",
     "left_control",
     "right_control",
-    "virtual_control",
     "left_alt",
     "right_alt",
-    "virtual_alt",
 ]
 
 navigation_keys = [
@@ -80,16 +74,16 @@ aliases: SymbolsWithAliases = {
     # modifiers
     "lshift": ["left_shift"],
     "rshift": ["right_shift"],
-    "shift": ["left_shift", "right_shift", "virtual_shift"],
+    "shift": ["left_shift", "right_shift"],
     "lalt": ["left_alt"],
     "ralt": ["right_alt"],
-    "alt": ["left_alt", "right_alt", "virtual_alt"],
+    "alt": ["left_alt", "right_alt"],
     "lcontrol": ["left_control"],
     "lctrl": ["left_control"],
     "rcontrol": ["right_control"],
     "rctrl": ["right_control"],
-    "control": ["left_control", "right_control", "virtual_control"],
-    "ctrl": ["left_control", "right_control", "virtual_control"],
+    "control": ["left_control", "right_control"],
+    "ctrl": ["left_control", "right_control"],
     # navigation
     "arrow_up": ["up_arrow"],
     "arrow_down": ["down_arrow"],
@@ -280,13 +274,10 @@ win32_vk_code_to_symbol_map: dict[int, str] = {
     # modifiers
     160: "left_shift",
     161: "right_shift",
-    16: "virtual_shift",
     162: "left_control",
     163: "right_control",
-    17: "virtual_control",
     164: "left_alt",
     165: "right_alt",
-    18: "virtual_alt",
     # navigation_keys
     38: "up_arrow",
     40: "down_arrow",
