@@ -46,7 +46,7 @@ navigation_keys = [
     "page_down",
 ]
 
-control_chars = ["enter", "tab", "return", "space"]
+control_chars = ["enter", "tab", "space"]
 
 special_chars = [
     "escape",
@@ -100,7 +100,6 @@ aliases: SymbolsWithAliases = {
     # control chars
     "\n": ["enter"],
     "\t": ["tab"],
-    "\r": ["return"],
     " ": ["space"],
 }
 
@@ -288,7 +287,6 @@ win32_vk_code_to_symbol_map: dict[int, str] = {
     # control_chars
     13: "enter",
     9: "tab",
-    10: "return",
     32: "space",
     # special_chars
     27: "escape",
