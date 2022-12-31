@@ -3,19 +3,14 @@ from typing import Any
 
 import hypothesis
 import hypothesis.strategies as st
+import pytest
 import strategies
 from hypothesis import given
 from tapper.model.types_ import SymbolsWithAliases
 from tapper.util import datastructs
 
 
-@given(strategies.primitives_and_seq)
-@hypothesis.settings(max_examples=1)
-@hypothesis.example([1])
-@hypothesis.example("1")
-@hypothesis.example(("1",))
-@hypothesis.example({"1": "1"})
-@hypothesis.example([1, [2, [3, [4]]]])
+@pytest.mark.parametrize("input_", [[1], "1", ("1",), {"1": "1"}, [1, [2, [3, [4]]]]])
 def test_to_flat_list(input_: Any | list[Any]) -> None:
     flat = datastructs.to_flat_list(input_)
     assert isinstance(flat, list)

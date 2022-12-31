@@ -1,7 +1,6 @@
 from typing import Any
 
-import hypothesis
-import strategies
+import pytest
 from tapper.util import event
 
 
@@ -16,8 +15,7 @@ subscriber = Subscriber()
 topic_name = "test_topic"
 
 
-@hypothesis.given(strategies.primitives)
-@hypothesis.settings(max_examples=20)
+@pytest.mark.parametrize("message", [("a", True), 123, ("lmb", "DOWN")])
 def test_pubsub(message: Any) -> None:
     event.publish("non-existing topic doesn't break anything", 123)
     event.subscribe(topic_name, subscriber.receive_message)
