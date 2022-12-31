@@ -31,9 +31,9 @@ def get_real_keyboards() -> list[evdev.InputDevice]:
     return result
 
 
-def make_virtual_kb_from(real_kb: evdev.InputDevice) -> UInput:
+def make_virtual_kb_from(real_kbs: list[evdev.InputDevice]) -> UInput:
     try:
-        return UInput.from_device(real_kb, name="Tapper-listener Virtual Keyboard")
+        return UInput.from_device(*real_kbs, name="Tapper-listener Virtual Keyboard")
     except evdev.UInputError:
         raise PermissionError("Cannot make virtual keyboard. Try running as root.")
 
@@ -61,7 +61,7 @@ class LinuxKeyboardSignalListener(KeyboardSignalListener):
 
     def start(self) -> None:
         self.real_kbs = get_real_keyboards()
-        self.virtual_kb = make_virtual_kb_from(self.real_kbs[0])
+        self.virtual_kb = make_virtual_kb_from(self.real_kbs)
         for kb in self.real_kbs:
             Thread(target=partial(self.keyboard_loop, kb)).start()
 
