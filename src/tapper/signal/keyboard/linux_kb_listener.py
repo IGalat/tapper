@@ -38,9 +38,15 @@ def make_virtual_kb_from(real_kb: evdev.InputDevice) -> UInput:
         raise PermissionError("Cannot make virtual keyboard. Try running as root.")
 
 
-def key_action(virtual_kb: UInput, code: int, evdev_direction: int) -> None:
-    virtual_kb.write(evdev.ecodes.EV_KEY, code, evdev_direction)
+def uinput_action(
+    virtual_kb: UInput, etype: int, code: int, evdev_direction: int
+) -> None:
+    virtual_kb.write(etype, code, evdev_direction)
     virtual_kb.syn()
+
+
+def key_action(virtual_kb: UInput, code: int, evdev_direction: int) -> None:
+    uinput_action(virtual_kb, evdev.ecodes.EV_KEY, code, evdev_direction)
     if EvdevKeyDir[evdev_direction] == KeyDirBool.UP:
         time.sleep(0.001)  # else lock fails to be acquired sometimes.
 
@@ -76,6 +82,8 @@ class LinuxKeyboardSignalListener(KeyboardSignalListener):
                         self.propagate(event)
                 except KeyError:
                     self.propagate(event)
+            else:
+                uinput_action(self.virtual_kb, event.type, event.code, event.value)
 
     def propagate(self, event: InputEvent) -> None:
         key_action(self.virtual_kb, event.code, event.value)
