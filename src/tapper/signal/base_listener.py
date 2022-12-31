@@ -32,7 +32,7 @@ class SignalListener(ABC):
     def start(self) -> None:
         """Initialize resources and start listening.
 
-        This will be launched in a separate thread.
+        Implementations should start the event loop in a separate thread.
         """
 
     @abstractmethod

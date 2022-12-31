@@ -1,3 +1,5 @@
+from threading import Thread
+
 import winput
 from tapper.model.constants import KeyDirBool
 from tapper.model.constants import ListenerResult
@@ -8,6 +10,9 @@ from winput import MouseEvent
 
 class Win32MouseSignalListener(MouseSignalListener):
     def start(self) -> None:
+        Thread(target=self.event_loop_start).start()
+
+    def event_loop_start(self) -> None:
         winput.set_DPI_aware(per_monitor=True)
         winput.hook_mouse(self.mouse_callback)
         winput.wait_messages()

@@ -22,7 +22,7 @@ class ResourceController(ABC):
 
     @abstractmethod
     def _start(self) -> None:
-        """Will be launched in a separate thread. Assumes init already called."""
+        """Assumes init already called."""
 
     @abstractmethod
     def _stop(self) -> None:

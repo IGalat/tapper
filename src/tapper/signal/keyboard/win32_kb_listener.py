@@ -1,3 +1,4 @@
+from threading import Thread
 from typing import Final
 
 from tapper.model import constants
@@ -18,6 +19,9 @@ class Win32KeyboardSignalListener(KeyboardSignalListener):
         return keyboard.get_key_list(constants.OS.win32)
 
     def start(self) -> None:
+        Thread(target=self.event_loop_start).start()
+
+    def event_loop_start(self) -> None:
         winput.set_DPI_aware(True)
         winput.hook_keyboard(self.keyboard_callback)
         winput.wait_messages()

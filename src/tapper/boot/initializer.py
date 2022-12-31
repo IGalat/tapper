@@ -1,5 +1,3 @@
-from threading import Thread
-
 from tapper import config
 from tapper import parser
 from tapper.action.runner import ActionRunner
@@ -142,6 +140,6 @@ def _fill_default_properties(group: Group) -> None:
 def start(listeners: list[SignalListener]) -> None:
     """Starts the application. Should be called after init"""
     for controller in config.controllers:
-        Thread(target=controller._start).start()
+        controller._start()
     for listener in listeners:
-        Thread(target=listener.start).start()
+        listener.start()
