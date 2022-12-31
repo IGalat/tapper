@@ -40,6 +40,8 @@ start()
 pip install git+https://github.com/IGalat/tapper.git#egg=tapper[all]
 ```
 
+For Linux, see [this](https://github.com/IGalat/tapper/blob/master/docs/dev/os_specific.md#installation).
+
 # How to use
 
 Here's a simple example: making the `backtick` key type `underscore` instead.
