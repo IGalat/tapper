@@ -49,8 +49,8 @@ class TestMisc:
         )
 
     def test_one_aux_many_main(self, parse: ParseFn) -> None:
-        assert parse("clear+ctrl") == Trigger(
-            MainKey(ctrl_list), [AuxiliaryKey(["clear"])]
+        assert parse("num5+ctrl") == Trigger(
+            MainKey(ctrl_list), [AuxiliaryKey(["num5"])]
         )
 
     def test_two_capital_letters(self, parse: ParseFn) -> None:

@@ -296,12 +296,12 @@ class TestCombosWithManyProps:
         )
 
     def test_mult_time(self, parse: ParseFn) -> None:
-        assert parse("$(v+clear 2x 1s)") == [
+        assert parse("$(v+num5 2x 1s)") == [
             KI("v", down),
-            KI("clear", down),
-            KI("clear", down),
+            KI("num5", down),
+            KI("num5", down),
             SleepInstruction(1),
-            KI("clear", up),
+            KI("num5", up),
             KI("v", up),
         ]
 
