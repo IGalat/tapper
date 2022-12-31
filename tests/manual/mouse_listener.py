@@ -1,12 +1,13 @@
 import sys
 
+from tapper.model.constants import ListenerResult
 from tapper.model.types_ import Signal
 from tapper.signal.mouse.mouse_listener import MouseSignalListener
 
 
-def on_signal(signal: Signal) -> bool:
+def on_signal(signal: Signal) -> ListenerResult:
     print(signal)
-    return False
+    return ListenerResult.SUPPRESS
 
 
 def mouse_listener() -> None:
