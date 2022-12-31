@@ -141,6 +141,7 @@ platform_specific_keys: dict[str, list[str]] = {
         "play_pause_media",
         "play",
         "zoom",
+        "numpad_enter",  # this is separate from enter on linux, but not on win32
     ],
 }
 
@@ -361,6 +362,7 @@ linux_evdev_code_to_symbol_map = {
     74: "numpad_minus",
     78: "numpad_plus",
     83: "numpad_dot",
+    96: "numpad_enter",
     58: "caps_lock",
     70: "scroll_lock",
     69: "num_lock",
