@@ -57,8 +57,8 @@ control_chars = ["enter", "tab", "return", "space"]
 
 special_chars = [
     "escape",
-    "left_windows",  # can be 'super' or 'meta' on linux, 'command' on mac
-    "right_windows",
+    "left_os",  # 'win' on windows, 'super' or 'meta' on linux, 'command' on mac
+    "right_os",
     "apps",  # opens the menu like right mouse button. Near rctrl usually
     "clear",  # num5 when num lock off
     "backspace",
@@ -97,12 +97,9 @@ aliases: SymbolsWithAliases = {
     "arrow_right": ["right_arrow"],
     # other special chars
     "esc": ["escape"],
-    "lwin": ["left_windows"],
-    "los": ["left_windows"],
-    "rwin": ["right_windows"],
-    "ros": ["right_windows"],
-    "win": ["left_windows", "right_windows"],
-    "os": ["left_windows", "right_windows"],
+    "los": ["left_os"],
+    "ros": ["right_os"],
+    "os": ["left_os", "right_os"],
     "del": ["delete"],
     "ins": ["insert"],
     "caps": ["caps_lock"],
@@ -306,8 +303,8 @@ win32_vk_code_to_symbol_map: dict[int, str] = {
     32: "space",
     # special_chars
     27: "escape",
-    91: "left_windows",
-    92: "right_windows",
+    91: "left_os",
+    92: "right_os",
     93: "apps",
     12: "clear",
     8: "backspace",
