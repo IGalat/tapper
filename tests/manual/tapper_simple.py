@@ -1,3 +1,4 @@
+from manual.util_mantest import killme_in
 from tapper import Group
 from tapper import mouse
 from tapper import root
@@ -49,6 +50,7 @@ def tapper_simple() -> None:
 
 
 def main() -> None:
+    killme_in(60)
     tapper_simple()
 
 

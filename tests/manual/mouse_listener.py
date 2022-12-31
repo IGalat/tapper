@@ -1,5 +1,6 @@
 import sys
 
+from manual.util_mantest import killme_in
 from tapper.model.constants import ListenerResult
 from tapper.model.types_ import Signal
 from tapper.signal.mouse.mouse_listener import MouseSignalListener
@@ -17,6 +18,7 @@ def mouse_listener() -> None:
 
 
 def main() -> None:
+    killme_in(30)
     mouse_listener()
 
 

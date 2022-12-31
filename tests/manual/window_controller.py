@@ -1,6 +1,7 @@
 import sys
 import time
 
+from manual.util_mantest import killme_in
 from tapper.controller.window.window_api import WindowController
 
 
@@ -29,6 +30,7 @@ def window_controller() -> None:
 
 
 def main() -> None:
+    killme_in(30)
     window_controller()
 
 

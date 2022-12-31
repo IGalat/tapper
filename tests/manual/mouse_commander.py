@@ -1,6 +1,7 @@
 import sys
 import time
 
+from manual.util_mantest import killme_in
 from tapper.controller.mouse.mouse_api import MouseController
 from tapper.state import keeper
 
@@ -58,6 +59,7 @@ def mouse_commander() -> None:
 
 
 def main() -> None:
+    killme_in(15)
     mouse_commander()
 
 

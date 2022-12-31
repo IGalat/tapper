@@ -1,6 +1,7 @@
 import sys
 import time
 
+from manual.util_mantest import killme_in
 from tapper.controller.keyboard import kb_api
 
 
@@ -37,6 +38,7 @@ def kb_commander() -> None:
 
 
 def main() -> None:
+    killme_in(10)
     kb_commander()
 
 
