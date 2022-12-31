@@ -50,3 +50,5 @@ class ListenerResult(Flag):
 
 WinputListenerResult = {ListenerResult.SUPPRESS: 4, ListenerResult.PROPAGATE: 0}
 """Corresponding result for winput, win32 low-level adapter."""
+
+EvdevKeyDir = {0: KeyDirBool.UP, 1: KeyDirBool.DOWN, 2: KeyDirBool.DOWN}
