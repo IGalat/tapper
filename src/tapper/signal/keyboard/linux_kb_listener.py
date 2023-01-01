@@ -10,43 +10,11 @@ from tapper.model.constants import EvdevKeyDir
 from tapper.model.constants import KeyDirBool
 from tapper.model.constants import ListenerResult
 from tapper.signal.keyboard.keyboard_listener import KeyboardSignalListener
-
-
-def get_real_keyboards() -> list[evdev.InputDevice]:
-    devices = [evdev.InputDevice(path) for path in evdev.list_devices()]
-    result = []
-    for d in devices:
-        cap = d.capabilities()
-        if 1 in cap:  # EV_KEY
-            if 16 in cap[1]:  # can type "q"
-                result.append(d)
-    if not result:
-        raise PermissionError(
-            "No keyboards detected."
-            "You should run this as root, or "
-            "if you don't need a keyboard signal listener, "
-            "remove it in tapper.config."
-        )
-    return result
-
-
-def make_virtual_kb_from(real_kbs: list[evdev.InputDevice]) -> UInput:
-    try:
-        return UInput.from_device(*real_kbs, name="Tapper-listener Virtual Keyboard")
-    except evdev.UInputError:
-        raise PermissionError("Cannot make virtual keyboard. Try running as root.")
-
-
-def uinput_action(
-    virtual_kb: UInput, etype: int, code: int, evdev_direction: int
-) -> None:
-    virtual_kb.write(etype, code, evdev_direction)
-    virtual_kb.syn()
+from tapper.util.linux import evdev_common
 
 
 def key_action(virtual_kb: UInput, code: int, evdev_direction: int) -> None:
-    virtual_kb.write(evdev.ecodes.EV_KEY, code, evdev_direction)
-    virtual_kb.syn()
+    evdev_common.uinput_action(virtual_kb, evdev.ecodes.EV_KEY, code, evdev_direction)
     if EvdevKeyDir[evdev_direction] == KeyDirBool.UP:
         time.sleep(0.001)  # else lock fails to be acquired sometimes.
 
@@ -60,8 +28,8 @@ class LinuxKeyboardSignalListener(KeyboardSignalListener):
         return keyboard.get_key_list(constants.OS.linux)
 
     def start(self) -> None:
-        self.real_kbs = get_real_keyboards()
-        self.virtual_kb = make_virtual_kb_from(self.real_kbs)
+        self.real_kbs = evdev_common.get_real_keyboards()
+        self.virtual_kb = evdev_common.get_virtual_kb()
         for kb in self.real_kbs:
             Thread(target=partial(self.keyboard_loop, kb)).start()
 
