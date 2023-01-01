@@ -91,7 +91,9 @@ def win32_winput() -> tuple[KeyboardTracker, KeyboardCommander]:
 
 
 def linux_evdev() -> tuple[KeyboardTracker, KeyboardCommander]:
-    from tapper.controller.keyboard.kb_linux_impl import LinuxKeyboardTrackerCommander
+    from tapper.controller.keyboard.kb_linux_evdev_impl import (
+        LinuxKeyboardTrackerCommander,
+    )
 
     r = LinuxKeyboardTrackerCommander()
     return r, r
