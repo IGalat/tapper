@@ -2,7 +2,7 @@
 
 ### Dependencies and implementation quirks
 
-**tapper** uses `winput` library for low-level keyboard and mouse monitoring and commands.
+`winput` library is used for low-level keyboard and mouse monitoring and commands.
 
 For window tracking and commands, `pywin32` is used.
 
@@ -20,3 +20,10 @@ sudo apt-get install python3.10-dev
 or similar for your python3 version. Then reboot the PC.
 
 ---
+
+### Dependencies and implementation quirks
+
+`python-evdev` library is used for low-level keyboard and mouse monitoring and commands.
+
+Keyboard and Mouse method that checks `toggled` status only works for `caps`, `num_lock`, and `scroll_lock`,
+in other cases always returns False.

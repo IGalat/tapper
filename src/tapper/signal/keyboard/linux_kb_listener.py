@@ -1,4 +1,3 @@
-import time
 from functools import partial
 from threading import Thread
 
@@ -7,6 +6,7 @@ from evdev import UInput
 from tapper.model import constants
 from tapper.model import keyboard
 from tapper.model.constants import EvdevKeyDir
+from tapper.model.constants import EvdevReverseKeyDir
 from tapper.model.constants import KeyDirBool
 from tapper.model.constants import ListenerResult
 from tapper.signal.keyboard.keyboard_listener import KeyboardSignalListener
@@ -15,8 +15,6 @@ from tapper.util.linux import evdev_common
 
 def key_action(virtual_kb: UInput, code: int, evdev_direction: int) -> None:
     evdev_common.uinput_action(virtual_kb, evdev.ecodes.EV_KEY, code, evdev_direction)
-    if EvdevKeyDir[evdev_direction] == KeyDirBool.UP:
-        time.sleep(0.001)  # else lock fails to be acquired sometimes.
 
 
 class LinuxKeyboardSignalListener(KeyboardSignalListener):
@@ -38,7 +36,9 @@ class LinuxKeyboardSignalListener(KeyboardSignalListener):
 
     def keyboard_loop(self, kb: evdev.InputDevice) -> None:
         for pressed_key_code in kb.active_keys():
-            key_action(self.virtual_kb, pressed_key_code, 0)  # lift
+            key_action(
+                self.virtual_kb, pressed_key_code, EvdevReverseKeyDir[KeyDirBool.UP]
+            )
         kb.grab()
 
         for event in kb.read_loop():

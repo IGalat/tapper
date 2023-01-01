@@ -15,7 +15,7 @@ class ListenerWrapper:
     on_signal: OnSignalFn
     """External action to do on signal, if it's not emulated."""
 
-    emul_keeper: keeper.Emul
+    emul_keeper: keeper.Emul | None
     """Dependency injected, not a special instance."""
 
     state_keeper: keeper.Pressed
@@ -24,7 +24,7 @@ class ListenerWrapper:
     def __init__(
         self,
         on_signal: OnSignalFn,
-        emul_keeper: keeper.Emul,
+        emul_keeper: keeper.Emul | None,
         state_keeper: keeper.Pressed,
     ) -> None:
         self.on_signal = on_signal  # type: ignore
@@ -36,7 +36,7 @@ class ListenerWrapper:
         return listener
 
     def _on_signal_wrap(self, signal: Signal, topic: str) -> constants.ListenerResult:
-        if self.emul_keeper.is_emulated(signal):
+        if self.emul_keeper and self.emul_keeper.is_emulated(signal):
             self.state_keeper.key_event(signal)
             return constants.ListenerResult.PROPAGATE
         result = self.on_signal(signal)  # type: ignore

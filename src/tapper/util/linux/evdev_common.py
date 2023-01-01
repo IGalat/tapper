@@ -1,7 +1,10 @@
+from functools import cache
+
 import evdev
 from evdev import UInput
 
 
+@cache
 def get_real_keyboards() -> list[evdev.InputDevice]:
     devices = [evdev.InputDevice(path) for path in evdev.list_devices()]
     result = []
@@ -20,6 +23,7 @@ def get_real_keyboards() -> list[evdev.InputDevice]:
     return result
 
 
+@cache
 def get_real_mice() -> list[evdev.InputDevice]:
     pass
 

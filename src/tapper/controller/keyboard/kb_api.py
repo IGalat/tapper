@@ -90,6 +90,14 @@ def win32_winput() -> tuple[KeyboardTracker, KeyboardCommander]:
     return r, r
 
 
+def linux_evdev() -> tuple[KeyboardTracker, KeyboardCommander]:
+    from tapper.controller.keyboard.kb_linux_impl import LinuxKeyboardTrackerCommander
+
+    r = LinuxKeyboardTrackerCommander()
+    return r, r
+
+
 by_os: dict[str, Callable[[], tuple[KeyboardTracker, KeyboardCommander]]] = {
-    constants.OS.win32: win32_winput
+    constants.OS.win32: win32_winput,
+    constants.OS.linux: linux_evdev,
 }
