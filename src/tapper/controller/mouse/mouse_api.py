@@ -6,10 +6,37 @@ from typing import Optional
 from tapper.controller.resource_controller import ResourceController
 from tapper.model import constants
 from tapper.state import keeper
+from tapper.validation import report
 
 
 def is_near(current_x: int, current_y: int, x: int, y: int, precision: int) -> bool:
     return (current_x - x) ** 2 + (current_y - y) ** 2 <= precision**2
+
+
+def calc_move(
+    get_pos: Callable[[], tuple[int, int]],
+    x: Optional[int],
+    y: Optional[int],
+    relative: bool,
+) -> tuple[int, int]:
+    if x is None and y is None:
+        report.error("MouseCommander move with no coordinates specified.")
+    if not relative:
+        if x is None:
+            x = get_pos()[0]
+        elif y is None:
+            y = get_pos()[1]
+    else:  # calculate here and absolute move
+        current_x, current_y = get_pos()
+        if x is None:
+            x = current_x
+        else:
+            x += current_x
+        if y is None:
+            y = current_y
+        else:
+            y += current_y
+    return x, y  # type: ignore
 
 
 class MouseTracker(ABC):
@@ -126,6 +153,17 @@ def win32_winput() -> tuple[MouseTracker, MouseCommander]:
     return r, r
 
 
+def linux_evdev() -> tuple[MouseTracker, MouseCommander]:
+    from tapper.controller.mouse.mouse_linux_evdev_impl import (
+        LinuxMouseTrackerCommander,
+    )
+
+    r = LinuxMouseTrackerCommander()
+
+    return r, r
+
+
 by_os: dict[str, Callable[[], tuple[MouseTracker, MouseCommander]]] = {
-    constants.OS.win32: win32_winput
+    constants.OS.win32: win32_winput,
+    constants.OS.linux: linux_evdev,
 }

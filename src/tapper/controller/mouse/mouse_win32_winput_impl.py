@@ -1,10 +1,10 @@
 from typing import Optional
 
+from tapper.controller.mouse.mouse_api import calc_move
 from tapper.controller.mouse.mouse_api import MouseCommander
 from tapper.controller.mouse.mouse_api import MouseTracker
 from tapper.model import mouse
 from tapper.util import datastructs
-from tapper.validation import report
 from winput import winput
 
 """Winput wheel scroll argument values."""
@@ -61,30 +61,7 @@ class Win32MouseTrackerCommander(MouseTracker, MouseCommander):
     def move(
         self, x: Optional[int] = None, y: Optional[int] = None, relative: bool = False
     ) -> None:
-        winput.set_mouse_pos(*self.calc_move(x, y, relative))
-
-    def calc_move(
-        self, x: Optional[int], y: Optional[int], relative: bool
-    ) -> tuple[int, int]:
-        if x is None and y is None:
-            report.error("Win32MouseCommander move with no coordinates specified.")
-
-        if not relative:
-            if x is None:
-                x = self.get_pos()[0]
-            elif y is None:
-                y = self.get_pos()[1]
-        else:  # winput.move_mouse (relative) is bugged, so calculate here and absolute move
-            current_x, current_y = self.get_pos()
-            if x is None:
-                x = current_x
-            else:
-                x += current_x
-            if y is None:
-                y = current_y
-            else:
-                y += current_y
-        return x, y  # type: ignore
+        winput.set_mouse_pos(*calc_move(self.get_pos, x, y, relative))
 
     def pressed(self, symbol: str) -> bool:
         return any(button_state(code) >> 15 == 1 for code in symbol_button_map[symbol])  # type: ignore
