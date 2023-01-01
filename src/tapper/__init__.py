@@ -46,7 +46,7 @@ if _mc := _datastructs.get_first_in(_MouseController, config.controllers):
     mouse = _mc
 
 if _wc := _datastructs.get_first_in(_WindowController, config.controllers):
-    """Window controller. Primarily for moving the cursor and getting the state."""
+    """Window controller. Command and get state of windows."""
     window = _wc
 
 
