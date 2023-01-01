@@ -39,7 +39,7 @@ class LinuxKeyboardTrackerCommander(KeyboardTracker, KeyboardCommander):
         evdev_common.uinput_action(
             self.virtual_kb,
             evdev.ecodes.EV_KEY,
-            symbol_code_map[symbol][0],
+            symbol_code_map[symbol][0],  # type: ignore
             EvdevReverseKeyDir[KeyDirBool.DOWN],
         )
         time.sleep(0.001)  # else evdev-lib lock fails to be acquired sometimes.
@@ -48,7 +48,7 @@ class LinuxKeyboardTrackerCommander(KeyboardTracker, KeyboardCommander):
         evdev_common.uinput_action(
             self.virtual_kb,
             evdev.ecodes.EV_KEY,
-            symbol_code_map[symbol][0],
+            symbol_code_map[symbol][0],  # type: ignore
             EvdevReverseKeyDir[KeyDirBool.UP],
         )
 
