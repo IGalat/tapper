@@ -66,3 +66,19 @@ win32_button_code_symbol_map: dict[int, str] = {
     8: "x1_mouse_button",
     16: "x2_mouse_button",
 }
+
+"""Evdev (type, code)."""
+linux_evdev_code_button_map: dict[int, str] = {
+    272: "left_mouse_button",
+    273: "right_mouse_button",
+    274: "middle_mouse_button",
+    # hope these are correct, no way to check
+    275: "x1_mouse_button",
+    276: "x2_mouse_button",
+}
+
+"""Evdev (type, code)."""
+linux_evdev_code_wheel_map: dict[tuple[int, int, int], str] = {
+    (2, 8, 1): "scroll_wheel_up",
+    (2, 8, -1): "scroll_wheel_down",
+}

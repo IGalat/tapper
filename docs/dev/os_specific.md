@@ -27,3 +27,8 @@ or similar for your python3 version. Then reboot the PC.
 
 Keyboard and Mouse method that checks `toggled` status only works for `caps`, `num_lock`, and `scroll_lock`,
 in other cases always returns False.
+
+Commands for mouse horizontal scroll don't work, use `lshift`+vertical scroll where applicable.
+
+Mouse `get_pos` and `move` work in low-level driver units, such as 0 to 65535 or -32768 to 32767.
+You can transform them into real coordinates using multiplication: `(max - min) * resolution` is a pixel.
