@@ -67,7 +67,14 @@ win32_button_code_symbol_map: dict[int, str] = {
     16: "x2_mouse_button",
 }
 
-"""Evdev (type, code)."""
+
+"""
+----------------------------
+UNUSED for now:
+----------------------------
+"""
+
+"""Evdev EV_KEY, code."""
 linux_evdev_code_button_map: dict[int, str] = {
     272: "left_mouse_button",
     273: "right_mouse_button",
@@ -77,8 +84,8 @@ linux_evdev_code_button_map: dict[int, str] = {
     276: "x2_mouse_button",
 }
 
-"""Evdev (type, code)."""
-linux_evdev_code_wheel_map: dict[tuple[int, int, int], str] = {
-    (2, 8, 1): "scroll_wheel_up",
-    (2, 8, -1): "scroll_wheel_down",
+"""Evdev EV_REL, REL_WHEEL, value."""
+linux_evdev_code_wheel_map: dict[int, str] = {
+    1: "scroll_wheel_up",
+    -1: "scroll_wheel_down",
 }

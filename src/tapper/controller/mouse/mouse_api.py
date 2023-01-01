@@ -153,17 +153,6 @@ def win32_winput() -> tuple[MouseTracker, MouseCommander]:
     return r, r
 
 
-def linux_evdev() -> tuple[MouseTracker, MouseCommander]:
-    from tapper.controller.mouse.mouse_linux_evdev_impl import (
-        LinuxMouseTrackerCommander,
-    )
-
-    r = LinuxMouseTrackerCommander()
-
-    return r, r
-
-
 by_os: dict[str, Callable[[], tuple[MouseTracker, MouseCommander]]] = {
     constants.OS.win32: win32_winput,
-    constants.OS.linux: linux_evdev,
 }

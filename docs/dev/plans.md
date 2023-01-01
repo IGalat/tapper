@@ -40,7 +40,7 @@ By having user configure triggers and corresponding actions, and running a loop 
 16. DONE. WindowTriggerConditionsTracker
 17. DONE. Helper: controls, do while pressed/held, recorder
 18. DONE. Basic Readme
-19. Linux impl
+19. DONE(Only keyboard). Linux impl
 20. Make sure it catches signals before other programs on OS
 21. Helper: one keyboard variation(ua) to make sure it's multi-lang
 22. (input/output multi-lang) ehhh, just hepler function here
