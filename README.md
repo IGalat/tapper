@@ -14,7 +14,7 @@ In practice it aims to do a lot more and is more flexible. Here are some of the 
 - Suppressing the key that triggered the action. (surprising how commonly this is absent in other tools)
 - Built-in suite of convenient, well-tested command functions.
 
-Planned features *
+For now - win32 and limited linux capabilities *
 
 ## Example
 
