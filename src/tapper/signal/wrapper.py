@@ -36,6 +36,7 @@ class ListenerWrapper:
         return listener
 
     def _on_signal_wrap(self, signal: Signal, topic: str) -> constants.ListenerResult:
+        # linux doesn't need emul as it uses virtual devices
         if self.emul_keeper and self.emul_keeper.is_emulated(signal):
             self.state_keeper.key_event(signal)
             return constants.ListenerResult.PROPAGATE
