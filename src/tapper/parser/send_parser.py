@@ -30,9 +30,19 @@ ki_shift_down = lambda: KeyInstruction(default_shift, constants.KeyDir.DOWN)
 ki_shift_up = lambda: KeyInstruction(default_shift, constants.KeyDir.UP)
 
 
-def parse_wrap(combo_wrap: str) -> tuple[str, str, re.Pattern[str]]:
+def parse_wrap(combo_wrap: str) -> re.Pattern[str]:
     prefix, suffix = combo_wrap.split("_")
-    return prefix, suffix, re.compile(prefix + COMBO_CONTENT + suffix)
+    return re.compile(prefix + COMBO_CONTENT + suffix)
+
+
+@cache
+def match_combos(command: str, pattern: re.Pattern[str]) -> list[re.Match[str]]:
+    start = 0
+    matches = []
+    while match := pattern.search(command, pos=start):
+        matches.append(match)
+        start = match.end()
+    return matches
 
 
 @dataclass
@@ -158,7 +168,7 @@ class SendParser:
         return super().__hash__()
 
     def set_wrap(self, combo_wrap: str) -> None:
-        self.combo_prefix, self.combo_suffix, self.pattern = parse_wrap(combo_wrap)
+        self.pattern = parse_wrap(combo_wrap)
 
     @cache
     def parse(self, command: str, shift_in: str | None = None) -> list[SendInstruction]:
@@ -171,7 +181,7 @@ class SendParser:
             default_shift = shift_in
         shift_down = bool(shift_in)
         result = []
-        combos = self.match_combos(command).copy()
+        combos = match_combos(command, self.pattern).copy()
 
         i = 0
         while i < len(command):
@@ -209,15 +219,6 @@ class SendParser:
         elif shift_in and not shift_down:
             result.append(ki_shift_down())
         return result
-
-    @cache
-    def match_combos(self, command: str) -> list[re.Match[str]]:
-        start = 0
-        matches = []
-        while match := self.pattern.search(command, pos=start):
-            matches.append(match)
-            start = match.end()
-        return matches
 
     def parse_combo(self, content: str, shift_down: bool) -> list[SendInstruction]:
         """
