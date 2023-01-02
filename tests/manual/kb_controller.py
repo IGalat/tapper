@@ -37,9 +37,19 @@ def kb_commander() -> None:
     kbc.release("alt")
 
 
+def language_monitor() -> None:
+    time.sleep(0.5)
+    kbl, kbc = kb_api.by_os[sys.platform]()
+    for _ in range(10):
+        time.sleep(1)
+        print(kbl.lang())
+
+    kbc.set_lang("en")
+
+
 def main() -> None:
-    killme_in(10)
-    kb_commander()
+    killme_in(11)
+    language_monitor()
 
 
 if __name__ == "__main__":

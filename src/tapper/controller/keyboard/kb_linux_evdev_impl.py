@@ -8,6 +8,7 @@ from tapper.controller.keyboard.kb_api import KeyboardTracker
 from tapper.model import keyboard
 from tapper.model.constants import EvdevReverseKeyDir
 from tapper.model.constants import KeyDirBool
+from tapper.model.languages import Lang
 from tapper.util import datastructs
 from tapper.util.linux import evdev_common
 
@@ -62,3 +63,9 @@ class LinuxKeyboardTrackerCommander(KeyboardTracker, KeyboardCommander):
         if led_index == -1:
             return False
         return any(led_index in kb.leds() for kb in self.real_kbs)
+
+    def lang(self, lang: str | int | Lang | None = None) -> None:
+        pass
+
+    def set_lang(self, lang: str | int | Lang, system_wide: bool = False) -> None:
+        pass

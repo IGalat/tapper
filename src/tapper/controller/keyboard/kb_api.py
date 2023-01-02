@@ -4,6 +4,7 @@ from typing import Callable
 
 from tapper.controller.resource_controller import ResourceController
 from tapper.model import constants
+from tapper.model.languages import Lang
 from tapper.state import keeper
 
 
@@ -24,6 +25,10 @@ class KeyboardTracker(ABC):
     def toggled(self, symbol: str) -> bool:
         pass
 
+    @abstractmethod
+    def lang(self, lang: str | int | Lang | None = None) -> None:
+        pass
+
 
 class KeyboardCommander(ABC):
     @abstractmethod
@@ -40,6 +45,10 @@ class KeyboardCommander(ABC):
 
     @abstractmethod
     def release(self, symbol: str) -> None:
+        pass
+
+    @abstractmethod
+    def set_lang(self, lang: str | int | Lang, system_wide: bool = False) -> None:
         pass
 
 
@@ -70,6 +79,9 @@ class KeyboardController(ResourceController):
         """Is key toggled."""
         return self._tracker.toggled(symbol)
 
+    def lang(self, lang: str | int | Lang | None = None) -> None:
+        """Get current language. If param `lang` specified, will return None if it doesn't match."""
+
     def press(self, symbol: str) -> None:
         """Presses down one key."""
         self._emul_keeper.will_emulate((symbol, constants.KeyDirBool.DOWN))
@@ -79,6 +91,17 @@ class KeyboardController(ResourceController):
         """Releases (presses up) one key."""
         self._emul_keeper.will_emulate((symbol, constants.KeyDirBool.UP))
         self._commander.release(symbol)
+
+    def set_lang(self, lang: str | int | Lang, system_wide: bool = False) -> None:
+        """
+        Switch input to specified language.
+
+        If this language is not in your user's language input list, nothing happens.
+
+        :param lang: see model.languages
+        :param system_wide: change lang for all apps. If False, only for active one.
+        """
+        self._commander.set_lang(lang, system_wide)
 
 
 def win32_winput() -> tuple[KeyboardTracker, KeyboardCommander]:
