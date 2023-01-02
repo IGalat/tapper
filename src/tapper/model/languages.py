@@ -18,6 +18,10 @@ class Lang:
         self.primary_lang_id = self.locale_id // 1024
 
 
+"""
+Look up the language, if it has emtpy string as last argument - it isn't implemented yet.
+It's very easy to contribute a language, read the docs.
+"""
 languages: list[Lang] = [
     Lang(1025, "Arabic - Saudi Arabia", "ar-SA", ""),
     Lang(1026, "Bulgarian", "bg-BG", ""),
@@ -270,9 +274,11 @@ languages: list[Lang] = [
 
 languages_by_letter_code: dict[str, Lang] = {}
 for lang in languages:
+    if not lang.charset:
+        continue
     languages_by_letter_code[lang.letter_code] = lang
     if lang.aliases:
         for alias in lang.aliases:
             languages_by_letter_code[alias] = lang
 
-languages_by_locale = {lang.locale_id: lang for lang in languages}
+languages_by_locale = {lang.locale_id: lang for lang in languages if lang.charset}
