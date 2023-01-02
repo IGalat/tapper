@@ -24,9 +24,9 @@ from tapper import root, Group, Tap, start, helper
 root.add(
     {"a": "b", "b": "a",  # remap "a" and "b"
     "h": "Hello,$(50ms) world!"},  # Sleeps for 0.05 sec in the middle
-    Group(win="notepad").add({"alt+enter": "$(f11)"}),  # fullscreen toggle
+    Group(win="notepad").add({"alt+enter": "f11"}),  # fullscreen toggle
     Group(win_exec="chrome.exe").add(
-        Tap("=", "$(mmb)", cursor_in=((0, 0), (1700, 45)))  # close tabs with "="
+        Tap("=", "mmb", cursor_in=((0, 0), (1700, 45)))  # close tabs with "="
     ),
     {"shift+caps": helper.actions.record_toggle(print)}  # record actions, print when done
 )
@@ -90,22 +90,19 @@ Ok, what if you need to do several actions only for `notepad`? Adding `win="note
 ```python
 root.add(Group(win="notepad").add({
     "`": "_",
-   "print_screen": "$(enter)"
+   "print_screen": "enter"
   }))
 ```
 
 Now `print screen` will click `enter` when in `notepad`.
 
-`enter` has to be in brackets `$()`, otherwise letters e,n,t,e,r would be sent -
-any non single-character key must be inside `$()` for the send command.
+The string translates un-bracketed letters to symbol (like `enter` instead of `e`,`n`,`t`,`e`,`r`), assuming there is only that one symbol.
 
-Actually, for `enter` and `tab` there are one-char equivalents:`\n` and `\t`. So this would work:
-
-```python
-"print_screen": "\n"
-```
+If you want to send letters, use `send("enter")`. And `send("$(enter)")` will again send `enter`.
 
 `send` has a lot of capabilities in `$()`, such as pressing key combinations, sleep, mouse move - see Reference section.
+
+Additionally, for `enter` and `tab` there are one-char equivalents:`\n` and `\t`.
 
 Groups can contain Groups, `root` is just a Group as well.
 

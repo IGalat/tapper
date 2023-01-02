@@ -5,6 +5,8 @@ into Shadow Tree - identically structured tree with useful for runtime fields.
 from functools import partial
 from typing import Any
 
+from tapper.model import keyboard
+from tapper.model import mouse
 from tapper.model.tap_tree import Group
 from tapper.model.tap_tree import Tap
 from tapper.model.tap_tree_shadow import SGroup
@@ -15,6 +17,8 @@ from tapper.model.types_ import SendFn
 from tapper.model.types_ import TriggerConditionFn
 from tapper.model.types_ import TriggerStr
 from tapper.parser.trigger_parser import TriggerParser
+
+all_symbols = [*keyboard.get_keys().keys(), mouse.get_keys().keys()]
 
 
 def find_property(prop_name: str, group: Group) -> Any:
@@ -101,5 +105,7 @@ class TreeTransformer:
 
     def to_action(self, action: Action | str) -> Action:
         if isinstance(action, str):
+            if action in all_symbols:
+                action = f"$({action})"
             action = partial(self.send, action)  # type: ignore
         return action
