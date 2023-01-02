@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from dataclasses import field
+from functools import cache
 
 
 @dataclass
@@ -56,7 +57,12 @@ languages: list[Lang] = [
     Lang(1043, "Dutch - Netherlands", "nl-NL", ""),
     Lang(1044, "Norwegian (Bokmål)", "nb-NO", ""),
     Lang(1045, "Polish", "pl-PL", ""),
-    Lang(1046, "Portuguese - Brazil", "pt-BR", ""),
+    Lang(
+        1046,
+        "Portuguese - Brazil",
+        "pt-BR",
+        "'1234567890-=qwertyuiop´[]asdfghjklç~zxcvbnm,.;\"!@#$%¨&*()_+QWERTYUIOP`{}ASDFGHJKLÇ^ZXCVBNM<>:",
+    ),
     Lang(1047, "Rhaeto-Romanic", "rm-CH", ""),
     Lang(1048, "Romanian", "ro-RO", ""),
     Lang(
@@ -282,3 +288,24 @@ for lang in languages:
             languages_by_letter_code[alias] = lang
 
 languages_by_locale = {lang.locale_id: lang for lang in languages if lang.charset}
+
+
+@cache
+def get(lang_in: str | int | Lang) -> Lang:
+    if isinstance(lang_in, Lang):
+        return lang_in
+    elif isinstance(lang_in, str):
+        try:
+            return languages_by_letter_code[lang_in]
+        except KeyError:
+            for ln in languages:
+                if lang_in.casefold() in ln.description.partition(" - ")[0].casefold():
+                    return ln
+            raise KeyError(
+                f"Language not found: {lang_in}. "
+                f"Support for it may be not implemented, or typo. See tapper.model.languages"
+            )
+    elif isinstance(lang_in, int):
+        return languages_by_locale[lang_in]
+    else:
+        raise TypeError
