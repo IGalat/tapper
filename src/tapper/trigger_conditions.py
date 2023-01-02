@@ -24,6 +24,9 @@ def keyboard(kb_c: KeyboardController) -> dict[str, Callable[[Any], Any]]:
     kwargs["kb_key_pressed"] = kb_c.pressed
     kwargs["kb_key_not_pressed"] = lambda symbol: not kb_c.pressed(symbol)
 
+    kwargs["lang"] = kb_c.lang
+    kwargs["lang_not"] = lambda lang: kb_c.lang(lang) is None
+
     return kwargs
 
 

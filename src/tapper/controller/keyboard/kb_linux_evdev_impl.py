@@ -64,7 +64,7 @@ class LinuxKeyboardTrackerCommander(KeyboardTracker, KeyboardCommander):
             return False
         return any(led_index in kb.leds() for kb in self.real_kbs)
 
-    def lang(self, lang: str | int | Lang | None = None) -> None:
+    def lang(self, lang: str | int | Lang | None = None) -> Lang | None:
         pass
 
     def set_lang(self, lang: str | int | Lang, system_wide: bool = False) -> None:

@@ -49,7 +49,7 @@ class Win32KeyboardTrackerCommander(KeyboardTracker, KeyboardCommander):
     def release(self, symbol: str) -> None:
         winput.release_key(symbol_code_map[symbol][0])
 
-    def lang(self, lang: str | int | Lang | None = None) -> None:
+    def lang(self, lang: str | int | Lang | None = None) -> Lang | None:
         curr_window = user32.GetForegroundWindow()
         thread_id = user32.GetWindowThreadProcessId(curr_window, 0)
         locale_id = user32.GetKeyboardLayout(thread_id) & (2**16 - 1)

@@ -169,3 +169,33 @@ def test_win_open(f: Fixture) -> None:
     tapper.window.maximize("bar")
     kj()
     assert f.actions[-2:] == [2, 12]
+
+
+def test_lang(f: Fixture) -> None:
+    tapper.root.add(
+        Tap("k", f.act(0)),
+        Tap("k", f.act(1), lang="ua"),
+        Tap("k", f.act(2), lang="spanish"),
+        Tap("j", f.act(10)),
+        Tap("j", f.act(11), lang_not="en"),
+        Tap("j", f.act(12), lang_not="pt-BR"),
+    )
+    f.start()
+
+    kj = lambda: f.send_real("k$(50ms)j")
+
+    tapper.kb.set_lang("portuguese")
+    kj()
+    assert f.actions[-2:] == [0, 11]
+
+    tapper.kb.set_lang("ukrainian")
+    kj()
+    assert f.actions[-2:] == [1, 12]
+
+    tapper.kb.set_lang("es")
+    kj()
+    assert f.actions[-2:] == [2, 12]
+
+    tapper.kb.set_lang("en")
+    kj()
+    assert f.actions[-2:] == [0, 12]

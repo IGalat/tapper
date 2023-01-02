@@ -26,7 +26,7 @@ class KeyboardTracker(ABC):
         pass
 
     @abstractmethod
-    def lang(self, lang: str | int | Lang | None = None) -> None:
+    def lang(self, lang: str | int | Lang | None = None) -> Lang | None:
         pass
 
 
@@ -79,8 +79,9 @@ class KeyboardController(ResourceController):
         """Is key toggled."""
         return self._tracker.toggled(symbol)
 
-    def lang(self, lang: str | int | Lang | None = None) -> None:
+    def lang(self, lang: str | int | Lang | None = None) -> Lang | None:
         """Get current language. If param `lang` specified, will return None if it doesn't match."""
+        return self._tracker.lang(lang)
 
     def press(self, symbol: str) -> None:
         """Presses down one key."""

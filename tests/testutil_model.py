@@ -11,7 +11,9 @@ from tapper.controller.mouse.mouse_api import MouseTracker
 from tapper.controller.window.window_api import WindowCommander
 from tapper.controller.window.window_api import WindowTracker
 from tapper.model import constants
+from tapper.model import languages
 from tapper.model import types_
+from tapper.model.languages import Lang
 from tapper.model.types_ import Signal
 from tapper.model.window import Window
 from tapper.signal.base_listener import SignalListener
@@ -45,6 +47,7 @@ class DummyKbTrackerCommander(KeyboardTracker, KeyboardCommander):
     all_signals: list[Signal]
     pressed_symbols: list[str]
     toggled_symbols: list[str]
+    lang_ = languages.get("en")
 
     def start(self) -> None:
         pass
@@ -85,6 +88,15 @@ class DummyKbTrackerCommander(KeyboardTracker, KeyboardCommander):
 
     def toggled(self, symbol: str) -> bool:
         return symbol in self.toggled_symbols
+
+    def lang(self, lang: str | int | Lang | None = None) -> None:
+        if lang is None:
+            return self.lang_
+        else:
+            return self.lang_ if self.lang_ == languages.get(lang) else None
+
+    def set_lang(self, lang: str | int | Lang, system_wide: bool = False) -> None:
+        self.lang_ = languages.get(lang)
 
 
 class DummyMouseTrackerCommander(MouseTracker, MouseCommander):

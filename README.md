@@ -36,6 +36,8 @@ start()
 
 ## Installation
 
+Install Python 3.10 or later, then install via [pip](https://pythonbasics.org/how-to-use-pip-and-pypi/):
+
 ```
 pip install git+https://github.com/IGalat/tapper.git#egg=tapper[all]
 ```
@@ -155,7 +157,7 @@ Configure which actions can be executed concurrently, and which cannot - by defa
 
 - Controllers: allow you to check status and give commands. ```from tapper import kb, mouse, window```
   - [Keyboard](https://github.com/IGalat/tapper/blob/master/src/tapper/controller/keyboard/kb_api.py#L46).
-  Get key state or issue commands. For commands `send` is more convenient though.
+  Get key state or issue commands; get/set language. For commands `send` is more convenient though.
   - [Mouse](https://github.com/IGalat/tapper/blob/master/src/tapper/controller/mouse/mouse_api.py#L61).
   Same thing.
   - [Window](https://github.com/IGalat/tapper/blob/master/src/tapper/controller/window/window_api.py#L118).
@@ -163,6 +165,7 @@ Configure which actions can be executed concurrently, and which cannot - by defa
 - `Tap`, `Group`, `root`, `control_group`.
 - Conditions for `Tap` and `Group`: only if all conditions work, will triggering actions be possible.
 - `send` - a versatile text-to-command tool.
+- Multi-language support.
 - Concurrency control for actions.
 - Events pub/sub: subscribe to device to get all non-emulated signals.
 - Convenience functions:
@@ -192,10 +195,12 @@ Here are existing Conditions:
 | Name                  | Value type expected             | Meaning                                                                                                                                                                                                | Example                                                                                                                                                                                               |
 |-----------------------|---------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | trigger_if            | Callable                        | Your custom function.<br/> bool(result) gets called directly.                                                                                                                                          | trigger_if=lambda: datetime.datetime.now().month > 5 <br/>trigger_if=my_eval_fn_with_no_params <br/>trigger_if=partial(my_fn, "input param")                                                          |
+| lang                  | str or int or Lang              | Language is the specified one. See Multi-language support section below.                                                                                                                               | lang="ua"<br/>lang=1046                                                                                                                                                                               |
+| lang_not              | str or int or Lang              | Opposite of previous.                                                                                                                                                                                  | lang_not="en"                                                                                                                                                                                         |
 | toggled_on            | str                             | Keyboard key is toggled on. Applicable to all keys, though usually only "lock" keys matter.                                                                                                            | toggled_on="num_lock"                                                                                                                                                                                 |
 | toggled_off           | str                             | Opposite of previous.                                                                                                                                                                                  | toggled_off="caps"                                                                                                                                                                                    |
 | kb_key_pressed        | str                             | Keyboard key is currently pressed.                                                                                                                                                                     | kb_key_pressed=" "                                                                                                                                                                                    |
-| kb_key_not_pressed    | str                             | Opposive of previous.                                                                                                                                                                                  | kb_key_not_pressed="esc"                                                                                                                                                                              |
+| kb_key_not_pressed    | str                             | Opposite of previous.                                                                                                                                                                                  | kb_key_not_pressed="esc"                                                                                                                                                                              |
 | mouse_key_pressed     | str                             | Same as kb_key_pressed for mouse.                                                                                                                                                                      | mouse_key_pressed="right_mouse_button"                                                                                                                                                                |
 | mouse_key_not_pressed | str                             | Same as kb_key_not_pressed for mouse.                                                                                                                                                                  | mouse_key_not_pressed="rmb"                                                                                                                                                                           |
 | cursor_near           | (int, int) or ((int, int), int) | Cursor is within circular area of target. <br/>Accepts (x, y) or ((x, y), radius).  Default radius is [50](https://github.com/IGalat/tapper/blob/master/src/tapper/controller/mouse/mouse_api.py#L92). | cursor_near=(500, 720) <br/>cursor_near=((860, 650), 400)                                                                                                                                             |
@@ -239,6 +244,51 @@ Here is a list of all keys and aliases for
 and [mouse](https://github.com/IGalat/tapper/blob/master/src/tapper/model/mouse.py).
 
 You can call `get_possible_signal_symbols()` for `kb`/`mouse` to get them as well.
+
+
+### Multi-language support
+
+Get current window language with:
+
+```python
+current_lang = tapper.kb.lang()
+```
+
+Make a check for a specific language:
+
+```python
+if tapper.kb.lang("en"):
+```
+
+Set language:
+
+```python
+tapper.kb.set_lang("ua", system_wide=True)  # for all apps
+tapper.kb.set_lang("es")  # for current app
+```
+
+Transliterate and send your string in a different language:
+
+```python
+from tapper.helper import lang
+def say_hi_in_ukrainian():
+    tapper.kb.set_lang("ua")
+    send(lang.to_en("ua", "Привіт!"))
+```
+
+Or if you have many strings:
+```python
+ua = lambda text: lang.to_en("ua", text)
+send(ua("Їжак"))
+send(ua("І Жак"))
+```
+
+You can use language identifiers `en-US`, aliases where they exist `en`, locale codes `1033`,
+or objects you got from `tapper.kb.lang()`.
+
+See currently supported languages [here](https://github.com/IGalat/tapper/blob/master/src/tapper/model/languages.py#L23).
+
+If you need another language - it's very easy to add, use [this](https://github.com/IGalat/tapper/blob/master/tests/manual/tapper_lang_helper.py) and make a pull request!
 
 ### Concurrency of actions
 

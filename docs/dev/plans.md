@@ -42,8 +42,7 @@ By having user configure triggers and corresponding actions, and running a loop 
 18. DONE. Basic Readme
 19. skip - DONE(Only keyboard). Linux impl
 20. skip - Make sure it catches signals before other programs on OS
-21. Helper: one keyboard variation(ua) to make sure it's multi-lang
-22. (input/output multi-lang) ehhh, just hepler function here
+21. DONE. Language detection, switching, and helper to transliterate
 23. Tray icon
 24. Tree and config validation with tkinter warnings, Error handling, Logging
 25. Moar trackers: kb lang, process, device connect/disconnect, service/daemon, file, resource(cpu/gpu/network) load
