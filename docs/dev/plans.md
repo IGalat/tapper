@@ -43,13 +43,13 @@ By having user configure triggers and corresponding actions, and running a loop 
 19. skip - DONE(Only keyboard). Linux impl
 20. skip - Make sure it catches signals before other programs on OS
 21. DONE. Language detection, switching, and helper to transliterate
-23. Tray icon
-24. Tree and config validation with tkinter warnings, Error handling, Logging
-25. Moar trackers: kb lang, process, device connect/disconnect, service/daemon, file, resource(cpu/gpu/network) load
-26. Group actions when it goes on/off, timer for checking group states? Tap without trigger, only for on/off active
-27. Helpers galore: picture assist, on repeat/hold, ?
-28. Good docs, with sphinx/readthedocs/doctest
-29. Optimization: profile everything, make caching, active tracking, for window controller in particular
+22. Tray icon
+23. Tree and config validation with tkinter warnings, Error handling, Logging
+24. Moar trackers: kb lang, process, device connect/disconnect, service/daemon, file, resource(cpu/gpu/network) load
+25. Group actions when it goes on/off, timer for checking group states? Tap without trigger, only for on/off active
+26. Helpers galore: picture assist, on repeat/hold, ?
+27. Good docs, with sphinx/readthedocs/doctest
+28. Optimization: profile everything, make caching, active tracking, for window controller in particular
 
 
 ## Limitations of the current design
