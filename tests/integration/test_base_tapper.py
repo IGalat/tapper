@@ -108,7 +108,7 @@ class TestTreeOrder:
     def test_nested(self, f: Fixture) -> None:
         group1_1 = Group("nested twice").add({"ctrl+1": "w/ctrl"})
         group1 = Group().add(Tap("ctrl+!", "never triggers"), group1_1, {"!": "excl"})
-        group2 = Group().add({"ctrl": "control", "left_alt+ctrl": "flip"})
+        group2 = Group().add({"ctrl": "controll", "left_alt+ctrl": "flip"})
         tapper.root.add({"1": "first"}, group1, group2, {"ctrl+left_alt+!": "last"})
         f.start()
 
@@ -116,11 +116,11 @@ class TestTreeOrder:
         assert ends_with(f.emul_signals, click("first"))
 
         f.send_real("$(ctrl+left_alt 50ms+1)")
-        assert ends_with(f.emul_signals, click("control" + "w/ctrl"))
+        assert ends_with(f.emul_signals, click("controll" + "w/ctrl"))
 
         time.sleep(1)
         f.send_real("$(shift+1 50ms+ctrl)")
-        assert ends_with(f.emul_signals, click("excl" + "control"))
+        assert ends_with(f.emul_signals, click("excl" + "controll"))
 
         f.send_real("$(alt+ctrl 50ms+shift+1)")
         assert ends_with(f.emul_signals, click("flip" + "last"))
