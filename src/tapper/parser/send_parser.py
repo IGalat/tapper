@@ -275,7 +275,6 @@ class SendParser:
             symbol, props = common.parse_symbol_and_props(
                 last_split, PROPERTY_DELIMITER
             )
-            sy = self.unalias(symbol)
             instructions = self.parse_last_split(_Key(self.unalias(symbol), props))
             result.extend(instructions)
 
