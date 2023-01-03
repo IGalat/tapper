@@ -151,6 +151,15 @@ Within `root`, priority is last-to-first, so set more general Taps/Groups first,
 
 Configure which actions can be executed concurrently, and which cannot - by default if an action is running, others cannot trigger.
 
+
+# How it works
+
+Each aspect, such as keyboard, window etc has an [OS-specific](https://github.com/IGalat/tapper/blob/master/docs/dev/os_specific.md) adapter.
+
+For receiving signals it is blocking, which is the only way to suppress signals that trigger actions,
+so there is an input delay that depends on how long processing takes.
+
+
 # Reference
 
 ### What you have access to:
