@@ -105,7 +105,7 @@ class TreeTransformer:
 
     def to_action(self, action: Action | str) -> Action:
         if isinstance(action, str):
-            if action in all_symbols:
+            if action in all_symbols and action not in keyboard.chars_en:
                 action = f"$({action})"
             action = partial(self.send, action)  # type: ignore
         return action

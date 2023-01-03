@@ -244,7 +244,7 @@ class SendParser:
 
         for i in range(len(symbols_split)):
             one_split = symbols_split[i]
-            if COMBO_DELIMITER in one_split[1:]:
+            if len(one_split) > 1 and COMBO_DELIMITER in one_split[1:]:
                 combo_delim_index = i + 1 + one_split.index(COMBO_DELIMITER, 1)
                 combo_delim_index += sum(len(s) for s in symbols_split[:i])
 
@@ -275,6 +275,7 @@ class SendParser:
             symbol, props = common.parse_symbol_and_props(
                 last_split, PROPERTY_DELIMITER
             )
+            sy = self.unalias(symbol)
             instructions = self.parse_last_split(_Key(self.unalias(symbol), props))
             result.extend(instructions)
 
