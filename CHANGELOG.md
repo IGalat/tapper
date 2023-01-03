@@ -4,9 +4,28 @@ Versions follow [CalVer](https://calver.org) with format YYYY.0M.MICRO.
 
 Until status changes from "Beta" to "Stable", don't expect backwards compatibility.
 
-## 2022.12.8
+## 2023.01.1 - Lang, tray, linux kb
 
-Initial release:
+
+### Compatibility breaking changes:
+
+- Support for one-symbol text to symbol. e.g. Tap("a", "enter") is
+  now interpreted as one symbol rather than separate letters, even without combo brackets.
+- Remove keyboard symbols: "return", "win"(now "os"), "virtual alt/shift/ctrl", "numpad_separator", "pause";
+change others from win32-specific to generic.
+
+### Major changes:
+
+- Limited linux support: keyboard, except for language, should work for all linux OS
+- Tray icon, for visibility and control
+- Language support: transliterate, get and change input language
+
+---
+
+Various bugfixes and minor changes.
+
+
+## 2022.12.8 - Initial release
 
 1. Parent classes for SignalListener and Commander
 2. keyboard and mouse dataclasses
