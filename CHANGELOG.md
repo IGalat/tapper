@@ -4,7 +4,7 @@ Versions follow [CalVer](https://calver.org) with format YYYY.0M.MICRO.
 
 Until status changes from "Beta" to "Stable", don't expect backwards compatibility.
 
-## 2023.01.1 - Lang, tray, linux kb
+## 2023.1.1 - Lang, tray, linux kb
 
 
 ### Compatibility breaking changes:
