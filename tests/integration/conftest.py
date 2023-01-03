@@ -68,6 +68,7 @@ def f(dummy: Dummy, is_debug: bool) -> Fixture:
     # restore default before each
     config.action_runner_executors_threads = [1]
     config.default_send_interval = 0
+    config.tray_icon = False
     tapper.root = Group("root")
     tapper.control_group = Group("control_group")
     tapper._initialized = False

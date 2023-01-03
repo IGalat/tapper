@@ -2,6 +2,7 @@ from tapper import config
 from tapper import parser
 from tapper.action.runner import ActionRunner
 from tapper.action.runner import ActionRunnerImpl
+from tapper.boot import tray_icon
 from tapper.boot.tree_transformer import TreeTransformer
 from tapper.controller.keyboard.kb_api import KeyboardController
 from tapper.controller.mouse.mouse_api import MouseController
@@ -146,3 +147,5 @@ def start(listeners: list[SignalListener]) -> None:
         controller._start()
     for listener in listeners:
         listener.start()
+    if config.tray_icon:  # this is blocking
+        tray_icon.create()

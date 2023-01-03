@@ -45,6 +45,9 @@ Must have "_" placeholder in the middle, and something before and after that.
 Screen special symbols, this is a regex.
 """
 
+tray_icon = True
+"""Icon in bottom right in your task bar lets you know tapper is running and allows control."""
+
 """
 ------------------------------------
 SECTION 2: Advanced usage.

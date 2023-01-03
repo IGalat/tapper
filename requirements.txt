@@ -1,5 +1,8 @@
 typing_extensions==4.3.0
 
+pillow=>9.4.0
+pystray>=0.19.4
+
 winput==1.5.0; sys_platform == 'win32'
 pywin32==305; sys_platform == 'win32'
 evdev>=1.6.0; sys_platform == 'linux'
