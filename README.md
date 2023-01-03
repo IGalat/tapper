@@ -6,15 +6,12 @@ On the tin, **tapper** might remind you of `pynput`, `autohotkey` and similar to
 
 In practice it aims to do a lot more and is more flexible. Here are some of the advantages:
 
-- Cross-platform.* Your scripts will work on across devices, and you don't need to learn separate tools for each platform.
-- Python-native, thus convenient for larger macros. Have you ever tried to write a serious script on `autohotkey`?
+- Cross-platform. Your scripts will work on across devices, and you don't need to learn separate tools for each platform.
 - Easy to learn API, convenient for both simple and complex scripts.
 - Responsiveness when rapidly typing or clicking.
 - Per-window or otherwise conditional hotkeys.
 - Suppressing the key that triggered the action. (surprising how commonly this is absent in other tools)
 - Built-in suite of convenient, well-tested command functions.
-
-For now - win32 and limited linux capabilities *
 
 ## Example
 
