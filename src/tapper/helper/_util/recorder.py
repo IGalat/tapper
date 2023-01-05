@@ -6,6 +6,8 @@ from typing import Callable
 import tapper
 from tapper.controller.mouse import mouse_api
 from tapper.helper.helper_model import RecordConfig
+from tapper.model import keyboard
+from tapper.model import mouse
 from tapper.model.constants import KeyDir
 from tapper.model.constants import KeyDirBool
 from tapper.model.send import CursorMoveInstruction
@@ -14,7 +16,24 @@ from tapper.model.send import SendInstruction
 from tapper.model.send import SleepInstruction
 from tapper.model.send import WheelInstruction
 from tapper.model.types_ import Signal
+from tapper.model.types_ import SymbolsWithAliases
 from tapper.util import event
+
+
+def calc_short_aliases(aliases: SymbolsWithAliases) -> dict[str, str]:
+    result: dict[str, str] = {}
+    for alias, refs in aliases.items():
+        ref = refs[0]
+        if len(refs) > 1 or len(alias) >= len(ref):
+            continue
+        if ref not in result or len(result[ref]) > len(alias):
+            result[ref] = alias
+    return result
+
+
+preferred_aliases: dict[str, str] = calc_short_aliases(
+    {**keyboard.aliases, **mouse.button_aliases, **mouse.wheel_aliases}
+)
 
 
 @dataclass
@@ -118,6 +137,8 @@ def to_instructions(records: list[SignalRecord]) -> list[SendInstruction]:
         if r.mouse_pos:
             result.append(CursorMoveInstruction(r.mouse_pos))
         symbol = r.signal[0]
+        if symbol in preferred_aliases:
+            symbol = preferred_aliases[symbol]
         instruction = tapper._send_processor.parser.symbols[symbol](symbol)  # type: ignore
         if isinstance(instruction, KeyInstruction):
             if r.signal[1] == KeyDirBool.DOWN:

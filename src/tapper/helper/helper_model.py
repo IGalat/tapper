@@ -16,3 +16,6 @@ class RecordConfig:
 
     min_mouse_movement: int = 50
     """Mouse movements less than this will be disregarded."""
+
+    shorten_to_aliases: bool = True
+    """Will swap "left_mouse_button" with "lmb", "left_control" with "lctrl" etc."""
