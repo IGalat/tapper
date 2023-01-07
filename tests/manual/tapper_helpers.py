@@ -9,6 +9,7 @@ from tapper import send
 from tapper import start
 from tapper import Tap
 from tapper.helper import actions
+from tapper.helper import img
 
 recording: str = ""
 
@@ -43,6 +44,13 @@ def helpers() -> None:
                 "numpad_plus": lambda: send(recording, interval=0.1, speed=2),
                 "ctrl+numpad_plus": lambda: print(recording),
             },
+        ),
+        Group("img").add(
+            {
+                "num1": lambda: print(
+                    img.wait_for("small_test_img.png")
+                )  # open this pic when testing
+            }
         ),
     )
     start()
