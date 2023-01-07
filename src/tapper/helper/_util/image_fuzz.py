@@ -1,7 +1,7 @@
-from tapper.helper._util.image import ndArray
+from numpy import ndarray
 
 
-def find(outer: ndArray, inner: ndArray, precision: float) -> tuple[int, int] | None:
+def find(outer: ndarray, inner: ndarray, precision: float) -> tuple[int, int] | None:
     import cv2
 
     comparison = cv2.matchTemplate(outer, inner, cv2.TM_CCOEFF_NORMED)

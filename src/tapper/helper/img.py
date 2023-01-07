@@ -1,24 +1,21 @@
 import re
 import time
-from typing import Any
 from typing import Union
 
-from numpy import dtype
 from numpy import ndarray
 from tapper.helper._util.image import _find_on_screen
 from tapper.helper._util.image import _normalize
 
-ndArray = ndarray[Any, dtype[Any]]
 
 SearchableImage = Union[
     str,
     tuple[str, tuple[int, int, int, int]],
-    tuple[ndArray, tuple[int, int, int, int]],
-    tuple[ndArray, None],
+    tuple[ndarray, tuple[int, int, int, int]],
+    tuple[ndarray, None],
 ]
 """
 Image to be searched for. May be:
-    - numpy array: pimg = numpy.array(PIL.Image.open('Image.jpg'))
+    - numpy array: pimg = numpy.array(PIL.Image.open('Image.jpg')). RGB is expected.
     - numpy array with bounding box: (pimg, (0, 0, 200, 50)), where coordinates are x_left, y_top, x_right, y_bottom
     - file path, absolute or relative: pic_name = "my_button.png"
     - file path with bounding box: (pic_name, (0, 0, 200, 50))
@@ -52,7 +49,7 @@ def find(image: SearchableImage, precision: float = 1.0) -> tuple[int, int] | No
 def wait_for(
     image: SearchableImage,
     timeout: int | float = 5,
-    interval: float = 0.1,
+    interval: float = 0.2,
     precision: float = 1.0,
 ) -> tuple[int, int] | None:
     """
@@ -78,7 +75,7 @@ def wait_for(
 def wait_for_one_of(
     images: list[SearchableImage],
     timeout: int | float = 5,
-    interval: float = 0.1,
+    interval: float = 0.4,
     precision: float = 1.0,
 ) -> SearchableImage | None:
     """

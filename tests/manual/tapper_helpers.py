@@ -57,7 +57,7 @@ def helpers() -> None:
 
 
 def main() -> None:
-    killme_in(60)
+    killme_in(120)
     helpers()
 
 
