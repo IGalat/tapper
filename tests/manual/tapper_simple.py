@@ -27,6 +27,7 @@ def tapper_simple() -> None:
                 "mmb": lambda: send("middle", interval=0.2),
                 "f1": "$(x10y10)",
                 "ctrl+f1": lambda: send("$(ctrl up)1s $(10s)delay", speed=10),
+                "f6": "lmb",
             }
         ),
         Group("remap").add(
@@ -50,7 +51,7 @@ def tapper_simple() -> None:
 
 
 def main() -> None:
-    killme_in(60)
+    killme_in(120)
     tapper_simple()
 
 

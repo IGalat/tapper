@@ -18,7 +18,7 @@ from tapper.model.types_ import TriggerConditionFn
 from tapper.model.types_ import TriggerStr
 from tapper.parser.trigger_parser import TriggerParser
 
-all_symbols = [*keyboard.get_keys().keys(), mouse.get_keys().keys()]
+all_symbols = [*keyboard.get_keys().keys(), *mouse.get_keys().keys()]
 
 
 def find_property(prop_name: str, group: Group) -> Any:
