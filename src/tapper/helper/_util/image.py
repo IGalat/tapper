@@ -2,11 +2,14 @@ import os.path
 import re
 import sys
 from functools import lru_cache
+from typing import Any
+from typing import Callable
 from typing import Union
 
 import numpy
 import PIL.Image
 import PIL.ImageGrab
+import tapper
 from numpy import ndarray
 from tapper.helper._util import image_fuzz
 from tapper.model import constants
@@ -34,7 +37,7 @@ def _normalize(
     if isinstance(data_in, ndarray):  # type: ignore
         return data_in, bbox  # type: ignore
     if isinstance(data_in, str):
-        if not bbox and (str_bbox := _bbox_pattern.match(data_in)):
+        if not bbox and (str_bbox := _bbox_pattern.search(data_in)):
             sx = str_bbox.group().split("_")
             bbox = int(sx[1]), int(sx[2]), int(sx[3]), int(sx[4].rstrip(")"))
         return from_path(os.path.abspath(data_in)), bbox
@@ -47,10 +50,7 @@ def _find_on_screen(
     image_arr, bbox = image_bbox
     sct = PIL.ImageGrab.grab(bbox=bbox, all_screens=True).convert("RGB")
     sct_arr = numpy.array(sct)
-    if precision == 1.0:
-        result = precise_find(sct_arr, image_arr)
-    else:
-        result = image_fuzz.find(sct_arr, image_arr, precision)
+    result = image_fuzz.find(sct_arr, image_arr, precision)
 
     if result is None:
         return None
@@ -100,3 +100,54 @@ def win32_multiscreen_normalize(coords: tuple[int, int]) -> tuple[int, int]:
     min_x = GetSystemMetrics(76)
     min_y = GetSystemMetrics(77)
     return coords[0] + min_x, coords[1] + min_y
+
+
+snip_start_coords: tuple[int, int] | None = None
+
+
+def _toggle_snip(
+    prefix: str,
+    bbox_in_name: bool,
+    bbox_callback: Callable[[int, int, int, int], Any] | None,
+) -> None:
+    if not snip_start_coords:
+        start_snip()
+    else:
+        stop_snip(prefix, bbox_in_name, bbox_callback)
+
+
+def start_snip() -> None:
+    global snip_start_coords
+    snip_start_coords = tapper.mouse.get_pos()
+
+
+def stop_snip(
+    prefix: str,
+    bbox_in_name: bool,
+    bbox_callback: Callable[[int, int, int, int], Any] | None,
+) -> None:
+    global snip_start_coords
+    if not snip_start_coords:
+        return
+    stop_coords = tapper.mouse.get_pos()
+    x1 = min(snip_start_coords[0], stop_coords[0])
+    x2 = max(snip_start_coords[0], stop_coords[0])
+    y1 = min(snip_start_coords[1], stop_coords[1])
+    y2 = max(snip_start_coords[1], stop_coords[1])
+    bbox = (x1, y1, x2, y2)
+    bbox_str = (
+        f"-(BBOX_{bbox[0]}_{bbox[1]}_{bbox[2]}_{bbox[3]})" if bbox_in_name else ""
+    )
+    ending = bbox_str + ".png"
+    full_name = ""
+    if not os.path.exists(prefix + ending):
+        full_name = prefix + ending
+    else:
+        for i in range(1, 100):
+            potential_name = prefix + f"({i})" + ending
+            if not os.path.exists(potential_name):
+                full_name = potential_name
+    PIL.ImageGrab.grab(bbox=bbox, all_screens=True).save(full_name, "PNG")
+    if bbox_callback:
+        bbox_callback(*bbox)
+    snip_start_coords = None

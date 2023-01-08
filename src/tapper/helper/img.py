@@ -1,11 +1,14 @@
 import re
 import time
+from functools import partial
+from typing import Any
+from typing import Callable
 from typing import Union
 
 from numpy import ndarray
 from tapper.helper._util.image import _find_on_screen
 from tapper.helper._util.image import _normalize
-
+from tapper.helper._util.image import _toggle_snip
 
 SearchableImage = Union[
     str,
@@ -37,8 +40,6 @@ def find(image: SearchableImage, precision: float = 1.0) -> tuple[int, int] | No
     :param image: see SearchableImage
     :param precision: A number between 0 and 1 to indicate the allowed deviation from the searched image.
         0.95 is a difference visible to the eye, and random images can sometimes match up to 0.8.
-        WARNING: Imprecise search is much slower, approximately 5-30 times.
-        NOTE: To use imprecise search, you need [imgfuzz] extra installed, unless you installed with [all] extras.
 
     :return: Coordinates X and Y of top-left of the found image relative to the bounding box (if any).
         If image not found, None is returned.
@@ -114,3 +115,31 @@ def wait_for_one_of(
                 return images[i]
         time.sleep(interval)
     return None
+
+
+def snip(
+    prefix: str = "snip",
+    bbox_in_name: bool = True,
+    bbox_callback: Callable[[int, int, int, int], Any] | None = None,
+) -> Callable[[], None]:
+    """
+    Press twice to get a picture(.png) of a region the screen.
+    Region is the rectangle between mouse cursor positions on first and second click.
+
+    :param prefix: Name prefix. It may be a path.
+    :param bbox_in_name: If true, will include in the name -(BBOX_{x1}_{y1}_{x2}_{y2}), with actual coordinates.
+        This will allow for precise-position search with `find` and `wait_for` methods.
+    :param bbox_callback: Action to be applied to bbox coordinates when snip is taken.
+        This is an alternative to bbox_in_name, if you want to supply it separately later.
+    :return: callable toggle, to be set into a Tap
+
+    Example:
+        {"a": img.snip()}
+            Mouseover a corner of desired snip, click "a", mouseover diagonal corner, click "a",
+            and you'll get an image with default name and bounding box in the name in the working dir of the script.
+
+        {"a": img.snip("image", False, pyperclip.copy)}
+            Same procedure to get an image, but this will be called "image.png" without bounding box in the name,
+            instead it will be copied to your clipboard. Package pyperclip if required for this.
+    """
+    return partial(_toggle_snip, prefix, bbox_in_name, bbox_callback)

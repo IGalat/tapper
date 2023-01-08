@@ -49,7 +49,11 @@ def helpers() -> None:
             {
                 "num1": lambda: print(
                     img.wait_for("small_test_img.png")
-                )  # open this pic when testing
+                ),  # open this pic when testing
+                "num2": img.snip(),
+                "num3": lambda: print(
+                    img.wait_for("snip_test-(BBOX_6_-1043_103_-1017).png")
+                ),
             }
         ),
     )
