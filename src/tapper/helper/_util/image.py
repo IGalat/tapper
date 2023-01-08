@@ -109,11 +109,12 @@ def _toggle_snip(
     prefix: str,
     bbox_in_name: bool,
     bbox_callback: Callable[[int, int, int, int], Any] | None,
+    picture_callback: Callable[[PIL.Image.Image], Any] | None = None,
 ) -> None:
     if not snip_start_coords:
         start_snip()
     else:
-        stop_snip(prefix, bbox_in_name, bbox_callback)
+        stop_snip(prefix, bbox_in_name, bbox_callback, picture_callback)
 
 
 def start_snip() -> None:
