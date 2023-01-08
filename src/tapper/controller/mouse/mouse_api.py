@@ -91,6 +91,7 @@ class MouseController(ResourceController):
     _tracker: MouseTracker
     _commander: MouseCommander
     _emul_keeper: keeper.Emul
+    _memorized_pos: tuple[int, int] | None = None
 
     def _init(self) -> None:
         if not hasattr(self, "_tracker") or not hasattr(self, "_commander"):
@@ -142,6 +143,15 @@ class MouseController(ResourceController):
         At least one of the coordinates must be specified.
         """
         self._commander.move(x, y, relative)
+
+    def memorize_pos(self) -> None:
+        """Remember current cursor position. Only used for to_memorized_pos."""
+        self._memorized_pos = self.get_pos()
+
+    def to_memorized_pos(self) -> None:
+        """Return to cursor to memorized position."""
+        if self._memorized_pos:
+            self.move(*self._memorized_pos)
 
 
 def win32_winput() -> tuple[MouseTracker, MouseCommander]:

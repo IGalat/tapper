@@ -160,6 +160,12 @@ class DummyMouseTrackerCommander(MouseTracker, MouseCommander):
     def get_pos(self) -> tuple[int, int]:
         return self.x, self.y
 
+    def memorize_pos(self) -> None:
+        pass
+
+    def to_memorized_pos(self) -> None:
+        pass
+
 
 def str_match(filtered: str | None, iterated: str | None, strict: bool) -> bool:
     if not filtered or not iterated:
