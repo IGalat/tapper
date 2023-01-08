@@ -5,6 +5,7 @@ from typing import Any
 from typing import Callable
 from typing import Union
 
+import PIL.Image
 from numpy import ndarray
 from tapper.helper._util.image import _find_on_screen
 from tapper.helper._util.image import _normalize
@@ -121,16 +122,19 @@ def snip(
     prefix: str = "snip",
     bbox_in_name: bool = True,
     bbox_callback: Callable[[int, int, int, int], Any] | None = None,
+    picture_callback: Callable[[PIL.Image.Image], Any] | None = None,
 ) -> Callable[[], None]:
     """
     Press twice to get a picture(.png) of a region the screen.
     Region is the rectangle between mouse cursor positions on first and second click.
 
-    :param prefix: Name prefix. It may be a path.
+    :param prefix: Name prefix. It may be a path. If your picture is not in same dir as script with tapper.start,
+        has to be a path, absolute or relative to that dir.
     :param bbox_in_name: If true, will include in the name -(BBOX_{x1}_{y1}_{x2}_{y2}), with actual coordinates.
         This will allow for precise-position search with `find` and `wait_for` methods.
     :param bbox_callback: Action to be applied to bbox coordinates when snip is taken.
         This is an alternative to bbox_in_name, if you want to supply it separately later.
+    :param picture_callback: Action to be applied to the resulting picture.
     :return: callable toggle, to be set into a Tap
 
     Example:
@@ -142,4 +146,4 @@ def snip(
             Same procedure to get an image, but this will be called "image.png" without bounding box in the name,
             instead it will be copied to your clipboard. Package pyperclip if required for this.
     """
-    return partial(_toggle_snip, prefix, bbox_in_name, bbox_callback)
+    return partial(_toggle_snip, prefix, bbox_in_name, bbox_callback, picture_callback)

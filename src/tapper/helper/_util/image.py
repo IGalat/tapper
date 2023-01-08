@@ -125,6 +125,7 @@ def stop_snip(
     prefix: str,
     bbox_in_name: bool,
     bbox_callback: Callable[[int, int, int, int], Any] | None,
+    picture_callback: Callable[[PIL.Image.Image], Any] | None = None,
 ) -> None:
     global snip_start_coords
     if not snip_start_coords:
@@ -135,19 +136,23 @@ def stop_snip(
     y1 = min(snip_start_coords[1], stop_coords[1])
     y2 = max(snip_start_coords[1], stop_coords[1])
     bbox = (x1, y1, x2, y2)
-    bbox_str = (
-        f"-(BBOX_{bbox[0]}_{bbox[1]}_{bbox[2]}_{bbox[3]})" if bbox_in_name else ""
-    )
-    ending = bbox_str + ".png"
-    full_name = ""
-    if not os.path.exists(prefix + ending):
-        full_name = prefix + ending
-    else:
-        for i in range(1, 100):
-            potential_name = prefix + f"({i})" + ending
-            if not os.path.exists(potential_name):
-                full_name = potential_name
-    PIL.ImageGrab.grab(bbox=bbox, all_screens=True).save(full_name, "PNG")
+    sct = PIL.ImageGrab.grab(bbox=bbox, all_screens=True)
+    if prefix is not None:
+        bbox_str = (
+            f"-(BBOX_{bbox[0]}_{bbox[1]}_{bbox[2]}_{bbox[3]})" if bbox_in_name else ""
+        )
+        ending = bbox_str + ".png"
+        full_name = ""
+        if not os.path.exists(prefix + ending):
+            full_name = prefix + ending
+        else:
+            for i in range(1, 100):
+                potential_name = prefix + f"({i})" + ending
+                if not os.path.exists(potential_name):
+                    full_name = potential_name
+        sct.save(full_name, "PNG")
     if bbox_callback:
         bbox_callback(*bbox)
+    if picture_callback:
+        picture_callback(sct)
     snip_start_coords = None
