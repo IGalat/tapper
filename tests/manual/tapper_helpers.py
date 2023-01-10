@@ -19,6 +19,14 @@ def set_recording(new_recording: str) -> None:
     recording = new_recording
 
 
+def print_pixel(color: tuple[int, int, int], coords: tuple[int, int]) -> None:
+    int_to_hex_str = lambda int_: ("0" + repr(hex(int_))[3:-1].upper())[-2:]
+    color_hex = (
+        int_to_hex_str(color[0]) + int_to_hex_str(color[1]) + int_to_hex_str(color[2])
+    )
+    print(f"Pixel {color = } {color_hex=} at {coords = }")
+
+
 def helpers() -> None:
     root.add(
         Group("repeat").add(
@@ -48,12 +56,15 @@ def helpers() -> None:
         Group("img").add(
             {
                 "num1": lambda: print(
-                    img.wait_for("small_test_img.png")
+                    img.find(("small_test_img.png", (500, -1080, 600, -900)))
                 ),  # open this pic when testing
                 "num2": img.snip(),
                 "num3": lambda: print(
                     img.wait_for("snip_test-(BBOX_6_-1043_103_-1017).png")
                 ),
+                "num4": img.pixel_info(print_pixel),
+                "num5": img.pixel_str(print),
+                "num6": lambda: print(img.pixel_find((62, 134, 160), (39, -1037))),
             }
         ),
     )

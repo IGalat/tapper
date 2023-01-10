@@ -7,6 +7,7 @@ from typing import Callable
 from typing import Union
 
 import numpy
+import numpy as np
 import PIL.Image
 import PIL.ImageGrab
 import tapper
@@ -25,12 +26,15 @@ def from_path(pathlike: str) -> ndarray:
 
 def _normalize(
     data_in: Union[
+        None,
         str,
         tuple[str, tuple[int, int, int, int]],
         tuple[ndarray, tuple[int, int, int, int]],
         tuple[ndarray, None],
     ]
-) -> tuple[ndarray, tuple[int, int, int, int] | None]:
+) -> tuple[ndarray | None, tuple[int, int, int, int] | None]:
+    if data_in is None:
+        return None, None
     bbox = None
     if isinstance(data_in, tuple):
         data_in, bbox = data_in  # type: ignore
@@ -44,77 +48,75 @@ def _normalize(
     raise TypeError(f"Unexpected type, {type(data_in)} of {data_in}")
 
 
-def _find_on_screen(
-    image_bbox: tuple[ndarray, tuple[int, int, int, int] | None], precision: float = 1.0
-) -> tuple[int, int] | None:
-    image_arr, bbox = image_bbox
+def get_screenshot_if_none_and_cut(
+    maybe_image: ndarray | None, bbox: tuple[int, int, int, int] | None
+) -> ndarray:
+    if maybe_image:
+        if bbox:
+            return maybe_image[bbox[1] : bbox[3], bbox[0] : bbox[2]]
+        return maybe_image
     sct = PIL.ImageGrab.grab(bbox=bbox, all_screens=True).convert("RGB")
-    sct_arr = numpy.array(sct)
-    result = image_fuzz.find(sct_arr, image_arr, precision)
+    return numpy.asarray(sct)
+
+
+def _find_in_image(
+    inner_image_bbox: tuple[ndarray, tuple[int, int, int, int] | None],
+    outer: ndarray | None = None,
+    precision: float = 1.0,
+) -> tuple[int, int] | None:
+    image_arr, bbox = inner_image_bbox
+    start_x, start_y = get_start_coords(outer)
+    outer = get_screenshot_if_none_and_cut(outer, bbox)
+    if bbox:
+        outer = outer[bbox[1] : bbox[3], bbox[0] : bbox[2]]
+    result = image_fuzz.find(outer, image_arr, precision)
 
     if result is None:
         return None
-    if sys.platform == constants.OS.win32:
-        return win32_multiscreen_normalize(result)
-    else:
-        return result
+    if bbox:
+        start_x, start_y = bbox[0], bbox[1]
+    return start_x + result[0], start_y + result[1]
 
 
-def precise_find(haystack: ndarray, needle: ndarray) -> tuple[int, int] | None:
-    haystack_size = len(haystack[0])
-    needle_size = len(needle[0])
-
-    haystack_bytes = haystack.tobytes()
-    needle_bytes = needle.tobytes()
-
-    gap_size = (haystack_size - needle_size) * 3
-    gap_regex = ("(?s).{" + str(gap_size) + "}").encode("utf-8")
-
-    chunk_size = needle_size * 3
-    split = [
-        needle_bytes[i : i + chunk_size]
-        for i in range(0, len(needle_bytes), chunk_size)
-    ]
-
-    regex = gap_regex.join([re.escape(s) for s in split])
-    p = re.compile(regex)
-    m = p.search(haystack_bytes)
-
-    if not m:
-        return None
-
-    x, _ = m.span()
-
-    left = x % (haystack_size * 3) / 3
-    top = x / haystack_size / 3
-
-    return int(left), int(top)
+def get_start_coords(outer: ndarray | None = None) -> tuple[int, int]:
+    if outer is None and sys.platform == constants.OS.win32:
+        return win32_coords_start()
+    return 0, 0
 
 
-def win32_multiscreen_normalize(coords: tuple[int, int]) -> tuple[int, int]:
-    """Win32 may have negative coords when multiscreen."""
+def win32_coords_start() -> tuple[int, int]:
+    """Win32 may start with negative coords when multiscreen."""
     import winput
     from win32api import GetSystemMetrics
 
     winput.set_DPI_aware(per_monitor=True)
-    min_x = GetSystemMetrics(76)
-    min_y = GetSystemMetrics(77)
-    return coords[0] + min_x, coords[1] + min_y
+    x = GetSystemMetrics(76)
+    y = GetSystemMetrics(77)
+    return x, y
 
 
 snip_start_coords: tuple[int, int] | None = None
 
 
 def _toggle_snip(
-    prefix: str,
-    bbox_in_name: bool,
-    bbox_callback: Callable[[int, int, int, int], Any] | None,
-    picture_callback: Callable[[PIL.Image.Image], Any] | None = None,
+    prefix: str | None = None,
+    bbox_in_name: bool = True,
+    bbox_callback: Callable[[int, int, int, int], Any] | None = None,
+    picture_callback: Callable[[ndarray], Any] | None = None,
 ) -> None:
+    global snip_start_coords
     if not snip_start_coords:
         start_snip()
     else:
-        stop_snip(prefix, bbox_in_name, bbox_callback, picture_callback)
+        stop_coords = tapper.mouse.get_pos()
+        x1 = min(snip_start_coords[0], stop_coords[0])
+        x2 = max(snip_start_coords[0], stop_coords[0])
+        y1 = min(snip_start_coords[1], stop_coords[1])
+        y2 = max(snip_start_coords[1], stop_coords[1])
+        finish_snip_with_callback(
+            prefix, bbox_in_name, (x1, y1, x2, y2), bbox_callback, picture_callback
+        )
+        snip_start_coords = None
 
 
 def start_snip() -> None:
@@ -122,38 +124,104 @@ def start_snip() -> None:
     snip_start_coords = tapper.mouse.get_pos()
 
 
-def stop_snip(
-    prefix: str,
-    bbox_in_name: bool,
-    bbox_callback: Callable[[int, int, int, int], Any] | None,
-    picture_callback: Callable[[PIL.Image.Image], Any] | None = None,
+def finish_snip_with_callback(
+    prefix: str | None = None,
+    bbox_in_name: bool = True,
+    bbox: tuple[int, int, int, int] | None = None,
+    bbox_callback: Callable[[int, int, int, int], Any] | None = None,
+    picture_callback: Callable[[ndarray], Any] | None = None,
 ) -> None:
-    global snip_start_coords
-    if not snip_start_coords:
-        return
-    stop_coords = tapper.mouse.get_pos()
-    x1 = min(snip_start_coords[0], stop_coords[0])
-    x2 = max(snip_start_coords[0], stop_coords[0])
-    y1 = min(snip_start_coords[1], stop_coords[1])
-    y2 = max(snip_start_coords[1], stop_coords[1])
-    bbox = (x1, y1, x2, y2)
-    sct = PIL.ImageGrab.grab(bbox=bbox, all_screens=True)
-    if prefix is not None:
-        bbox_str = (
-            f"-(BBOX_{bbox[0]}_{bbox[1]}_{bbox[2]}_{bbox[3]})" if bbox_in_name else ""
-        )
-        ending = bbox_str + ".png"
-        full_name = ""
-        if not os.path.exists(prefix + ending):
-            full_name = prefix + ending
-        else:
-            for i in range(1, 100):
-                potential_name = prefix + f"({i})" + ending
-                if not os.path.exists(potential_name):
-                    full_name = potential_name
-        sct.save(full_name, "PNG")
+    nd_sct, bbox = _finish_snip(prefix, bbox, bbox_in_name)
     if bbox_callback:
         bbox_callback(*bbox)
     if picture_callback:
-        picture_callback(sct)
-    snip_start_coords = None
+        picture_callback(nd_sct)
+
+
+def _finish_snip(
+    prefix: str | None = None,
+    bbox: tuple[int, int, int, int] | None = None,
+    bbox_in_name: bool = True,
+) -> tuple[ndarray, tuple[int, int, int, int]]:
+    sct = PIL.ImageGrab.grab(bbox=bbox, all_screens=True)
+    if prefix is not None:
+        save_to_disk(sct, prefix, bbox, bbox_in_name)
+    return numpy.asarray(sct.convert("RGB")), bbox  # type: ignore
+
+
+def save_to_disk(
+    sct: PIL.Image.Image,
+    prefix: str,
+    bbox: tuple[int, int, int, int] | None,
+    bbox_in_name: bool,
+) -> None:
+    bbox_str = (
+        f"-(BBOX_{bbox[0]}_{bbox[1]}_{bbox[2]}_{bbox[3]})"
+        if bbox and bbox_in_name
+        else ""
+    )
+    ending = bbox_str + ".png"
+    full_name = ""
+    if not os.path.exists(prefix + ending):
+        full_name = prefix + ending
+    else:
+        for i in range(1, 100):
+            potential_name = prefix + f"({i})" + ending
+            if not os.path.exists(potential_name):
+                full_name = potential_name
+    sct.save(full_name, "PNG")
+
+
+coords_to_bbox_1_pixel = lambda coords: (
+    coords[0],
+    coords[1],
+    coords[0] + 1,
+    coords[1] + 1,
+)
+
+
+def _get_pixel_color(
+    coords: tuple[int, int], outer: str | ndarray | None
+) -> tuple[int, int, int]:
+    outer, _ = _normalize(outer)  # type: ignore
+    bbox = coords_to_bbox_1_pixel(coords)
+    outer = get_screenshot_if_none_and_cut(outer, bbox)
+    return outer[0][0]
+
+
+def _pixel_str(coords: tuple[int, int], outer: str | ndarray | None) -> str:
+    color = _get_pixel_color(coords, outer)
+    return f"({color[0]}, {color[1]}, {color[2]}), ({coords[0]}, {coords[1]})"
+
+
+def _pixel_find(
+    color: tuple[int, int, int],
+    bbox_or_coords: tuple[int, int, int, int] | tuple[int, int] | None,
+    outer: str | ndarray | None,
+    variation: int,
+) -> tuple[int, int] | None:
+    c_match = lambda component, target: abs(component - target) <= variation
+
+    def color_match(c) -> bool:
+        return (
+            c_match(c[0], color[0])
+            and c_match(c[1], color[1])
+            and c_match(c[2], color[2])
+        )
+
+    # color_match = lambda r, g, b: c_match(r, color[0]) and c_match(g, color[1]) and c_match(b, color[2])
+
+    start_x, start_y = get_start_coords(outer)  # type: ignore
+    outer, _ = _normalize(outer)  # type: ignore
+    if isinstance(bbox_or_coords, tuple) and len(bbox_or_coords) == 2:
+        bbox_or_coords = coords_to_bbox_1_pixel(bbox_or_coords)
+    outer = get_screenshot_if_none_and_cut(outer, bbox_or_coords)  # type: ignore
+    matching_px = np.array(np.where(outer[0] > 0))
+    if matching_px.size > 0:
+        first_match = matching_px[:, 0]
+        if bbox_or_coords:
+            start_x, start_y = bbox_or_coords[0], bbox_or_coords[1]
+        x = start_x + first_match[0]
+        y = start_y + first_match[1]
+        return x, y
+    return None
