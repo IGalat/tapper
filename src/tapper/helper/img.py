@@ -256,4 +256,4 @@ def pixel_find(
         If you specify 255 shades of variation, all colors will match.
     :return: Coordinates X and Y of the first pixel that matches, or None if no match.
     """
-    return _pixel_find(color, bbox_or_coords, outer, variation)
+    return _pixel_find(color, bbox_or_coords, _normalize(outer)[0], variation)

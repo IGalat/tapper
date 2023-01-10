@@ -31,6 +31,7 @@ def _normalize(
         tuple[str, tuple[int, int, int, int]],
         tuple[ndarray, tuple[int, int, int, int]],
         tuple[ndarray, None],
+        ndarray,
     ]
 ) -> tuple[ndarray | None, tuple[int, int, int, int] | None]:
     if data_in is None:
@@ -51,7 +52,7 @@ def _normalize(
 def get_screenshot_if_none_and_cut(
     maybe_image: ndarray | None, bbox: tuple[int, int, int, int] | None
 ) -> ndarray:
-    if maybe_image:
+    if maybe_image is not None:
         if bbox:
             return maybe_image[bbox[1] : bbox[3], bbox[0] : bbox[2]]
         return maybe_image
@@ -65,21 +66,23 @@ def _find_in_image(
     precision: float = 1.0,
 ) -> tuple[int, int] | None:
     image_arr, bbox = inner_image_bbox
-    start_x, start_y = get_start_coords(outer)
+    x_start, y_start = get_start_coords(outer, bbox)
     outer = get_screenshot_if_none_and_cut(outer, bbox)
-    if bbox:
-        outer = outer[bbox[1] : bbox[3], bbox[0] : bbox[2]]
     result = image_fuzz.find(outer, image_arr, precision)
 
     if result is None:
         return None
-    if bbox:
-        start_x, start_y = bbox[0], bbox[1]
-    return start_x + result[0], start_y + result[1]
+    return x_start + result[0], y_start + result[1]
 
 
-def get_start_coords(outer: ndarray | None = None) -> tuple[int, int]:
-    if outer is None and sys.platform == constants.OS.win32:
+def get_start_coords(
+    outer: ndarray | None,
+    bbox_or_coords: tuple[int, int, int, int] | tuple[int, int] | None,
+) -> tuple[int, int]:
+    if bbox_or_coords:
+        return bbox_or_coords[0], bbox_or_coords[1]
+    screenshot_required = outer is None
+    if screenshot_required and sys.platform == constants.OS.win32:
         return win32_coords_start()
     return 0, 0
 
@@ -197,30 +200,29 @@ def _pixel_str(coords: tuple[int, int], outer: str | ndarray | None) -> str:
 def _pixel_find(
     color: tuple[int, int, int],
     bbox_or_coords: tuple[int, int, int, int] | tuple[int, int] | None,
-    outer: str | ndarray | None,
+    outer: ndarray | None,
     variation: int,
 ) -> tuple[int, int] | None:
-    c_match = lambda component, target: abs(component - target) <= variation
+    start_x, start_y = get_start_coords(outer, bbox_or_coords)
 
-    def color_match(c) -> bool:
-        return (
-            c_match(c[0], color[0])
-            and c_match(c[1], color[1])
-            and c_match(c[2], color[2])
-        )
+    bbox: tuple[int, int, int, int] | None = None
+    if isinstance(bbox_or_coords, tuple):
+        if len(bbox_or_coords) == 2:
+            bbox = coords_to_bbox_1_pixel(bbox_or_coords)
+        elif len(bbox_or_coords) == 4:
+            bbox = bbox_or_coords  # type: ignore
 
-    # color_match = lambda r, g, b: c_match(r, color[0]) and c_match(g, color[1]) and c_match(b, color[2])
+    outer = get_screenshot_if_none_and_cut(outer, bbox)
+    min_mask = color[0] - variation, color[1] - variation, color[2] - variation
+    max_mask = color[0] + variation, color[1] + variation, color[2] + variation
+    if variation == 0:
+        matching_px = np.array(np.where(outer == color))
+    else:
+        matching_px = np.array(np.where(outer >= min_mask))
+        matching_px = np.array(np.where(matching_px <= max_mask))
 
-    start_x, start_y = get_start_coords(outer)  # type: ignore
-    outer, _ = _normalize(outer)  # type: ignore
-    if isinstance(bbox_or_coords, tuple) and len(bbox_or_coords) == 2:
-        bbox_or_coords = coords_to_bbox_1_pixel(bbox_or_coords)
-    outer = get_screenshot_if_none_and_cut(outer, bbox_or_coords)  # type: ignore
-    matching_px = np.array(np.where(outer[0] > 0))
     if matching_px.size > 0:
         first_match = matching_px[:, 0]
-        if bbox_or_coords:
-            start_x, start_y = bbox_or_coords[0], bbox_or_coords[1]
         x = start_x + first_match[0]
         y = start_y + first_match[1]
         return x, y
