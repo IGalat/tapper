@@ -14,7 +14,7 @@ class RecordConfig:
     down_up_as_click: bool = True
     """Transform UP and DOWN key to CLICK key."""
 
-    min_mouse_movement: int = 50
+    min_mouse_movement: int = 0
     """Mouse movements less than this will be disregarded."""
 
     shorten_to_aliases: bool = True
