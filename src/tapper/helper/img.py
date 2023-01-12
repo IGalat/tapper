@@ -67,7 +67,7 @@ def wait_for(
     This is blocking until timeout, obviously.
 
     :param image: see SearchableImage
-    :param timeout: How long to search for.
+    :param timeout: If this many seconds elapsed, return None.
     :param interval: Time between searches. Note that search can take significant time as well,
         and actual frequency may be lower than you expect because of this.
     :param precision: see `find` param.
@@ -75,11 +75,14 @@ def wait_for(
     """
     finish_time = time.perf_counter() + timeout
     normalized = _normalize(image)  # type: ignore
-    while time.perf_counter() < finish_time:
+    while True:
         if found := _find_in_image(normalized, precision=precision):  # type: ignore
             return found
+        if time.perf_counter() < finish_time:
+            return None
         time.sleep(interval)
-    return None
+        if time.perf_counter() < finish_time:
+            return None
 
 
 def wait_for_one_of(
@@ -119,12 +122,15 @@ def wait_for_one_of(
     """
     finish_time = time.perf_counter() + timeout
     normalized = [_normalize(image) for image in images]  # type: ignore
-    while time.perf_counter() < finish_time:
+    while True:
         for i in range(len(normalized)):
             if _find_in_image(normalized[i], precision=precision):  # type: ignore
                 return images[i]
+        if time.perf_counter() < finish_time:
+            return None
         time.sleep(interval)
-    return None
+        if time.perf_counter() < finish_time:
+            return None
 
 
 def snip(
@@ -198,7 +204,7 @@ def pixel_info(
     :return: callable toggle, to be set into a Tap.
     """
     return lambda: callback(
-        get_pixel_color(tapper.mouse.get_pos(), outer), tapper.mouse.get_pos()
+        pixel_get_color(tapper.mouse.get_pos(), outer), tapper.mouse.get_pos()
     )
 
 
@@ -222,7 +228,7 @@ def pixel_str(
     return lambda: callback(_pixel_str(tapper.mouse.get_pos(), outer))
 
 
-def get_pixel_color(
+def pixel_get_color(
     coords: tuple[int, int], outer: str | ndarray | None = None
 ) -> tuple[int, int, int]:
     """
@@ -257,3 +263,67 @@ def pixel_find(
     :return: Coordinates X and Y of the first pixel that matches, or None if no match.
     """
     return _pixel_find(color, bbox_or_coords, _normalize(outer)[0], variation)
+
+
+def pixel_wait_for(
+    color: tuple[int, int, int],
+    bbox_or_coords: tuple[int, int, int, int] | tuple[int, int] | None = None,
+    timeout: int | float = 5,
+    interval: float = 0.1,
+    variation: int = 0,
+) -> tuple[int, int] | None:
+    """
+    Regularly search the screen or region of the screen for a pixel,
+    returning coordinates when it appears, or None if timeout.
+    This is blocking until timeout, obviously.
+
+    :param color: see pixel_find
+    :param bbox_or_coords: see pixel_find
+    :param timeout: If this many seconds elapsed, return None.
+    :param interval: Time between searches.
+    :param variation: see pixel_find
+    :return: Coordinates of the pixel if found, else None.
+    """
+    finish_time = time.perf_counter() + timeout
+    while True:
+        if found := pixel_find(color, bbox_or_coords, variation=variation):
+            return found
+        if time.perf_counter() < finish_time:
+            return None
+        time.sleep(interval)
+        if time.perf_counter() < finish_time:
+            return None
+
+
+def pixel_wait_for_one_of(
+    colors_coords: list[
+        tuple[tuple[int, int, int], tuple[int, int, int, int] | tuple[int, int] | None]
+    ],
+    timeout: int | float = 5,
+    interval: float = 0.1,
+    variation: int = 0,
+) -> tuple[
+    tuple[int, int, int], tuple[int, int, int, int] | tuple[int, int] | None
+] | None:
+    """
+    Regularly search the screen or region of the screen for pixels,
+    returning first that appears, or None if timeout.
+    This is blocking until timeout, obviously.
+
+    :param colors_coords: list of tuples(color, coords) - for color and coords see pixel_find.
+        Each pixel may have own coords/bbox to be searched in. Coords None will search entire screen.
+    :param timeout: see pixel_wait_for
+    :param interval: see pixel_wait_for
+    :param variation: see pixel_find
+    :return: tuple(color, coords) that was found, else None.
+    """
+    finish_time = time.perf_counter() + timeout
+    while True:
+        for _, col_coo in enumerate(colors_coords):
+            if pixel_find(*col_coo, variation=variation):
+                return col_coo
+        if time.perf_counter() < finish_time:
+            return None
+        time.sleep(interval)
+        if time.perf_counter() < finish_time:
+            return None
