@@ -4,8 +4,17 @@ Versions follow [CalVer](https://calver.org) with format YYYY.0M.MICRO.
 
 Until status changes from "Beta" to "Stable", don't expect backwards compatibility.
 
-## 2023.1.1 - Lang, tray, linux kb
 
+## 2023.1.2 - Images
+
+### Major changes:
+- Image support! Snip, search, wait for images/pixels.
+
+### Minor changes:
+- New `mouse` convenience methods to memorize position and return to it.
+
+
+## 2023.1.1 - Lang, tray, linux kb
 
 ### Compatibility breaking changes:
 
@@ -19,10 +28,6 @@ change others from win32-specific to generic.
 - Limited linux support: keyboard, except for language, should work for all linux OS
 - Tray icon, for visibility and control
 - Language support: transliterate, get and change input language
-
----
-
-Various bugfixes and minor changes.
 
 
 ## 2022.12.8 - Initial release
