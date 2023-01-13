@@ -6,7 +6,6 @@ import sys
 
 def restart() -> None:
     print("Restarting tapper...")
-    sys.stdout.flush()
     popen_args = [sys.executable] + sys.argv
     if sys.platform == "win32":
         subprocess.Popen(popen_args, creationflags=subprocess.DETACHED_PROCESS)
