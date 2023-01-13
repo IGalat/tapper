@@ -38,7 +38,7 @@ _bbox_pattern = re.compile(r"\(BBOX_-?\d+_-?\d+_-?\d+_-?\d+\)")
 
 
 def find(
-    image: SearchableImage, outer: str | ndarray | None = None, precision: float = 1.0
+    image: SearchableImage, outer: str | ndarray | None = None, precision: float = 0.999
 ) -> tuple[int, int] | None:
     """
     Search a region of the screen for an image.
@@ -59,7 +59,7 @@ def wait_for(
     image: SearchableImage,
     timeout: int | float = 5,
     interval: float = 0.2,
-    precision: float = 1.0,
+    precision: float = 0.999,
 ) -> tuple[int, int] | None:
     """
     Regularly search the screen or region of the screen for image,
@@ -89,7 +89,7 @@ def wait_for_one_of(
     images: list[SearchableImage],
     timeout: int | float = 5,
     interval: float = 0.4,
-    precision: float = 1.0,
+    precision: float = 0.999,
 ) -> SearchableImage | None:
     """
     Regularly search the screen or region of the screen for images,
@@ -137,7 +137,7 @@ def wait_for_one_of(
 
 def snip(
     prefix: str | None = "snip",
-    bbox_in_name: bool = True,
+    bbox_to_name: bool = True,
     bbox_callback: Callable[[int, int, int, int], Any] | None = None,
     picture_callback: Callable[[ndarray], Any] | None = None,
 ) -> Callable[[], None]:
@@ -147,7 +147,7 @@ def snip(
 
     :param prefix: Name prefix. It may be a path. If your picture is not in same dir as script with tapper.start,
         has to be a path, absolute or relative to that dir.
-    :param bbox_in_name: If true, will include in the name -(BBOX_{x1}_{y1}_{x2}_{y2}), with actual coordinates.
+    :param bbox_to_name: If true, will include in the name "-(BBOX_{x1}_{y1}_{x2}_{y2})", with actual coordinates.
         This is useful for precise-position search with `find` and `wait_for` methods.
     :param bbox_callback: Action to be applied to bbox coordinates when snip is taken.
         This is an alternative to bbox_in_name, if you want to supply it separately later.
@@ -163,7 +163,7 @@ def snip(
             Same procedure to get an image, but this will be called "image.png" without bounding box in the name,
             instead it will be copied to your clipboard. Package pyperclip if required for this.
     """
-    return partial(_toggle_snip, prefix, bbox_in_name, bbox_callback, picture_callback)
+    return partial(_toggle_snip, prefix, bbox_to_name, bbox_callback, picture_callback)
 
 
 def get_snip(

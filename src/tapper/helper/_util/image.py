@@ -6,6 +6,7 @@ from typing import Any
 from typing import Callable
 from typing import Union
 
+import mss as mss
 import numpy
 import numpy as np
 import PIL.Image
@@ -16,6 +17,8 @@ from tapper.helper._util import image_fuzz
 from tapper.model import constants
 
 _bbox_pattern = re.compile(r"\(BBOX_-?\d+_-?\d+_-?\d+_-?\d+\)")
+
+mss = mss.mss()
 
 
 @lru_cache
@@ -56,8 +59,12 @@ def get_screenshot_if_none_and_cut(
         if bbox:
             return maybe_image[bbox[1] : bbox[3], bbox[0] : bbox[2]]
         return maybe_image
-    sct = PIL.ImageGrab.grab(bbox=bbox, all_screens=True).convert("RGB")
-    return numpy.asarray(sct)
+    if bbox:
+        sct = mss.grab(bbox)
+    else:
+        sct = mss.grab(mss.monitors[0])
+    pil_rgb = PIL.Image.frombytes("RGB", sct.size, sct.bgra, "raw", "BGRX")
+    return numpy.asarray(pil_rgb)
 
 
 def _find_in_image(
@@ -103,7 +110,7 @@ snip_start_coords: tuple[int, int] | None = None
 
 def _toggle_snip(
     prefix: str | None = None,
-    bbox_in_name: bool = True,
+    bbox_to_name: bool = True,
     bbox_callback: Callable[[int, int, int, int], Any] | None = None,
     picture_callback: Callable[[ndarray], Any] | None = None,
 ) -> None:
@@ -117,7 +124,7 @@ def _toggle_snip(
         y1 = min(snip_start_coords[1], stop_coords[1])
         y2 = max(snip_start_coords[1], stop_coords[1])
         finish_snip_with_callback(
-            prefix, bbox_in_name, (x1, y1, x2, y2), bbox_callback, picture_callback
+            prefix, bbox_to_name, (x1, y1, x2, y2), bbox_callback, picture_callback
         )
         snip_start_coords = None
 
@@ -129,12 +136,12 @@ def start_snip() -> None:
 
 def finish_snip_with_callback(
     prefix: str | None = None,
-    bbox_in_name: bool = True,
+    bbox_to_name: bool = True,
     bbox: tuple[int, int, int, int] | None = None,
     bbox_callback: Callable[[int, int, int, int], Any] | None = None,
     picture_callback: Callable[[ndarray], Any] | None = None,
 ) -> None:
-    nd_sct, bbox = _finish_snip(prefix, bbox, bbox_in_name)
+    nd_sct, bbox = _finish_snip(prefix, bbox, bbox_to_name)
     if bbox_callback:
         bbox_callback(*bbox)
     if picture_callback:
@@ -144,16 +151,16 @@ def finish_snip_with_callback(
 def _finish_snip(
     prefix: str | None = None,
     bbox: tuple[int, int, int, int] | None = None,
-    bbox_in_name: bool = True,
+    bbox_to_name: bool = True,
 ) -> tuple[ndarray, tuple[int, int, int, int]]:
-    sct = PIL.ImageGrab.grab(bbox=bbox, all_screens=True)
+    sct = get_screenshot_if_none_and_cut(None, bbox)
     if prefix is not None:
-        save_to_disk(sct, prefix, bbox, bbox_in_name)
-    return numpy.asarray(sct.convert("RGB")), bbox  # type: ignore
+        save_to_disk(sct, prefix, bbox, bbox_to_name)
+    return sct, bbox
 
 
 def save_to_disk(
-    sct: PIL.Image.Image,
+    sct: ndarray,
     prefix: str,
     bbox: tuple[int, int, int, int] | None,
     bbox_in_name: bool,
@@ -173,7 +180,7 @@ def save_to_disk(
             if not os.path.exists(potential_name):
                 full_name = potential_name
                 break
-    sct.save(full_name, "PNG")
+    PIL.Image.fromarray(sct).save(full_name, "PNG")
 
 
 coords_to_bbox_1_pixel = lambda coords: (

@@ -1,6 +1,7 @@
 typing_extensions==4.3.0
 
 pillow>=9.4.0
+mss>=7.0.1
 pystray>=0.19.4
 opencv-python>=4.7.0.68
 numpy>=1.24.1
