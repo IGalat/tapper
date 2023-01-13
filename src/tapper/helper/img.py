@@ -111,7 +111,9 @@ def wait_for_one_of(
         no_btn = "no(BBOX_-100_213_-56_412).png"
         close_btn = "close.png"
 
-        if (btn := img.wait_for_one_of([yes_btn, no_btn, close_btn], timeout=2) == yes_btn:
+        btn = img.wait_for_one_of([yes_btn, no_btn, close_btn])
+
+        if btn == yes_btn:
             continue_flow()
         elif btn == no_btn:
             warn()

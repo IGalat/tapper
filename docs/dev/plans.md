@@ -47,7 +47,7 @@ By having user configure triggers and corresponding actions, and running a loop 
 23. Tree and config validation with tkinter warnings, Error handling, Logging
 24. Moar trackers: kb lang, process, device connect/disconnect, service/daemon, file, resource(cpu/gpu/network) load
 25. Group actions when it goes on/off, timer for checking group states? Tap without trigger, only for on/off active
-26. Helpers galore: picture assist, on repeat/hold, ?
+26. DONE. Helpers galore: picture assist, on repeat/hold
 27. Good docs, with sphinx/readthedocs/doctest
 28. Optimization: profile everything, make caching, active tracking, for window controller in particular
 

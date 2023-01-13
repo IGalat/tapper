@@ -11,7 +11,7 @@ In practice it aims to do a lot more and is more flexible. Here are some of the 
 - Responsiveness when rapidly typing or clicking.
 - Per-window or otherwise conditional hotkeys.
 - Suppressing the key that triggered the action. (surprising how commonly this is absent in other tools)
-- Built-in suite of convenient, well-tested command functions.
+- Built-in suite of convenient, well-tested helper functions.
 
 ## Example
 
@@ -436,6 +436,155 @@ You can supply a [RecordConfig](https://github.com/IGalat/tapper/blob/master/src
 to `record_toggle` or `record_stop` to modify details about the string you get.
 
 ---
+
+### Image and pixel search, snip
+
+```python
+from tapper.helper import img
+```
+
+allows you to:
+
+- search for an image on a screen (or in image), fuzzy search is an option
+- wait for image (or one of the images) to appear
+- snip the screen easily and save in a format convenient for **tapper** usage
+- all of this for a single pixel, which works much faster
+
+---
+
+```python
+Tap("f2", img.snip())
+```
+
+Move cursor to a spot, press `f2`, move to another spot, press `f2` - and now you have
+a saved `.png` file - partial screenshot of a rectangle between first and second mouse
+positions, with name like `snip-(BBOX_953_531_997_686).png`, where in brackets are
+coordinates of top-left and bottom-right corners of the image on the screen.
+
+This now can be used to search the picture:
+
+```python
+if img.find("snip-(BBOX_953_531_997_686).png"):
+    do_my_stuff()
+```
+
+You can also specify the bounding box separately, or not at all:
+
+```python
+img.find(("my_pic.png", (953, 531, 997, 686)))  # bbox separate from name
+img.find("my_pic.png")  # search the whole screen
+```
+
+Note that using the same bbox the image was snipped with means searching that exact
+position on the screen. To search a more broad position but not the whole screen, set
+coordinates appropriately.
+
+Fuzzy search allows you to search for an image like what you supplied:
+
+```python
+img.find("my_pic.png", precision=0.8)
+```
+
+---
+
+To wait for an image:
+
+```python
+img.wait_for("my_pic.png")
+```
+
+This will regularly take screenshots and check if the picture is found on screen.
+
+You can control the search interval and timeout:
+
+```python
+img.wait_for("my_pic.png", timeout=15, interval=0.5)
+```
+
+---
+
+If you expect one of the images to appear, use `wait_for_one_of`:
+
+```python
+yes_btn = "yes.png", (-100, 213, -56, 412)
+no_btn = "no(BBOX_-100_213_-56_412).png"
+close_btn = "close.png"
+
+btn = img.wait_for_one_of([yes_btn, no_btn, close_btn])
+
+if btn == yes_btn:
+    continue_flow()
+elif btn == no_btn:
+    warn()
+elif btn == close_btn:
+    close_app()
+else:
+    raise ValueError
+```
+
+Each image may have a different bounding box.
+
+---
+
+Similar functions for pixel:
+
+```python
+"f2": img.pixel_str(pyperclip.copy)
+```
+
+Press `f2` once, and you'll get a string of RGB color and xy-position of the pixel to your clipboard, like:
+
+`"(255, 255, 255), (1919, 1079)"`
+
+Or get the same thing as tuples:
+
+```python
+def my_pixel_callback(color: tuple[int, int, int], coords: tuple[int, int]):
+  ...
+
+"f2": img.pixel_info(my_pixel_callback)
+```
+
+There is an immediate, non-callback option:
+
+```python
+my_pixel = pixel_get_color(1920 - 1, 1080 - 1)
+assert my_pixel == (64, 45, 182)
+```
+
+---
+
+Use the string from `img.pixel_str` to find or wait for a pixel:
+
+```python
+my_pixel_precise_coords = (255, 255, 255), (1919, 1079)
+if img.pixel_find(my_pixel_precise_coords):
+    ...
+
+if img.pixel_wait_for((255, 255, 255), (1000, 1020, 1919, 1079)):  # search in wider area
+    ...
+
+yes_btn_pixel = (67, 240, 13), (560, 780)  # will only be searched for in one spot
+no_btn_pixel = (255, 13, 13), None  # will be searched for on the whole screen, as bbox=None
+if img.pixel_wait_for_one_of([yes_btn_pixel, no_btn_pixel]):
+    ...
+```
+
+---
+
+Functions for image and pixel allow searching and snipping an image instead of screen.
+
+This may be a pathname, or numpy-array.
+
+This exists for efficiency, as taking screenshot every time in a loop or a function is slow.
+
+```python
+sct = img.get_snip()
+for i in range(100):
+    bbox = (i, i, i + 100, i + 1)
+    if img.find((my_img_of_horizontal_line_100_by_1_px, bbox), sct):
+    return i
+```
 
 ## Config
 
