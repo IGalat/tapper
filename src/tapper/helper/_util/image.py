@@ -172,6 +172,7 @@ def save_to_disk(
             potential_name = prefix + f"({i})" + ending
             if not os.path.exists(potential_name):
                 full_name = potential_name
+                break
     sct.save(full_name, "PNG")
 
 
