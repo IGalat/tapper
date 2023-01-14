@@ -121,6 +121,15 @@ class MouseController(ResourceController):
         """Circle with "precision" radius."""
         return is_near(*self.get_pos(), x, y, precision)
 
+    def is_in(self, x1: int, y1: int, x2: int, y2: int) -> bool:
+        """Is cursor within bounding box - rectangle between x1 y1 and x2 y2."""
+        x, y = self.get_pos()
+        x_left = min(x1, x2)
+        x_right = max(x1, x2)
+        y_top = min(y1, y2)
+        y_bottom = max(y1, y2)
+        return x_left <= x <= x_right and y_top <= y <= y_bottom
+
     def press(self, symbol: str) -> None:
         """Presses down one key."""
         self._emul_keeper.will_emulate((symbol, constants.KeyDirBool.DOWN))

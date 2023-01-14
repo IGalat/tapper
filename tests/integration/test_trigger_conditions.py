@@ -82,8 +82,8 @@ def test_cursor_near(f: Fixture) -> None:
 def test_cursor_in(f: Fixture) -> None:
     tapper.root.add(
         Tap("a", "0"),
-        Tap("a", "1", cursor_in=((10, 10), (20, 20))),
-        Tap("a", "2", cursor_in=((500, 500), (600, 600))),
+        Tap("a", "1", cursor_in=(10, 10, 20, 20)),
+        Tap("a", "2", cursor_in=(500, 500, 600, 600)),
     )
     f.start()
 

@@ -51,17 +51,7 @@ def mouse(mouse_c: MouseController) -> dict[str, Callable[[Any], Any]]:
         return mouse_c.is_near(x=param1, y=param2)
 
     kwargs["cursor_near"] = is_cursor_near
-
-    def is_cursor_in_rect(
-        up_down_coords: tuple[tuple[int, int], tuple[int, int]]
-    ) -> bool:
-        xy1, xy2 = up_down_coords
-        x1, y1 = xy1
-        x2, y2 = xy2
-        x, y = mouse_c.get_pos()
-        return x1 <= x <= x2 and y1 <= y <= y2
-
-    kwargs["cursor_in"] = is_cursor_in_rect
+    kwargs["cursor_in"] = lambda bbox: mouse_c.is_in(bbox[0], bbox[1], bbox[2], bbox[3])
 
     return kwargs
 
