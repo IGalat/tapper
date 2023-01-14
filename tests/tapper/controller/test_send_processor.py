@@ -70,7 +70,7 @@ class TestSendCommandProcessor:
         mc._tracker, mc._commander, mc._emul_keeper = mouse_tc, mouse_tc, emul
         self.mc = mc
 
-        self.sender = SendCommandProcessor("", parser, kbc, mc, 0)
+        self.sender = SendCommandProcessor("", parser, kbc, mc, lambda: 0)
         self.sender.sleep_fn = lambda f: self.all_signals.append(sleep(f))
 
         event.subscribe(listener.name, lambda signal: self.real_signals.append(signal))
@@ -118,23 +118,24 @@ class TestSendCommandProcessor:
         ]
 
     def test_default_interval(self) -> None:
-        self.sender.default_interval = 0.5
+        self.sender.default_interval = lambda: 0.5
         self.sender.send("hello")
         result = []
         for letter in "hello":
             result.append(sleep(0.5))
             result.extend(click(letter))
+        result.pop(0)
         assert self.all_signals == result
 
     def test_interval_variable(self) -> None:
-        self.sender.default_interval = 0.1
+        self.sender.default_interval = lambda: 0.1
         self.sender.send("hi")
-        self.sender.send("q", interval=10)
+        self.sender.send("qq", interval=10)
         assert self.all_signals == [
-            sleep(0.1),
             *click("h"),
             sleep(0.1),
             *click("i"),
+            *click("q"),
             sleep(10),
             *click("q"),
         ]
@@ -154,7 +155,6 @@ class TestSendCommandProcessor:
     def test_speed_and_interval(self) -> None:
         self.sender.send("h$(1s)k", interval=0.1, speed=2)
         assert self.all_signals == [
-            sleep(0.1),
             *click("h"),
             sleep(0.5),
             sleep(0.1),

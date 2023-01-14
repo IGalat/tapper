@@ -112,6 +112,7 @@ def f(dummy: Dummy, is_debug: bool) -> Fixture:
         real_sender.os = sender.os
         real_sender.parser = sender.parser
         real_sender.sleep_fn = partial(sleep_logged, signals=fixture.real_signals)
+        real_sender.default_interval = lambda: config.default_send_interval
 
         emul_keeper = keeper.Emul()
 

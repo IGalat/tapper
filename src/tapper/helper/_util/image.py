@@ -67,6 +67,18 @@ def get_screenshot_if_none_and_cut(
     return numpy.asarray(pil_rgb)
 
 
+def _find_in_image_raw(
+    inner_image_bbox: tuple[ndarray, tuple[int, int, int, int] | None],
+    outer: ndarray | None = None,
+) -> tuple[float, tuple[int, int]]:
+    image_arr, bbox = inner_image_bbox
+    x_start, y_start = get_start_coords(outer, bbox)
+    outer = get_screenshot_if_none_and_cut(outer, bbox)
+    confidence, coords = image_fuzz.find(outer, image_arr)
+
+    return confidence, (x_start + coords[0], y_start + coords[1])
+
+
 def _find_in_image(
     inner_image_bbox: tuple[ndarray, tuple[int, int, int, int] | None],
     outer: ndarray | None = None,
@@ -75,11 +87,11 @@ def _find_in_image(
     image_arr, bbox = inner_image_bbox
     x_start, y_start = get_start_coords(outer, bbox)
     outer = get_screenshot_if_none_and_cut(outer, bbox)
-    result = image_fuzz.find(outer, image_arr, precision)
+    confidence, coords = image_fuzz.find(outer, image_arr)
 
-    if result is None:
+    if confidence < precision:
         return None
-    return x_start + result[0], y_start + result[1]
+    return x_start + coords[0], y_start + coords[1]
 
 
 def get_start_coords(
@@ -142,7 +154,7 @@ def finish_snip_with_callback(
     picture_callback: Callable[[ndarray], Any] | None = None,
 ) -> None:
     nd_sct, bbox = _finish_snip(prefix, bbox, bbox_to_name)
-    if bbox_callback:
+    if bbox and bbox_callback:
         bbox_callback(*bbox)
     if picture_callback:
         picture_callback(nd_sct)
@@ -152,7 +164,7 @@ def _finish_snip(
     prefix: str | None = None,
     bbox: tuple[int, int, int, int] | None = None,
     bbox_to_name: bool = True,
-) -> tuple[ndarray, tuple[int, int, int, int]]:
+) -> tuple[ndarray, tuple[int, int, int, int] | None]:
     sct = get_screenshot_if_none_and_cut(None, bbox)
     if prefix is not None:
         save_to_disk(sct, prefix, bbox, bbox_to_name)
@@ -205,6 +217,21 @@ def _pixel_str(coords: tuple[int, int], outer: str | ndarray | None) -> str:
     return f"({color[0]}, {color[1]}, {color[2]}), ({coords[0]}, {coords[1]})"
 
 
+px_eq = (
+    lambda im, color: (im[:, :, 0] == color[0])
+    & (im[:, :, 1] == color[1])
+    & (im[:, :, 2] == color[2])
+)
+px_between = lambda im, min_mask, max_mask: (
+    (max_mask[0] >= im[:, :, 0])
+    & (im[:, :, 0] >= min_mask[0])
+    & (max_mask[1] >= im[:, :, 1])
+    & (im[:, :, 1] >= min_mask[1])
+    & (max_mask[2] >= im[:, :, 2])
+    & (im[:, :, 2] >= min_mask[2])
+)
+
+
 def _pixel_find(
     color: tuple[int, int, int],
     bbox_or_coords: tuple[int, int, int, int] | tuple[int, int] | None,
@@ -221,17 +248,15 @@ def _pixel_find(
             bbox = bbox_or_coords  # type: ignore
 
     outer = get_screenshot_if_none_and_cut(outer, bbox)
-    min_mask = color[0] - variation, color[1] - variation, color[2] - variation
-    max_mask = color[0] + variation, color[1] + variation, color[2] + variation
     if variation == 0:
-        matching_px = np.array(np.where(outer == color))
+        matching_px = np.argwhere(px_eq(outer, color))
     else:
-        matching_px = np.array(np.where(outer >= min_mask))
-        matching_px = np.array(np.where(matching_px <= max_mask))
-
+        min_mask = color[0] - variation, color[1] - variation, color[2] - variation
+        max_mask = color[0] + variation, color[1] + variation, color[2] + variation
+        matching_px = np.argwhere(px_between(outer, min_mask, max_mask))
     if matching_px.size > 0:
-        first_match = matching_px[:, 0]
-        x = start_x + first_match[0]
-        y = start_y + first_match[1]
+        first_match = matching_px[0]
+        x = start_x + first_match[1]
+        y = start_y + first_match[0]
         return x, y
     return None

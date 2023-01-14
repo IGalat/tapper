@@ -49,7 +49,7 @@ def language_monitor() -> None:
 
 def main() -> None:
     killme_in(11)
-    language_monitor()
+    kb_commander()
 
 
 if __name__ == "__main__":

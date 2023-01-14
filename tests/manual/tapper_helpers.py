@@ -64,7 +64,7 @@ def helpers() -> None:
                 ),
                 "num4": img.pixel_info(print_pixel),
                 "num5": img.pixel_str(print),
-                "num6": lambda: print(img.pixel_find((62, 134, 160), (39, -1037))),
+                "num6": lambda: print(img.pixel_find((62, 134, 160), (39, 43))),
             }
         ),
     )

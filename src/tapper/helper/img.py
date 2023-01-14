@@ -8,6 +8,7 @@ from typing import Union
 import tapper
 from numpy import ndarray
 from tapper.helper._util.image import _find_in_image
+from tapper.helper._util.image import _find_in_image_raw
 from tapper.helper._util.image import _finish_snip
 from tapper.helper._util.image import _get_pixel_color
 from tapper.helper._util.image import _normalize
@@ -15,10 +16,13 @@ from tapper.helper._util.image import _pixel_find
 from tapper.helper._util.image import _pixel_str
 from tapper.helper._util.image import _toggle_snip
 
+STD_PRECISION = 0.999
+
 SearchableImage = Union[
     str,
     tuple[str, tuple[int, int, int, int]],
-    tuple[ndarray, tuple[int, int, int, int] | None],
+    tuple[ndarray, tuple[int, int, int, int]],
+    ndarray,
 ]
 """
 Image to be searched for. May be:
@@ -38,15 +42,18 @@ _bbox_pattern = re.compile(r"\(BBOX_-?\d+_-?\d+_-?\d+_-?\d+\)")
 
 
 def find(
-    image: SearchableImage, outer: str | ndarray | None = None, precision: float = 0.999
+    image: SearchableImage,
+    outer: str | ndarray | None = None,
+    precision: float = STD_PRECISION,
 ) -> tuple[int, int] | None:
     """
     Search a region of the screen for an image.
 
-    :param image: see SearchableImage
+    :param image: see `SearchableImage`.
     :param outer: Optional image in which to find, pathname or numpy array. If not specified, will search on screen.
     :param precision: A number between 0 and 1 to indicate the allowed deviation from the searched image.
         0.95 is a difference visible to the eye, and random images can sometimes match up to 0.8.
+        To calibrate, use get_find_raw method below.
 
     :return: Coordinates X and Y of top-left of the found image relative to the bounding box (if any).
         If image not found, None is returned.
@@ -55,18 +62,40 @@ def find(
     return _find_in_image(_normalize(image), norm_outer, precision=precision)  # type: ignore
 
 
+def find_one_of(
+    images: list[SearchableImage],
+    outer: str | ndarray | None = None,
+    precision: float = STD_PRECISION,
+) -> SearchableImage | None:
+    """
+    Get first image found.
+
+    :param images: see `SearchableImage`.
+    :param outer: see `find` param.
+    :param precision: see `find` param.
+    :return: First image detected, or None if timeout.
+        Will return object supplied in the list if it finds corresponding image.
+        In case many images are present, first found in the `images` list will be returned.
+    """
+    normalized = [_normalize(image) for image in images]  # type: ignore
+    for i in range(len(normalized)):
+        if _find_in_image(normalized[i], outer, precision=precision):  # type: ignore
+            return images[i]
+    return None
+
+
 def wait_for(
     image: SearchableImage,
     timeout: int | float = 5,
     interval: float = 0.2,
-    precision: float = 0.999,
+    precision: float = STD_PRECISION,
 ) -> tuple[int, int] | None:
     """
     Regularly search the screen or region of the screen for image,
     returning coordinates when it appears, or None if timeout.
     This is blocking until timeout, obviously.
 
-    :param image: see SearchableImage
+    :param image: see `SearchableImage`.
     :param timeout: If this many seconds elapsed, return None.
     :param interval: Time between searches. Note that search can take significant time as well,
         and actual frequency may be lower than you expect because of this.
@@ -75,28 +104,25 @@ def wait_for(
     """
     finish_time = time.perf_counter() + timeout
     normalized = _normalize(image)  # type: ignore
-    while True:
+    while time.perf_counter() < finish_time:
         if found := _find_in_image(normalized, precision=precision):  # type: ignore
             return found
-        if time.perf_counter() < finish_time:
-            return None
         time.sleep(interval)
-        if time.perf_counter() < finish_time:
-            return None
+    return None
 
 
 def wait_for_one_of(
     images: list[SearchableImage],
     timeout: int | float = 5,
     interval: float = 0.4,
-    precision: float = 0.999,
+    precision: float = STD_PRECISION,
 ) -> SearchableImage | None:
     """
     Regularly search the screen or region of the screen for images,
     returning first that appears, or None if timeout.
     This is blocking until timeout, obviously.
 
-    :param images: see SearchableImage
+    :param images: see `SearchableImage`.
     :param timeout: see `wait_for` param.
     :param interval: see `wait_for` param.
     :param precision: see `find` param.
@@ -124,15 +150,28 @@ def wait_for_one_of(
     """
     finish_time = time.perf_counter() + timeout
     normalized = [_normalize(image) for image in images]  # type: ignore
-    while True:
+    while time.perf_counter() < finish_time:
         for i in range(len(normalized)):
             if _find_in_image(normalized[i], precision=precision):  # type: ignore
                 return images[i]
-        if time.perf_counter() < finish_time:
-            return None
         time.sleep(interval)
-        if time.perf_counter() < finish_time:
-            return None
+    return None
+
+
+def get_find_raw(
+    image: SearchableImage, outer: str | ndarray | None = None
+) -> tuple[float, tuple[int, int]]:
+    """
+    Find an image within a region of the screen or image, and return raw result.
+
+    Immediate function, wrap in lambda if setting as action of Tap.
+
+    :param image: see `find` param.
+    :param outer: see `find` param.
+    :return: Match precision, and coordinates.
+    """
+
+    return _find_in_image_raw(_normalize(image), _normalize(outer)[0])  # type: ignore
 
 
 def snip(
@@ -174,7 +213,7 @@ def get_snip(
     """
     Screenshot with specified bounding box, or entire screen. Optionally saves to disk.
 
-    NOTE: This is an immediate function and should not be set as action of Tap.
+    Immediate function, wrap in lambda if setting as action of Tap.
 
     :param bbox: Bounding box of the screenshot or image. If None, the whole screen or image is snipped.
     :param prefix: Optional name, may be a path of image to save, without extension. If not specified,
@@ -236,7 +275,7 @@ def pixel_get_color(
     """
     Get pixel color.
 
-    NOTE: This is an immediate function and should not be set as action of Tap.
+    Immediate function, wrap in lambda if setting as action of Tap.
 
     :param coords: x, y coordinates of the pixel, absolute to screen, or relative to outer.
     :param outer: Optional image, pathname or numpy array. If not specified, will get color from screen.
@@ -279,11 +318,11 @@ def pixel_wait_for(
     returning coordinates when it appears, or None if timeout.
     This is blocking until timeout, obviously.
 
-    :param color: see pixel_find
-    :param bbox_or_coords: see pixel_find
+    :param color: see `pixel_find` param.
+    :param bbox_or_coords: see `pixel_find` param.
     :param timeout: If this many seconds elapsed, return None.
     :param interval: Time between searches.
-    :param variation: see pixel_find
+    :param variation: see `pixel_find` param.
     :return: Coordinates of the pixel if found, else None.
     """
     finish_time = time.perf_counter() + timeout
@@ -314,9 +353,9 @@ def pixel_wait_for_one_of(
 
     :param colors_coords: list of tuples(color, coords) - for color and coords see pixel_find.
         Each pixel may have own coords/bbox to be searched in. Coords None will search entire screen.
-    :param timeout: see pixel_wait_for
-    :param interval: see pixel_wait_for
-    :param variation: see pixel_find
+    :param timeout: see `pixel_wait_for` param.
+    :param interval: see `pixel_wait_for` param.
+    :param variation: see `pixel_find` param.
     :return: tuple(color, coords) that was found, else None.
     """
     finish_time = time.perf_counter() + timeout
