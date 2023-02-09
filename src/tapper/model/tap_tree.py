@@ -52,6 +52,13 @@ class Tap(TapGeneric):
         )
         self.trigger_conditions = trigger_conditions
 
+    def conditions(self, **trigger_conditions: Any) -> "Tap":
+        """Add new trigger conditions. Can also be done in constructor."""
+        if not self.trigger_conditions:
+            self.trigger_conditions = {}
+        self.trigger_conditions.update(trigger_conditions)
+        return self
+
     def __repr__(self) -> str:
         return f"Tap('{self.trigger}')"
 
@@ -96,6 +103,13 @@ class Group(TapGeneric):
         self.trigger_conditions = trigger_conditions
 
         self._children = []
+
+    def conditions(self, **trigger_conditions: Any) -> "Group":
+        """Add new trigger conditions. Can also be done in constructor."""
+        if not self.trigger_conditions:
+            self.trigger_conditions = {}
+        self.trigger_conditions.update(trigger_conditions)
+        return self
 
     def __repr__(self) -> str:
         return f"Group '{self.name}': {self._children}"
