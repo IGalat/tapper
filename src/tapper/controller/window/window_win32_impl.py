@@ -226,7 +226,7 @@ class Win32WindowTrackerCommander(WindowTracker, WindowCommander):
             return False
 
         self.window_commands([destroy_command], handle=window.handle)
-        time.sleep(0.1)
+        time.sleep(0.3)
         if self.get_open(handle=window.handle):
             print(f"Found open window: {window.title}")
             os.system(f"taskkill /f /pid {window.process_id}")
