@@ -209,7 +209,8 @@ def _get_pixel_color(
     outer, _ = _normalize(outer)  # type: ignore
     bbox = coords_to_bbox_1_pixel(coords)
     outer = get_screenshot_if_none_and_cut(outer, bbox)
-    return outer[0][0]
+    nd_pixel = outer[0][0]
+    return tuple(c for c in nd_pixel)  # type: ignore
 
 
 def _pixel_str(coords: tuple[int, int], outer: str | ndarray | None) -> str:
