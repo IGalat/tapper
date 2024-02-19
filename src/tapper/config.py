@@ -46,7 +46,10 @@ Screen special symbols, this is a regex.
 """
 
 tray_icon = True
-"""Icon in bottom right in your task bar lets you know tapper is running and allows control."""
+"""
+Icon in bottom right in your task bar lets you know tapper is running and allows control.
+Not implemented for MacOS.
+"""
 
 """
 ------------------------------------

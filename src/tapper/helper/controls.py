@@ -1,3 +1,4 @@
+import atexit
 import os
 import signal
 import subprocess
@@ -20,4 +21,5 @@ def terminate() -> None:
 
 
 def _terminate() -> None:
+    atexit._run_exitfuncs()
     os.kill(os.getpid(), signal.SIGINT)

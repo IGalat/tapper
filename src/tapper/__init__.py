@@ -70,9 +70,8 @@ def start(blocking: bool = True) -> None:
         init()
     _initializer.start(_listeners)
 
-    # If tray icon is on, it will be blocking anyway, which is required for Mac compatibility.
-    # So this is for cases where it's not on.
-    # But boolean flag is there mostly for testing.
+    # Should be blocking for normal usage, flag is for testing.
+    # If tray icon is on, it will be blocking anyway.
     if blocking:
         while True:
             _time.sleep(1000000)

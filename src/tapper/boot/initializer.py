@@ -147,5 +147,5 @@ def start(listeners: list[SignalListener]) -> None:
         controller._start()
     for listener in listeners:
         listener.start()
-    if config.tray_icon:  # this is blocking
+    if config.tray_icon and config.os != "darwin":  # No tray for MacOS
         tray_icon.create()

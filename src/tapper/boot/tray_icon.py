@@ -1,3 +1,4 @@
+import atexit
 import os
 from typing import Any
 
@@ -28,6 +29,8 @@ def create() -> None:
 
     stray = pystray.Icon("tapper", logo, menu=make_menu())
 
-    # this is blocking. Not running in separate thread for Mac compatibility
-    # https://pystray.readthedocs.io/en/latest/usage.html
-    stray.run()
+    @atexit.register
+    def remove_stray() -> None:
+        stray.visible = False
+
+    stray.run_detached()
