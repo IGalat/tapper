@@ -15,10 +15,9 @@ def repeat_while(
     max_repeats: int | None = None,
 ) -> Callable[[], None]:
     """Repeats an action while condition applies."""
-    max_repeats_int = max_repeats or 999999999999999
 
     def fn() -> None:
-        for _ in range(max_repeats_int):
+        for _ in range(max_repeats or 999999999999999):
             if not bool(condition()):
                 break
             action()
@@ -39,9 +38,8 @@ def repeat_while_pressed(
     Warning: if key up is suppressed (used in another Tap), action will be
     repeated forever(or until overridden by another toggle_repeat or repeat_while_pressed)
     """
-    max_repeats_int = max_repeats or 999999999999999
 
-    repeater.registered_repeatables[action] = period_s, max_repeats_int
+    repeater.registered_repeatables[action] = period_s, max_repeats or 999999999999999
     return partial(repeater.while_pressed, symbol, action)
 
 
@@ -67,8 +65,7 @@ def toggle_repeat(
         When you press 'a', 'p' will be pressed every 0.1 sec until you
         press 'a' again or press another button which triggers a different toggle_repeat.
     """
-    max_repeats_int = max_repeats or 999999999999999
-    repeater.registered_repeatables[action] = period_s, max_repeats_int
+    repeater.registered_repeatables[action] = period_s, max_repeats or 999999999999999
     return partial(repeater.toggle_repeatable, action)
 
 
