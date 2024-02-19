@@ -12,9 +12,13 @@
 from typing import Any
 from typing import Callable
 from typing import ClassVar
+from typing import Optional
 from typing import Protocol
 
-SubscribedFunction = Callable[[Any], None]
+SubscribedFunction = Callable[[Any], Optional[bool]]
+"""
+If return value is False, the function is unsubscribed.
+"""
 
 _subscribers: dict[str, list[SubscribedFunction]] = dict()
 
@@ -25,7 +29,7 @@ def subscribe(topic: str, subscribed_function: SubscribedFunction) -> None:
     :param topic: predefined string
     :param subscribed_function: function that will receive messages.
         It has to accept one parameter, and should be compatible
-        with publisher's message' data type
+        with publisher's message' data type.
     """
     if topic not in _subscribers:
         _subscribers[topic] = []
@@ -48,12 +52,14 @@ def publish(topic: str, message: Any) -> None:
 
     :param topic: predefined string
     :param message: Any data type, dataclass of this
-        should in a separate module to decouple from subscribers
+        should in a separate module to decouple from subscribers.
     """
     if topic not in _subscribers:
         return
     for subscribed_function in _subscribers[topic]:
-        subscribed_function(message)
+        result = subscribed_function(message)
+        if result is False:
+            unsubscribe(topic, subscribed_function)
 
 
 class EventDatatype(Protocol):
