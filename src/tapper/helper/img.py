@@ -321,7 +321,7 @@ def pixel_wait_for(
     :param color: see `pixel_find` param.
     :param bbox_or_coords: see `pixel_find` param.
     :param timeout: If this many seconds elapsed, return None.
-    :param interval: Time between searches.
+    :param interval: Time between searches, in seconds.
     :param variation: see `pixel_find` param.
     :return: Coordinates of the pixel if found, else None.
     """
@@ -329,10 +329,10 @@ def pixel_wait_for(
     while True:
         if found := pixel_find(color, bbox_or_coords, variation=variation):
             return found
-        if time.perf_counter() < finish_time:
+        if time.perf_counter() > finish_time:
             return None
         time.sleep(interval)
-        if time.perf_counter() < finish_time:
+        if time.perf_counter() > finish_time:
             return None
 
 
