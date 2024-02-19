@@ -4,7 +4,6 @@ from tapper import mouse
 from tapper import root
 from tapper import send
 from tapper import start
-from tapper import Tap
 from tapper import window
 
 
@@ -45,7 +44,12 @@ def tapper_simple() -> None:
                 "ctrl+d": duplicate_chrome_tab,
             }
         ),
-        Tap("num9", window.close),
+        Group("window controls").add(
+            {
+                "alt+f4": lambda: window.close(force_after=0.3),
+                "alt+f5": window.close,
+            }
+        ),
     )
     start()
 

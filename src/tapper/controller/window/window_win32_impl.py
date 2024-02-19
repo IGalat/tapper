@@ -201,7 +201,7 @@ class Win32WindowTrackerCommander(WindowTracker, WindowCommander):
         strict: bool = False,
         process_id: Optional[int] = None,
         handle: Any = None,
-        force: bool = True,
+        force_after: Optional[float] = None,
     ) -> bool:
         if (
             window_or_exec_or_title is None
@@ -226,9 +226,11 @@ class Win32WindowTrackerCommander(WindowTracker, WindowCommander):
             return False
 
         self.window_commands([destroy_command], handle=window.handle)
-        time.sleep(0.3)
+
+        if force_after is None:
+            return True
+        time.sleep(force_after)
         if self.get_open(handle=window.handle):
-            print(f"Found open window: {window.title}")
             os.system(f"taskkill /f /pid {window.process_id}")
         return True
 

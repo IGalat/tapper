@@ -241,7 +241,7 @@ class DummyWindowTrackerCommander(WindowTracker, WindowCommander):
         strict: bool = False,
         process_id: int | None = None,
         handle: Any = None,
-        force: bool = True,
+        force_after: float | None = None,
     ) -> bool:
         pass
 
