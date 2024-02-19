@@ -15,7 +15,7 @@ from tapper.util.type_check import is_tuple_of
 @example({"some dict too": 456})
 @settings(max_examples=20)
 def test_data_structures__is_list_of(input_: Any) -> None:
-    if type(input_) == list:
+    if type(input_) is list:
         if not input_:
             assert is_list_of(input_, int)
         else:
@@ -38,7 +38,7 @@ def test_primitives__is_list_of(input_: Any) -> None:
 @example({"some dict too": 456})
 @settings(max_examples=20)
 def test_data_structures__is_tuple_of(input_: Any) -> None:
-    if type(input_) == tuple:
+    if type(input_) is tuple:
         if not input_:
             assert is_tuple_of(input_, int)
         else:
