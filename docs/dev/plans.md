@@ -51,6 +51,13 @@ By having user configure triggers and corresponding actions, and running a loop 
 27. Good docs, with sphinx/readthedocs/doctest
 28. Optimization: profile everything, make caching, active tracking, for window controller in particular
 
+Small change plans:
+
+
+Potential ideas:
+1. AHK-like Window of Useful Info (app name, pixel color, etc in real time)
+2. Helper function to show programmed hotkeys for this app/global. Add optional description to Tap, and show there?
+
 
 ## Limitations of the current design
 
