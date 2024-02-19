@@ -1,8 +1,9 @@
 import time
 from concurrent.futures import ThreadPoolExecutor
-from dataclasses import dataclass
+from functools import partial
 from typing import Any
 from typing import Callable
+from typing import Optional
 
 from tapper.model.constants import KeyDirBool
 from tapper.model.types_ import Signal
@@ -45,10 +46,26 @@ def run_task(repeatable: Callable[[], Any]) -> None:
                     return
 
 
+def equal_fn(fn1: Optional[Callable], fn2: Optional[Callable]) -> bool:
+    if fn1 is None or fn2 is None:
+        return False
+    if fn1 is fn2 or fn1 == fn2:
+        return True
+    return (
+        fn1.__code__.co_code == fn2.__code__.co_code
+        and fn1.__code__.co_consts == fn2.__code__.co_consts
+        and fn1.__code__.co_stacksize == fn2.__code__.co_stacksize
+        and fn1.__code__.co_varnames == fn2.__code__.co_varnames
+        and fn1.__code__.co_flags == fn2.__code__.co_flags
+        and fn1.__code__.co_name == fn2.__code__.co_name
+        and fn1.__code__.co_names == fn2.__code__.co_names
+    )
+
+
 def toggle_repeatable(action: Callable[[], Any]) -> None:
     global running_repeatable
     global new_repeatable_queued
-    if action is not running_repeatable:
+    if action is not None and not equal_fn(action, running_repeatable):
         running_repeatable = action
         new_repeatable_queued = True
         executor.submit(run_task, action)
@@ -56,24 +73,22 @@ def toggle_repeatable(action: Callable[[], Any]) -> None:
         running_repeatable = None
 
 
-@dataclass
-class Sub:
-    symbol: str
-    action: Callable[[], Any]
-
-    def unsub(self, signal: Signal) -> None:
-        global running_repeatable
-        if signal[1] == KeyDirBool.UP and signal[0] == self.symbol:
-            if running_repeatable == self.action:
-                running_repeatable = None
-            event.unsubscribe("keyboard", self.unsub)
-            event.unsubscribe("mouse", self.unsub)
+def remove_repeatable_and_unsub(signal: Signal, expected_symbol: str) -> bool:
+    """return False for unsub."""
+    global running_repeatable
+    if signal[0] == expected_symbol and signal[1] == KeyDirBool.UP:
+        running_repeatable = None
+        return False
+    return True
 
 
 def while_pressed(symbol: str, action: Callable[[], Any]) -> None:
-    if action == running_repeatable:
+    if equal_fn(action, running_repeatable):
         return
     toggle_repeatable(action)
-    sub = Sub(symbol, action)
-    event.subscribe("keyboard", sub.unsub)
-    event.subscribe("mouse", sub.unsub)
+    event.subscribe(
+        "keyboard", partial(remove_repeatable_and_unsub, expected_symbol=symbol)
+    )
+    event.subscribe(
+        "mouse", partial(remove_repeatable_and_unsub, expected_symbol=symbol)
+    )
