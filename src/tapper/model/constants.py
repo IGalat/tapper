@@ -42,9 +42,9 @@ class OS(str, Enum):
 
 
 class ListenerResult(Flag):
-    PROPAGATE = True
+    PROPAGATE = False
     """Signal will be received by other apps."""
-    SUPPRESS = False
+    SUPPRESS = True
     """Signal will be suppressed and will not be received by other apps."""
 
 
