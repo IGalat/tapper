@@ -94,12 +94,14 @@ class Group(TapGeneric):
         self,
         name: Optional[str] = None,
         executor: Optional[int] = None,
-        suppress_trigger: Optional[ListenerResult] = None,
+        suppress_trigger: Optional[bool] = None,
         **trigger_conditions: Any,
     ) -> None:
         self.name = name
         self.executor = executor
-        self.suppress_trigger = suppress_trigger
+        self.suppress_trigger = (
+            ListenerResult(suppress_trigger) if suppress_trigger else None
+        )
         self.trigger_conditions = trigger_conditions
 
         self._children = []

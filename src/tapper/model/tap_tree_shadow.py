@@ -31,7 +31,7 @@ class STapGeneric(ABC):
 
 @dataclass
 class STap(STapGeneric):
-    """Shadow tap: used during runtime."""
+    """Shadow Tap: used during runtime."""
 
     trigger: Trigger
     action: Action
@@ -47,7 +47,7 @@ class STap(STapGeneric):
 
 @dataclass
 class SGroup(STapGeneric):
-    """Shadow group: used during runtime."""
+    """Shadow Group: used during runtime."""
 
     children: list[STapGeneric] = field(default_factory=list)
 
