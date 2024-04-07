@@ -34,10 +34,6 @@ This is just a default value. You can use a different one individually:
     Group(suppress_trigger=ListenerResult.PROPAGATE)
 """
 
-only_visible_windows = True
-"""Limit windows to visible - ones that are open on the taskbar.
-Reduces WindowController lag, and junk windows caught into filters."""
-
 send_combo_wrap = r"\$\(_\)"
 """
 Wrap for send command.
@@ -62,6 +58,10 @@ action_runner_executors_threads: list[int] = [1]
 
 Setting value to N will allow N actions to execute simultaneously for a given executor.
 """
+
+only_visible_windows = True
+"""Limit windows to visible - ones that are open on the taskbar.
+Reduces WindowController lag, and junk windows caught into filters."""
 
 """
 ------------------------------------
