@@ -319,12 +319,12 @@ By default, trigger key is suppressed:
 Tap("a+b", "hoy")
 ```
 
-This will result in `ahoy`, as `b` is suppressed. You can modify this per-Tap/Group, or default in config:
+This will result in `ahoy`, as `b` is suppressed. You can modify this per-Tap/Group, including on `root`:
 
 ```python
-default_trigger_suppression = ListenerResult.PROPAGATE
+root.suppress_trigger = False
 # or
-Tap("h+e", "llo", suppress_trigger=ListenerResult.PROPAGATE)
+Tap("h+e", "llo", suppress_trigger=False)
 ```
 
 This will result in `hello` not `hllo`.

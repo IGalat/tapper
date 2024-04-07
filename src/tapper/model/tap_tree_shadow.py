@@ -22,6 +22,8 @@ class STapGeneric(ABC):
 
     original: Optional[TapGeneric]
     """Item based on which this shadow is created."""
+    send_interval: float
+    send_press_duration: float
     trigger_conditions: list[TriggerConditionFn]
 
     @abstractmethod

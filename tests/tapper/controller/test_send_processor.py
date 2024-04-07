@@ -1,6 +1,7 @@
 import time
 
 import pytest
+from tapper.action import wrapper
 from tapper.boot import initializer
 from tapper.controller.keyboard.kb_api import KeyboardController
 from tapper.controller.mouse.mouse_api import MouseController
@@ -70,10 +71,12 @@ class TestSendCommandProcessor:
         mc._tracker, mc._commander, mc._emul_keeper = mouse_tc, mouse_tc, emul
         self.mc = mc
 
-        self.sender = SendCommandProcessor("", parser, kbc, mc, lambda: 0)
+        self.sender = SendCommandProcessor("", parser, kbc, mc)
         self.sender.sleep_fn = lambda f: self.all_signals.append(sleep(f))
 
         event.subscribe(listener.name, lambda signal: self.real_signals.append(signal))
+
+        wrapper.config_thread_local_storage.action_config = wrapper.ActionConfig(0, 0)
 
     def test_simplest(self) -> None:
         self.sender.send("a")
@@ -117,24 +120,25 @@ class TestSendCommandProcessor:
             sleep(1.0),
         ]
 
-    def test_default_interval(self) -> None:
-        self.sender.default_interval = lambda: 0.5
+    def test_interval_config(self) -> None:
+        wrapper.config_thread_local_storage.action_config.send_interval = 0.5
         self.sender.send("hello")
         result = []
         for letter in "hello":
             result.append(sleep(0.5))
             result.extend(click(letter))
-        result.pop(0)
         assert self.all_signals == result
 
-    def test_interval_variable(self) -> None:
-        self.sender.default_interval = lambda: 0.1
+    def test_interval_variable_overrides_config(self) -> None:
+        wrapper.config_thread_local_storage.action_config.send_interval = 0.1
         self.sender.send("hi")
         self.sender.send("qq", interval=10)
         assert self.all_signals == [
+            sleep(0.1),
             *click("h"),
             sleep(0.1),
             *click("i"),
+            sleep(10),
             *click("q"),
             sleep(10),
             *click("q"),
@@ -155,10 +159,35 @@ class TestSendCommandProcessor:
     def test_speed_and_interval(self) -> None:
         self.sender.send("h$(1s)k", interval=0.1, speed=2)
         assert self.all_signals == [
+            sleep(0.1),
             *click("h"),
             sleep(0.5),
             sleep(0.1),
             *click("k"),
+        ]
+
+    def test_press_duration_config(self) -> None:
+        wrapper.config_thread_local_storage.action_config.send_press_duration = 0.1
+        self.sender.send("sp")
+        assert self.all_signals == [
+            down("s"),
+            sleep(0.1),
+            up("s"),
+            down("p"),
+            sleep(0.1),
+            up("p"),
+        ]
+
+    def test_press_duration_variable_overrides_config(self) -> None:
+        wrapper.config_thread_local_storage.action_config.send_press_duration = 0.3
+        self.sender.send("mz", press_duration=1)
+        assert self.all_signals == [
+            down("m"),
+            sleep(1),
+            up("m"),
+            down("z"),
+            sleep(1),
+            up("z"),
         ]
 
     def test_wheel_and_cursor(self) -> None:

@@ -21,7 +21,7 @@ from tapper.model.types_ import SendFn
 from tapper.parser.send_parser import SendParser
 from tapper.parser.trigger_parser import TriggerParser
 from tapper.signal.base_listener import SignalListener
-from tapper.signal.processor import SignalProcessor
+from tapper.signal.signal_processor import SignalProcessor
 from tapper.signal.wrapper import ListenerWrapper
 from tapper.state import keeper
 from tapper.util import datastructs
@@ -81,10 +81,10 @@ def init(
     transformer = TreeTransformer(
         send, default_trigger_parser(os), config.kw_trigger_conditions
     )
-    _fill_default_properties(iroot)
+    verify_settings_exist(iroot)
     root = transformer.transform(iroot)
-    _fill_control_if_empty(icontrol)
-    _fill_default_properties(icontrol)
+    set_default_controls_if_empty(icontrol)
+    control_config_fill(icontrol)
     control = transformer.transform(icontrol)
 
     runner = default_action_runner()
@@ -122,7 +122,7 @@ def init(
     return listeners
 
 
-def _fill_control_if_empty(icontrol: Group) -> None:
+def set_default_controls_if_empty(icontrol: Group) -> None:
     """Sets default controls if none."""
     if not icontrol._children:
         icontrol.add(
@@ -133,12 +133,23 @@ def _fill_control_if_empty(icontrol: Group) -> None:
         )
 
 
-def _fill_default_properties(group: Group) -> None:
-    """Sets absent properties to defaults."""
-    if group.executor is None:
-        group.executor = 0
-    if group.suppress_trigger is None:
-        group.suppress_trigger = config.default_trigger_suppression
+def control_config_fill(group: Group) -> None:
+    group.executor = group.executor or 0
+    group.suppress_trigger = group.suppress_trigger or constants.ListenerResult.SUPPRESS
+    group.send_interval = group.send_interval or 0
+    group.send_press_duration = group.send_press_duration or 0
+
+
+def verify_settings_exist(group: Group) -> None:
+    if (
+        group.executor is None
+        or group.suppress_trigger is None
+        or group.send_interval is None
+        or group.send_press_duration is None
+    ):
+        raise AttributeError(
+            f"Group '{group.name}' does not have mandatory configs set."
+        )
 
 
 def start(listeners: list[SignalListener]) -> None:

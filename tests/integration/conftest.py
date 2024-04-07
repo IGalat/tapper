@@ -6,7 +6,7 @@ from typing import Callable
 import pytest
 import tapper
 from tapper import config
-from tapper import Group
+from tapper.action import wrapper
 from tapper.controller.keyboard.kb_api import KeyboardController
 from tapper.controller.mouse.mouse_api import MouseController
 from tapper.controller.send_processor import SendCommandProcessor
@@ -62,16 +62,18 @@ class Fixture:
 
 
 @pytest.fixture
-def f(dummy: Dummy, is_debug: bool) -> Fixture:
+def f(dummy: Dummy, is_debug: bool, make_group: Callable) -> Fixture:
     debug_sleep_mult = 5 if is_debug else 1
 
     # restore default before each
     config.action_runner_executors_threads = [1]
-    config.default_send_interval = 0
     config.tray_icon = False
-    tapper.root = Group("root")
-    tapper.control_group = Group("control_group")
+    tapper.root = make_group("root")
+    tapper.control_group = make_group("control_group")
     tapper._initialized = False
+    tapper.action.wrapper.config_thread_local_storage.action_config = (
+        wrapper.ActionConfig(0, 0)
+    )
 
     listener = dummy.Listener.get_for_os("")
     config.listeners = [listener]
@@ -112,7 +114,6 @@ def f(dummy: Dummy, is_debug: bool) -> Fixture:
         real_sender.os = sender.os
         real_sender.parser = sender.parser
         real_sender.sleep_fn = partial(sleep_logged, signals=fixture.real_signals)
-        real_sender.default_interval = lambda: config.default_send_interval
 
         emul_keeper = keeper.Emul()
 
@@ -134,6 +135,6 @@ def f(dummy: Dummy, is_debug: bool) -> Fixture:
         tapper._blocking = False
         tapper.start()
 
-    fixture.start = start  # type: ignore
+    fixture.start = start
 
     return fixture

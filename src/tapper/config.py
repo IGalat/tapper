@@ -19,13 +19,6 @@ SECTION 1: Most likely to be tweaked.
 ------------------------------------
 """
 
-default_send_interval = 0.01
-"""
-Interval between clicks for send command.
-This is just a default value. You can use a different one in each send:
-    send("Hellow", interval=1)
-"""
-
 default_trigger_suppression = ListenerResult.SUPPRESS
 """
 Will the triggering signal be suppressed for other apps, when a Tap triggers?

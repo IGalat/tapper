@@ -23,6 +23,8 @@ TransformFn = Callable[[Group], SGroup]
 class TestTreeTransformer:
     ex = 2
     res = ListenerResult.SUPPRESS
+    si = 0.02
+    spd = 0.03
 
     @pytest.fixture(scope="class")
     def transform(self) -> TransformFn:
@@ -32,7 +34,13 @@ class TestTreeTransformer:
 
     @pytest.fixture
     def group(self) -> Group:
-        return Group("fixture_group", self.ex, self.res)
+        return Group(
+            "fixture_group",
+            self.ex,
+            self.res,
+            send_interval=self.si,
+            send_press_duration=self.spd,
+        )
 
     def test_empty_with_props(self, transform: TransformFn) -> None:
         group = Group()
@@ -44,16 +52,18 @@ class TestTreeTransformer:
     def test_simplest(self, transform: TransformFn, group: Group) -> None:
         tap = Tap("a", send)
         group.add(tap)
-        sg = transform(group)
+        shadow_group = transform(group)
 
-        assert sg.get_main_triggers(KeyDirBool.DOWN) == ["a"]
-        assert sg.get_main_triggers(KeyDirBool.UP) == []
-        assert len(sg.children) == 1
-        t = sg.children[0]
+        assert shadow_group.get_main_triggers(KeyDirBool.DOWN) == ["a"]
+        assert shadow_group.get_main_triggers(KeyDirBool.UP) == []
+        assert len(shadow_group.children) == 1
+        t = shadow_group.children[0]
         assert isinstance(t, STap)
         if isinstance(t, STap):
             assert t.executor == self.ex
             assert t.suppress_trigger == self.res
+            assert t.send_interval == self.si
+            assert t.send_press_duration == self.spd
             assert t.get_main_triggers(KeyDirBool.DOWN) == ["a"]
             assert t.original == tap
             assert t.action == send

@@ -16,11 +16,18 @@ class TapGeneric(ABC):
     """
 
     executor: Optional[int]
-    """Which executor to run the action in. see ActionRunner."""
+    """Which executor to run the action in. see `ActionRunner`."""
     suppress_trigger: Optional[ListenerResult]
     """Whether to suppress main key when an action is triggered."""
+    send_interval: Optional[float]
+    """Time before keypress for `send` command, in seconds. Will be overridden if specified on `send` itself."""
+    send_press_duration: Optional[float]
+    """
+    Time between key press and release, in seconds. Will be overridden if specified on `send` itself.
+    Only applies to click, not up/down. `e down;e up` will not have this time inbetween, `e` will.
+    """
     trigger_conditions: dict[str, Any]
-    """Keyword trigger conditions that can be used as part of Tap or Group. See config for docs."""
+    """Keyword trigger conditions that can be used as part of `Tap` or `Group`. See config for docs."""
 
 
 @dataclass(init=False)
@@ -42,6 +49,8 @@ class Tap(TapGeneric):
         action: Action | str,
         executor: Optional[int] = None,
         suppress_trigger: Optional[bool] = None,
+        send_interval: Optional[float] = None,
+        send_press_duration: Optional[float] = None,
         **trigger_conditions: Any,
     ) -> None:
         self.trigger = trigger
@@ -50,6 +59,8 @@ class Tap(TapGeneric):
         self.suppress_trigger = (
             ListenerResult(suppress_trigger) if suppress_trigger else None
         )
+        self.send_interval = send_interval
+        self.send_press_duration = send_press_duration
         self.trigger_conditions = trigger_conditions
 
     def conditions(self, **trigger_conditions: Any) -> "Tap":
@@ -95,6 +106,8 @@ class Group(TapGeneric):
         name: Optional[str] = None,
         executor: Optional[int] = None,
         suppress_trigger: Optional[bool] = None,
+        send_interval: Optional[float] = None,
+        send_press_duration: Optional[float] = None,
         **trigger_conditions: Any,
     ) -> None:
         self.name = name
@@ -102,6 +115,8 @@ class Group(TapGeneric):
         self.suppress_trigger = (
             ListenerResult(suppress_trigger) if suppress_trigger else None
         )
+        self.send_interval = send_interval
+        self.send_press_duration = send_press_duration
         self.trigger_conditions = trigger_conditions
 
         self._children = []

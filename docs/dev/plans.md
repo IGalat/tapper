@@ -38,10 +38,11 @@ Small change plans:
 
 Potential ideas:
 
-- skip - DONE(Only keyboard). Linux impl
-- skip - Make sure it catches signals before other programs on OS
+- DONE(Only keyboard). Linux impl
+- Make sure it catches signals before other programs on OS
 - Action queue, maybe with time limit when put? i.e. I press "ab" quickly, both are hotkeys, and if "a" is still going
 on the last millisecond, "b" can trigger afterwards. Whole can of worms though.
+- trigger conditions: have IDE autocomplete
 
 
 ## Limitations of the current design

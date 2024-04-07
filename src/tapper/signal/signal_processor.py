@@ -1,5 +1,6 @@
 import time
 
+from tapper.action import wrapper
 from tapper.action.runner import ActionRunner
 from tapper.model.constants import KeyDirBool
 from tapper.model.constants import ListenerResult
@@ -37,10 +38,10 @@ class SignalProcessor:
         symbol, direction = signal
         state = self.state_keeper.get_state(time.perf_counter())
         if tap := self.match(self.control, symbol, direction, state):
-            self.runner.run_control(tap.action)
+            self.runner.run_control(wrapper.wrapped_action(tap))
             return tap.suppress_trigger
         elif tap := self.match(self.root, symbol, direction, state):
-            self.runner.run(tap.action, tap.executor)
+            self.runner.run(wrapper.wrapped_action(tap), tap.executor)
             return tap.suppress_trigger
         else:
             return ListenerResult.PROPAGATE

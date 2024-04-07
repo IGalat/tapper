@@ -59,6 +59,8 @@ class TreeTransformer:
     def transform(self, group: Group) -> SGroup:
         result = SGroup()
         result.original = group
+        result.send_interval = group.send_interval  # type: ignore  # it's not None here
+        result.send_press_duration = group.send_press_duration  # type: ignore  # it's not None here
         result.trigger_conditions = transform_trigger_conditions(
             self.possible_trigger_conditions, group.trigger_conditions
         )
@@ -80,9 +82,15 @@ class TreeTransformer:
             executor = find_property("executor", tap._parent)
         if (suppress_trigger := tap.suppress_trigger) is None:
             suppress_trigger = find_property("suppress_trigger", tap._parent)
+        if (send_interval := tap.send_interval) is None:
+            send_interval = find_property("send_interval", tap._parent)
+        if (send_press_duration := tap.send_press_duration) is None:
+            send_press_duration = find_property("send_press_duration", tap._parent)
         action = self.to_action(tap.action)
         result = STap(trigger, action, executor, suppress_trigger)
         result.original = tap
+        result.send_interval = send_interval
+        result.send_press_duration = send_press_duration
         result.trigger_conditions = transform_trigger_conditions(
             self.possible_trigger_conditions, tap.trigger_conditions
         )
@@ -95,10 +103,14 @@ class TreeTransformer:
         result = []
         executor = find_property("executor", parent)
         suppress_trigger = find_property("suppress_trigger", parent)
+        send_interval = find_property("send_interval", parent)
+        send_press_duration = find_property("send_press_duration", parent)
         for trigger_str, action in taps.items():
             trigger = self.trigger_parser.parse(trigger_str)
             action = self.to_action(action)
             stap = STap(trigger, action, executor, suppress_trigger)
+            stap.send_interval = send_interval
+            stap.send_press_duration = send_press_duration
             stap.trigger_conditions = []
             result.append(stap)
         return result
@@ -107,5 +119,5 @@ class TreeTransformer:
         if isinstance(action, str):
             if action in all_symbols and action not in keyboard.chars_en:
                 action = f"$({action})"
-            action = partial(self.send, action)  # type: ignore
+            action = partial(self.send, action)
         return action

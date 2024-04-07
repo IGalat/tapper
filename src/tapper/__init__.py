@@ -24,8 +24,14 @@ Tap = _tap_tree.Tap
 Group = _tap_tree.Group
 """Group of Taps, and/or other Groups."""
 
-root = Group("root")
-"""Root group, the parent to all except control group."""
+root = Group(
+    "root",
+    executor=0,
+    suppress_trigger=True,
+    send_interval=0.01,
+    send_press_duration=0.01,
+)
+"""Root group, the parent to all except control group. For config options doc, see `Tap`"""
 
 control_group = Group("control_group")
 """
@@ -55,6 +61,7 @@ def init() -> None:
     """Initializes all underlying tools."""
     global _listeners
     global _initialized
+    _initializer.set_default_controls_if_empty(control_group)
     _listeners = _initializer.init(root, control_group, _send_processor, send)
     _initialized = True
 

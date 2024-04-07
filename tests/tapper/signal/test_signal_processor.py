@@ -1,6 +1,7 @@
 import time
 
 import pytest
+from tapper.action import wrapper
 from tapper.boot import initializer
 from tapper.model.constants import KeyDirBool
 from tapper.model.constants import ListenerResult
@@ -11,7 +12,7 @@ from tapper.model.trigger import MainKey
 from tapper.model.trigger import Trigger
 from tapper.model.types_ import Action
 from tapper.model.types_ import Signal
-from tapper.signal.processor import SignalProcessor
+from tapper.signal.signal_processor import SignalProcessor
 from tapper.state import keeper
 from testutil_model import Dummy
 from testutil_model import DummyActionRunner
@@ -60,6 +61,8 @@ class TestSignalProcessor:
 
     @pytest.fixture(autouse=True)
     def setup(self, dummy: Dummy) -> None:
+        wrapper.wrapped_action = lambda stap: stap.action
+
         self.root = SGroup()
         self.root.trigger_conditions = {}
         self.control = SGroup()

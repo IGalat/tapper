@@ -1,6 +1,7 @@
 import time
 from typing import Callable
 
+from tapper.action.wrapper import config_thread_local_storage
 from tapper.controller.keyboard.kb_api import KeyboardController
 from tapper.controller.mouse.mouse_api import MouseController
 from tapper.model import constants
@@ -31,42 +32,49 @@ class SendCommandProcessor:
         parser: SendParser,
         kb_controller: KeyboardController,
         mouse_controller: MouseController,
-        default_interval: Callable[[], float],
     ) -> None:
         self.os = os
         self.parser = parser
         self.kb_controller = kb_controller
         self.mouse_controller = mouse_controller
-        self.default_interval = default_interval  # type: ignore
 
     @classmethod
     def from_none(cls) -> "SendCommandProcessor":
         """To be filled during init."""
-        return SendCommandProcessor(None, None, None, None, None)  # type: ignore
+        return SendCommandProcessor(None, None, None, None)  # type: ignore
 
     def send(
-        self, command: str, interval: float | None = None, speed: float = 1
+        self,
+        command: str,
+        interval: float | None = None,
+        press_duration: float | None = None,
+        speed: float = 1,
     ) -> None:
         """
         Entry point, processes the command and sends instructions.
 
         :param command: What to send.
         :param interval: Time before each key/button press.
-        :param speed: All sleep commands are divided by this number. Does not influence interval.
+        :param press_duration: Time between key press and release, only applies on click, not on up/down.
+        :param speed: All sleep commands are divided by this number. Does not influence interval or press_duration.
         """
-        interval_ = interval or self.default_interval()  # type: ignore
+        config = config_thread_local_storage.action_config
+        interval = interval if interval is not None else config.send_interval
+        press_duration = (
+            press_duration if press_duration is not None else config.send_press_duration
+        )
+
         instructions: list[SendInstruction] = self.parser.parse(
             command, self.shift_down()
         )
-        for index, instruction in enumerate(instructions):
+        for instruction in instructions:
             if isinstance(instruction, KeyInstruction):
                 if (
                     instruction.dir in [constants.KeyDir.DOWN, constants.KeyDir.CLICK]
-                    and interval_
-                    and index != 0
+                    and interval
                 ):
-                    self.sleep_fn(interval_)  # type: ignore
-                self._send_key_instruction(instruction)
+                    self.sleep_fn(interval)
+                self._send_key_instruction(instruction, press_duration)
             elif isinstance(instruction, WheelInstruction):
                 self.mouse_controller.press(instruction.wheel_symbol)
             elif isinstance(instruction, CursorMoveInstruction):
@@ -83,7 +91,7 @@ class SendCommandProcessor:
                 return shift
         return None
 
-    def _send_key_instruction(self, ki: KeyInstruction) -> None:
+    def _send_key_instruction(self, ki: KeyInstruction, press_duration: float) -> None:
         symbol = ki.symbol
         cmd: KeyboardController | MouseController
         if symbol in keyboard.get_keys(self.os):
@@ -98,15 +106,23 @@ class SendCommandProcessor:
         elif ki.dir == constants.KeyDir.UP:
             cmd.release(symbol)
         elif ki.dir == constants.KeyDir.CLICK:
-            cmd.press(symbol)
-            cmd.release(symbol)
+            self._click(cmd, symbol, press_duration)
         elif ki.dir == constants.KeyDir.ON:
             if not cmd.toggled(symbol):
-                cmd.press(symbol)
-                cmd.release(symbol)
+                self._click(cmd, symbol, press_duration)
         elif ki.dir == constants.KeyDir.OFF:
             if cmd.toggled(symbol):
-                cmd.press(symbol)
-                cmd.release(symbol)
+                self._click(cmd, symbol, press_duration)
         else:
             raise SendError
+
+    def _click(
+        self,
+        cmd: KeyboardController | MouseController,
+        symbol: str,
+        press_duration: float,
+    ) -> None:
+        cmd.press(symbol)
+        if press_duration:
+            self.sleep_fn(press_duration)
+        cmd.release(symbol)
