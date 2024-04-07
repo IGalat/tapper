@@ -72,7 +72,7 @@ class SendCommandProcessor:
             elif isinstance(instruction, CursorMoveInstruction):
                 self.mouse_controller.move(*instruction.xy, instruction.relative)
             elif isinstance(instruction, SleepInstruction):
-                self.sleep_fn(instruction.time / speed)  # type: ignore  # https://github.com/python/mypy/issues/5485
+                self.sleep_fn(instruction.time / speed)
             else:
                 raise SendError
 

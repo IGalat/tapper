@@ -151,14 +151,15 @@ def has_chars(instructions: list[SendInstruction]) -> bool:
 class SendParser:
     """Parses the 'send' command."""
 
-    combo_prefix: str = ""
-    combo_suffix: str = ""
-    pattern: re.Pattern[str] = ""  # type: ignore
+    pattern: re.Pattern[str] | None = None
     """Pattern of the combo."""
+
     symbols: dict[str, type[SendInstruction]] = field(default_factory=dict)
     """Symbol and corresponding command. Includes aliases."""
+
     aliases: dict[str, str] = field(default_factory=dict)
     """Alias to first non-alias mapping."""
+
     regexes: dict[
         re.Pattern[str], tuple[type[SendInstruction], Callable[[str], Any]]
     ] = field(default_factory=dict)
@@ -174,8 +175,7 @@ class SendParser:
     def parse(self, command: str, shift_in: str | None = None) -> list[SendInstruction]:
         """Parse send command into sequential instructions."""
         global default_shift
-        if not self.pattern:
-            self.set_wrap(COMBO_WRAP)
+        self.pattern = self.pattern or parse_wrap(COMBO_WRAP)
 
         if shift_in:
             default_shift = shift_in
