@@ -58,7 +58,7 @@ flowchart
 
 ### Trigger conditions
 
-TBD, planned after first release (see plans.md)
+See README
 
 ### Command
 
