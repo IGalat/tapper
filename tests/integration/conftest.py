@@ -131,7 +131,8 @@ def f(dummy: Dummy, is_debug: bool) -> Fixture:
         real_sender.kb_controller = kbc
         real_sender.mouse_controller = mc
 
-        tapper.start(False)
+        tapper._blocking = False
+        tapper.start()
 
     fixture.start = start  # type: ignore
 

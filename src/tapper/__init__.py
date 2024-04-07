@@ -16,6 +16,7 @@ _listeners: list[_SignalListener]
 
 _send_processor = _SendCommandProcessor.from_none()
 _initialized = False
+_blocking = True
 
 Tap = _tap_tree.Tap
 """Trigger-action plan. Main part of this library. Allows setting hotkeys."""
@@ -58,7 +59,7 @@ def init() -> None:
     _initialized = True
 
 
-def start(blocking: bool = True) -> None:
+def start() -> None:
     """
     Initializes all underlying tools, and starts listeners.
     No changes by user in any elements of tapper are expected after this command.
@@ -72,6 +73,6 @@ def start(blocking: bool = True) -> None:
 
     # Should be blocking for normal usage, flag is for testing.
     # If tray icon is on, it will be blocking anyway.
-    if blocking:
+    if _blocking:
         while True:
             _time.sleep(1000000)
