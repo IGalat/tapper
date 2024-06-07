@@ -1,4 +1,4 @@
-typing_extensions==4.3.0
+typing_extensions>=4.3.0
 
 pillow>=9.4.0
 mss>=7.0.1
@@ -6,6 +6,6 @@ pystray>=0.19.4
 opencv-python>=4.7.0.68
 numpy>=1.24.1
 
-winput==1.5.0; sys_platform == 'win32'
-pywin32==305; sys_platform == 'win32'
+winput>=1.5.0; sys_platform == 'win32'
+pywin32>=305; sys_platform == 'win32'
 evdev>=1.6.0; sys_platform == 'linux'
