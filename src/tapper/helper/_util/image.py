@@ -6,19 +6,26 @@ from typing import Any
 from typing import Callable
 from typing import Union
 
-import mss as mss
+import mss
 import numpy
 import numpy as np
 import PIL.Image
 import PIL.ImageGrab
 import tapper
+from mss.base import MSSBase
 from numpy import ndarray
 from tapper.helper._util import image_fuzz
 from tapper.model import constants
 
 _bbox_pattern = re.compile(r"\(BBOX_-?\d+_-?\d+_-?\d+_-?\d+\)")
 
-mss = mss.mss()
+mss_instance: MSSBase
+
+
+def get_mss() -> MSSBase:
+    global mss_instance
+    mss_instance = mss.mss()
+    return mss_instance
 
 
 @lru_cache
@@ -60,9 +67,12 @@ def get_screenshot_if_none_and_cut(
             return maybe_image[bbox[1] : bbox[3], bbox[0] : bbox[2]]
         return maybe_image
     if bbox:
-        sct = mss.grab(bbox)
+        try:
+            sct = get_mss().grab(bbox)
+        except Exception as e:
+            raise e
     else:
-        sct = mss.grab(mss.monitors[0])
+        sct = get_mss().grab(get_mss().monitors[0])
     pil_rgb = PIL.Image.frombytes("RGB", sct.size, sct.bgra, "raw", "BGRX")
     return numpy.asarray(pil_rgb)
 

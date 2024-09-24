@@ -5,6 +5,8 @@ from typing import Any
 from typing import Callable
 from typing import Optional
 
+from tapper.action.wrapper import ActionConfig
+from tapper.action.wrapper import config_thread_local_storage
 from tapper.model.constants import KeyDirBool
 from tapper.model.types_ import Signal
 from tapper.util import event
@@ -25,6 +27,9 @@ def run_task(repeatable: Callable[[], Any]) -> None:
     global new_repeatable_queued
     new_repeatable_queued = False
     end_run = lambda: new_repeatable_queued or not running_repeatable
+    config_thread_local_storage.action_config = ActionConfig(
+        send_interval=0.01, send_press_duration=0.01
+    )
 
     to_wait, repeats = registered_repeatables[repeatable]
     for _ in range(repeats):
