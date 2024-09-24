@@ -2,15 +2,16 @@
 
 ## Functionality
 
-On the tin, **tapper** might remind you of `pynput`, `autohotkey` and similar tools - and indeed, they were an inspiration.
+**tapper** draws inspiration from tools like `autohotkey`, `pynput`
+and others, and strives to provide a more flexible and convenient solution.
 
-In practice it aims to do a lot more and is more flexible. Here are some of the advantages:
+ Here are some of the advantages:
 
-- Cross-platform. Your scripts will work on across devices, and you don't need to learn separate tools for each platform.
+- Cross-platform. Your scripts will work across devices, and you don't need to learn separate tools for each platform.
 - Easy to learn API, convenient for both simple and complex scripts.
 - Responsiveness when rapidly typing or clicking.
 - Per-window or otherwise conditional hotkeys.
-- Suppressing the key that triggered the action. (surprising how commonly this is absent in other tools)
+- Suppressing the key that triggered the action. (surprising how often this is absent in other tools)
 - Built-in suite of convenient, well-tested helper functions.
 
 ## Example
@@ -33,13 +34,13 @@ start()
 
 ## Installation
 
-Install Python 3.10 or later, then install via [pip](https://pythonbasics.org/how-to-use-pip-and-pypi/):
+Install Python 3.12 or later, then install via [pip](https://pythonbasics.org/how-to-use-pip-and-pypi/):
 
 ```
-pip install git+https://github.com/IGalat/tapper.git#egg=tapper[all]
+pip install tapper[all]
 ```
 
-For Linux, see [this](https://github.com/IGalat/tapper/blob/master/docs/dev/os_specific.md#installation).
+For Linux, see [a separate instruction](https://github.com/IGalat/tapper/blob/master/docs/dev/os_specific.md#installation).
 
 # How to use
 

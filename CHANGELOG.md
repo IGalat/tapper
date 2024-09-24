@@ -5,6 +5,42 @@ Versions follow [CalVer](https://calver.org) with format YYYY.0M.MICRO.
 Until status changes from "Beta" to "Stable", don't expect backwards compatibility.
 
 
+## 2024.9.3 - Action config
+
+### Major changes:
+
+Action Config: specify it on a Tap or a Group, and it will be respected by all tapper functions in that Tap/Group.
+For now, has 2 configs:
+
+`send_interval: float` - time between keystrokes in "send" command.
+`send_press_duration: float` - time between key press and release in "send" command.
+
+These can be specified per `send`, otherwise inherited from `Tap`,
+then closest `Group` and up the chain to the `root`.
+
+Dropped support for python < 3.12.
+
+### Minor changes:
+
+Force close window now accepts a delay, and tries regular close first,
+and only force after the delay, if window's still there.
+
+Used `mss` lib for screenshots, for speed.
+
+`conditions` now can be added as separate method to `Tap` ot `Group`, as opposed to args in constructor.
+
+System tray now disappears when termination is invoked on Windows.
+
+`suppress_trigger` now accepts True/False, not just internal enum values.
+
+### Fixes:
+
+`.pyw` script not restarting correctly
+
+`pixel_wait_for` method in util
+
+
+
 ## 2023.1.2 - Images
 
 ### Major changes:

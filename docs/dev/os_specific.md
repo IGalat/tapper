@@ -11,11 +11,11 @@ For window tracking and commands, `pywin32` is used.
 
 ### Installation
 
-Command `pip install` in README should be prefixed by `python3.10 -m` or your python version >= 3.10.
+Command `pip install` in README should be prefixed by `python3.12 -m` or your python version >= 3.12.
 
 If running the command fails with error about C headers, install python3-dev:
 ```
-sudo apt-get install python3.10-dev
+sudo apt-get install python3.12-dev
 ```
 or similar for your python3 version.
 
