@@ -18,8 +18,6 @@ For now, has 2 configs:
 These can be specified per `send`, otherwise inherited from `Tap`,
 then closest `Group` and up the chain to the `root`.
 
-Dropped support for python < 3.12.
-
 ### Minor changes:
 
 Force close window now accepts a delay, and tries regular close first,
