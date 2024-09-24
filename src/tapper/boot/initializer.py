@@ -39,11 +39,11 @@ def default_keeper_pressed(os: str | None = None) -> keeper.Pressed:
     return keeper.Pressed(registered_symbols=config.keys_held_down(os))
 
 
-def default_send_parser() -> SendParser:
+def default_send_parser(os: str | None = None) -> SendParser:
     send_parser = SendParser()
     send_parser.set_wrap(config.send_combo_wrap)
     for symbol in [
-        *keyboard.get_keys().keys(),
+        *keyboard.get_keys(os).keys(),
         *mouse.regular_buttons,
         *mouse.button_aliases.keys(),
     ]:
@@ -114,7 +114,7 @@ def init(
     [c._init() for c in controllers]
 
     send_processor.os = os
-    send_processor.parser = default_send_parser()
+    send_processor.parser = default_send_parser(os)
     send_processor.kb_controller = kbc  # type: ignore
     send_processor.mouse_controller = mc  # type: ignore
     send_processor.default_interval = lambda: config.default_send_interval  # type: ignore

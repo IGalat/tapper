@@ -5,6 +5,7 @@ into Shadow Tree - identically structured tree with useful for runtime fields.
 from functools import partial
 from typing import Any
 
+from tapper import config
 from tapper.model import keyboard
 from tapper.model import mouse
 from tapper.model.tap_tree import Group
@@ -18,7 +19,7 @@ from tapper.model.types_ import TriggerConditionFn
 from tapper.model.types_ import TriggerStr
 from tapper.parser.trigger_parser import TriggerParser
 
-all_symbols = [*keyboard.get_keys().keys(), *mouse.get_keys().keys()]
+all_symbols = [*keyboard.get_keys(config.os).keys(), *mouse.get_keys().keys()]
 
 
 def find_property(prop_name: str, group: Group) -> Any:
