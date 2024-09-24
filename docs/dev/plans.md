@@ -43,7 +43,12 @@ Potential ideas:
 - Action queue, maybe with time limit when put? i.e. I press "ab" quickly, both are hotkeys, and if "a" is still going
 on the last millisecond, "b" can trigger afterwards. Whole can of worms though.
 - trigger conditions: have IDE autocomplete
-
+- repeater helper: add argument fn - stop condition
+- add "key was pressed, since now/since X seconds from now". This would allow running something until key was pressed, without helper.toggle
+- add "wait for any key/alphanumeric key/other categories" functionality
+- when Tap is set up incorrectly and function is invoked not passed, you get:
+AttributeError: 'MouseController' object has no attribute '_tracker'
+Fix this, so that errors are clear.
 
 ## Limitations of the current design
 
