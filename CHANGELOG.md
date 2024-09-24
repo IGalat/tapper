@@ -5,7 +5,7 @@ Versions follow [CalVer](https://calver.org) with format YYYY.0M.MICRO.
 Until status changes from "Beta" to "Stable", don't expect backwards compatibility.
 
 
-## 2024.9.3 - Action config
+## 2024.9.4 - Action config
 
 ### Major changes:
 
