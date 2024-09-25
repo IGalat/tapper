@@ -50,7 +50,7 @@ class SignalRecord:
 recording_: list[SignalRecord] | None = None
 
 record_signal = lambda signal: recording_.append(  # type: ignore
-    SignalRecord(signal, time.time(), mouse.get_pos())
+    SignalRecord(signal, time.perf_counter(), mouse.get_pos())
 )
 
 

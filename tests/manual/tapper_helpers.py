@@ -7,9 +7,9 @@ from tapper import kb
 from tapper import root
 from tapper import start
 from tapper import Tap
-from tapper.helper import actions
 from tapper.helper import img
 from tapper.helper import recording
+from tapper.helper import repeat
 
 
 def print_pixel(color: tuple[int, int, int], coords: tuple[int, int]) -> None:
@@ -24,19 +24,17 @@ def helpers() -> None:
     root.add(
         Group("repeat").add(
             {
-                "[": actions.repeat_while(
+                "[": repeat.while_fn(
                     lambda: random.randint(0, 2), lambda: print("randint")
                 ),
-                "]": actions.repeat_while(
+                "]": repeat.while_fn(
                     lambda: kb.pressed("ctrl"), lambda: print("ctrl!"), 0.5
                 ),
-                "p": actions.repeat_while_pressed(
-                    "p", lambda: print(f"{time.time():.3f}")
-                ),
-                "o": actions.repeat_while_pressed("o", lambda: print("o", end=""), 1),
+                "p": repeat.while_pressed("p", lambda: print(f"{time.time():.3f}")),
+                "o": repeat.while_pressed("o", lambda: print("o", end=""), 1),
             },
-            Tap("(", actions.toggle_repeat(lambda: print("Sadge"), 1, 4)),
-            Tap(")", actions.toggle_repeat(lambda: print("sMILE"), 1, 4)),
+            Tap("(", repeat.toggle(lambda: print("Sadge"), 1, 4)),
+            Tap(")", repeat.toggle(lambda: print("sMILE"), 1, 4)),
         ),
         Group("recording").add(
             {

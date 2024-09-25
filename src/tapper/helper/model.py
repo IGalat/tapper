@@ -1,4 +1,8 @@
+import uuid
 from dataclasses import dataclass
+from dataclasses import field
+from typing import Any
+from typing import Callable
 
 
 @dataclass
@@ -23,3 +27,21 @@ class RecordConfig:
 
     cut_start_stop: bool = True
     """Will cut start and stop keys out of recording."""
+
+
+@dataclass
+class Repeatable:
+    """Details of repeat functions."""
+
+    condition: Callable[[], Any]
+    """Will be checked every time, with bool(result) used for evaluating."""
+
+    action: Callable[[], Any]
+    """What to repeat."""
+
+    uid: uuid.UUID = field(default_factory=uuid.uuid4)
+
+    interval: float = 0.1
+    """Time between repeats in seconds."""
+
+    max_repeats: int | None = None

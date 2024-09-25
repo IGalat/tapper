@@ -1,73 +1,79 @@
-import time
 from functools import partial
 from typing import Any
 from typing import Callable
 
 from tapper.helper._util import repeat_util
+from tapper.helper.model import Repeatable
 
 
-def repeat_while(
+def while_fn(
     condition: Callable[[], Any],
     action: Callable[[], Any],
-    period_s: float = 0.1,
+    interval: float = 0.1,
     max_repeats: int | None = None,
 ) -> Callable[[], None]:
-    """Repeats an action while condition applies."""
+    """
+    Repeats an action while condition applies.
 
-    def fn() -> None:
-        for _ in range(max_repeats or 999999999999999):
-            if not bool(condition()):
-                break
-            action()
-            time.sleep(period_s)
+    Notes:
+    - runs in one separate thread, so cannot launch multiple toggle_repeats
+    - if another repeat is triggered, the current execution stops immediately
 
-    return fn
+    :param condition: Checked every loop, `not bool(condition())` stops.
+    :param action: what to repeat.
+    :param interval: how often to repeat, in seconds.
+    :param max_repeats: optional limit.
+    :return: callable toggle, to be set into a Tap.
+    """
+    return partial(
+        repeat_util.run_action,
+        Repeatable(
+            condition=condition,
+            action=action,
+            interval=interval,
+            max_repeats=max_repeats,
+        ),
+    )
 
 
-def repeat_while_pressed(
+def while_pressed(
     symbol: str,
     action: Callable[[], Any],
-    period_s: float = 0.1,
+    interval: float = 0.1,
     max_repeats: int | None = None,
 ) -> Callable[[], None]:
     """
-    Repeats action in a separate thread until key is released.
+    Repeats action until key is released.
 
-    Warning: if key up is suppressed (used in another Tap), action will be
-    repeated forever(or until overridden by another toggle_repeat or repeat_while_pressed)
+    :param symbol: keyboard or mouse key, aliases are accepted.
+        Only a single key works, combinations don't.
+    See :func:`while_fn` for other docs.
     """
-
-    repeat_util.registered_repeatables[action] = (
-        period_s,
-        max_repeats or 999999999999999,
+    return partial(
+        repeat_util.run_action,
+        Repeatable(
+            condition=repeat_util.to_pressed_condition(symbol),
+            action=action,
+            interval=interval,
+            max_repeats=max_repeats,
+        ),
     )
-    return partial(repeat_util.while_pressed, symbol, action)
 
 
-def toggle_repeat(
-    action: Callable[[], Any], period_s: float = 0.1, max_repeats: int | None = None
+def toggle(
+    action: Callable[[], Any], interval: float = 0.1, max_repeats: int | None = None
 ) -> Callable[[], None]:
     """
     When toggled, starts repeating the action until toggled again.
 
-    Notes:
-        - runs in one separate thread, so cannot launch multiple toggle_repeats
-        - if another toggle_repeat is triggered, the current execution stops immediately
-        - execution immediately stops on second toggle of toggle_repeat
-
-    :param action: what to repeat
-    :param period_s: how often to repeat, seconds
-    :param max_repeats: optional limit
-    :return: callable toggle, to be set into a Tap
-
-    Example:
-        {"a": toggle_repeat(lambda: print("p")) }
-
-        When you press 'a', 'p' will be pressed every 0.1 sec until you
-        press 'a' again or press another button which triggers a different toggle_repeat.
+    See :func:`while_fn` for docs.
     """
-    repeat_util.registered_repeatables[action] = (
-        period_s,
-        max_repeats or 999999999999999,
+    return partial(
+        repeat_util.toggle_run,
+        Repeatable(
+            condition=lambda: True,
+            action=action,
+            interval=interval,
+            max_repeats=max_repeats,
+        ),
     )
-    return partial(repeat_util.toggle_repeatable, action)
