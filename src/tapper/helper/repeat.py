@@ -3,7 +3,7 @@ from functools import partial
 from typing import Any
 from typing import Callable
 
-from tapper.helper._util import repeater
+from tapper.helper._util import repeat_util
 
 
 def repeat_while(
@@ -37,8 +37,11 @@ def repeat_while_pressed(
     repeated forever(or until overridden by another toggle_repeat or repeat_while_pressed)
     """
 
-    repeater.registered_repeatables[action] = period_s, max_repeats or 999999999999999
-    return partial(repeater.while_pressed, symbol, action)
+    repeat_util.registered_repeatables[action] = (
+        period_s,
+        max_repeats or 999999999999999,
+    )
+    return partial(repeat_util.while_pressed, symbol, action)
 
 
 def toggle_repeat(
@@ -63,5 +66,8 @@ def toggle_repeat(
         When you press 'a', 'p' will be pressed every 0.1 sec until you
         press 'a' again or press another button which triggers a different toggle_repeat.
     """
-    repeater.registered_repeatables[action] = period_s, max_repeats or 999999999999999
-    return partial(repeater.toggle_repeatable, action)
+    repeat_util.registered_repeatables[action] = (
+        period_s,
+        max_repeats or 999999999999999,
+    )
+    return partial(repeat_util.toggle_repeatable, action)

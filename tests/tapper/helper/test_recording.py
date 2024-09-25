@@ -3,8 +3,8 @@ from unittest.mock import patch
 
 import pytest
 from tapper.helper import recording
-from tapper.helper._util import recorder
-from tapper.helper._util.recorder import SignalRecord
+from tapper.helper._util import record_util
+from tapper.helper._util.record_util import SignalRecord
 from tapper.helper.model import RecordConfig
 from tapper.model.constants import KeyDirBool
 from tapper.util import event
@@ -20,11 +20,11 @@ def wrap_in_start_stop(records: list[SignalRecord]) -> list[SignalRecord]:
 
 class TestRecorderTransform:
     def test_simplest(self) -> None:
-        result = recorder.transform_recording([], RecordConfig(cut_start_stop=False))
+        result = record_util.transform_recording([], RecordConfig(cut_start_stop=False))
         assert result == "$()"
 
     def test_cut_simplest(self) -> None:
-        result = recorder.transform_recording(wrap_in_start_stop([]), RecordConfig())
+        result = record_util.transform_recording(wrap_in_start_stop([]), RecordConfig())
         assert result == "$()"
 
     def test_cut_with_content(self) -> None:
@@ -38,7 +38,7 @@ class TestRecorderTransform:
                 SignalRecord(("e", KeyDirBool.UP), 0, None),
             ]
         )
-        result = recorder.transform_recording(
+        result = record_util.transform_recording(
             record, RecordConfig(down_up_as_click=True)
         )
         assert result == "$(q;w;e)"
@@ -56,7 +56,7 @@ class TestRecorderTransform:
             SignalRecord(("control", KeyDirBool.DOWN), 0, None),
             SignalRecord(("9", KeyDirBool.DOWN), 0, None),
         ]
-        result = recorder.transform_recording(
+        result = record_util.transform_recording(
             record, RecordConfig(down_up_as_click=True)
         )
         assert result == "$(q;w;e)"
@@ -72,7 +72,7 @@ class TestRecorderTransform:
                 SignalRecord(("e", KeyDirBool.UP), 6.001, None),  # should be rounded
             ]
         )
-        result = recorder.transform_recording(
+        result = record_util.transform_recording(
             record, RecordConfig(down_up_as_click=False, max_compress_action_interval=1)
         )
         assert result == "$(q down;q up;w down;3s;w up;e down;1.5s;e up)"
@@ -88,7 +88,7 @@ class TestRecorderTransform:
                 SignalRecord(("e", KeyDirBool.UP), 5.001, None),
             ]
         )
-        result = recorder.transform_recording(
+        result = record_util.transform_recording(
             record, RecordConfig(down_up_as_click=True, max_compress_action_interval=1)
         )
         assert result == "$(q;w down;3s;w up;e)"
@@ -107,7 +107,7 @@ class TestRecorderTransform:
                 SignalRecord(("r", KeyDirBool.UP), 0, (200, 216)),
             ]
         )
-        result = recorder.transform_recording(
+        result = record_util.transform_recording(
             record, RecordConfig(down_up_as_click=True, min_mouse_movement=10)
         )
         assert result == "$(x0y0;q;x100y100;w down;x200y200;w up;e;x200y216;r)"
@@ -123,7 +123,7 @@ class TestRecorderTransform:
                 SignalRecord(("right_mouse_button", KeyDirBool.UP), 0, None),
             ]
         )
-        result = recorder.transform_recording(
+        result = record_util.transform_recording(
             record, RecordConfig(down_up_as_click=True, shorten_to_aliases=True)
         )
         assert result == "$(esc;lctrl;rmb)"

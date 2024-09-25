@@ -7,14 +7,14 @@ from typing import Union
 
 import tapper
 from numpy import ndarray
-from tapper.helper._util.image import _find_in_image
-from tapper.helper._util.image import _find_in_image_raw
-from tapper.helper._util.image import _finish_snip
-from tapper.helper._util.image import _get_pixel_color
-from tapper.helper._util.image import _normalize
-from tapper.helper._util.image import _pixel_find
-from tapper.helper._util.image import _pixel_str
-from tapper.helper._util.image import _toggle_snip
+from tapper.helper._util.image_util import _find_in_image
+from tapper.helper._util.image_util import _find_in_image_raw
+from tapper.helper._util.image_util import _finish_snip
+from tapper.helper._util.image_util import _get_pixel_color
+from tapper.helper._util.image_util import _normalize
+from tapper.helper._util.image_util import _pixel_find
+from tapper.helper._util.image_util import _pixel_str
+from tapper.helper._util.image_util import _toggle_snip
 
 STD_PRECISION = 0.999
 

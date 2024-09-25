@@ -3,7 +3,7 @@ from typing import Any
 from typing import Callable
 
 from tapper import send
-from tapper.helper._util import recorder
+from tapper.helper._util import record_util
 from tapper.helper.model import RecordConfig
 
 
@@ -32,7 +32,7 @@ def start() -> Callable[[], None]:
 
     :return: callable start, to be set into a Tap
     """
-    return recorder.start_recording
+    return record_util.start_recording
 
 
 def stop(
@@ -48,7 +48,7 @@ def stop(
     :param config: config settings.
     :return: callable stop, to be set into a Tap.
     """
-    return partial(recorder.stop_recording, [_set_new_recording, callback], config)
+    return partial(record_util.stop_recording, [_set_new_recording, callback], config)
 
 
 def toggle(
@@ -65,4 +65,4 @@ def toggle(
     :param config: config settings.
     :return: callable toggle, to be set into a Tap.
     """
-    return partial(recorder.toggle_recording, [_set_new_recording, callback], config)
+    return partial(record_util.toggle_recording, [_set_new_recording, callback], config)

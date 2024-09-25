@@ -91,6 +91,7 @@ def while_pressed(symbol: str, action: Callable[[], Any]) -> None:
     if equal_fn(action, running_repeatable):
         return
     toggle_repeatable(action)
+    time.sleep(0)  # or may detect trigger
     event.subscribe(
         "keyboard", partial(remove_repeatable_and_unsub, expected_symbol=symbol)
     )
