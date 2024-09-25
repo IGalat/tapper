@@ -17,6 +17,10 @@ def to_en(language: str | int | Lang, text: str) -> str:
     Will only transliterate characters outside $() - or whatever the send_combo_wrap is in your tapper.config
     """
     lang = languages.get(language)
+    if len(lang.charset) != len(keyboard.chars_en):
+        raise NotImplementedError(
+            f"Language {language} you're trying to transliterate is not implemented."
+        )
     result = []
     combos = send_parser.match_combos(text, _combo_pattern)
     i = 0

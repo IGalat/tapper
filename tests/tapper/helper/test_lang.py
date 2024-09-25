@@ -28,3 +28,8 @@ def test_to_en_wrong_lang() -> None:
     assert ua("ії") == "s]"
     with pytest.raises(ValueError):
         ua("hi there")
+
+
+def test_language_not_implemented() -> None:
+    with pytest.raises(NotImplementedError):
+        to_en("Tajik", "")

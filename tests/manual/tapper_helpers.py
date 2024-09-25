@@ -5,18 +5,11 @@ from manual.util_mantest import killme_in
 from tapper import Group
 from tapper import kb
 from tapper import root
-from tapper import send
 from tapper import start
 from tapper import Tap
 from tapper.helper import actions
 from tapper.helper import img
-
-recording: str = ""
-
-
-def set_recording(new_recording: str) -> None:
-    global recording
-    recording = new_recording
+from tapper.helper import recording
 
 
 def print_pixel(color: tuple[int, int, int], coords: tuple[int, int]) -> None:
@@ -47,10 +40,10 @@ def helpers() -> None:
         ),
         Group("recording").add(
             {
-                "numpad_minus": actions.record_toggle(set_recording),
-                "ctrl+numpad_minus": actions.record_start(),
-                "numpad_plus": lambda: send(recording, interval=0.1, speed=2),
-                "ctrl+numpad_plus": lambda: print(recording),
+                "numpad_minus": recording.toggle(),
+                "ctrl+numpad_minus": recording.start(),
+                "numpad_plus": recording.action_playback_last(speed=2),
+                "ctrl+numpad_plus": lambda: print(recording.last_recorded),
             },
         ),
         Group("img").add(

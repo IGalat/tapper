@@ -3,9 +3,7 @@ from functools import partial
 from typing import Any
 from typing import Callable
 
-from tapper.helper._util import recorder
 from tapper.helper._util import repeater
-from tapper.helper.helper_model import RecordConfig
 
 
 def repeat_while(
@@ -67,45 +65,3 @@ def toggle_repeat(
     """
     repeater.registered_repeatables[action] = period_s, max_repeats or 999999999999999
     return partial(repeater.toggle_repeatable, action)
-
-
-def record_start() -> Callable[[], None]:
-    """
-    Gives a function, that:
-    Starts recording keystrokes and mouse clicks, and position of the mouse during these actions.
-    If recording in progress, destroys it and starts a new one.
-
-    :return: callable start, to be set into a Tap
-    """
-    return recorder.start_recording
-
-
-def record_stop(
-    callback: Callable[[str], Any], config: RecordConfig = RecordConfig()
-) -> Callable[[], None]:
-    """
-    Gives a function, that:
-    Stops recording, and if there was a recording, transforms recorded actions into a string
-        that can be supplied to tapper.send and calls the callback with this string.
-
-    :param callback: What to do with resulting string
-    :param config: config settings
-    :return: callable stop, to be set into a Tap
-    """
-    return partial(recorder.stop_recording, callback, config)
-
-
-def record_toggle(
-    callback: Callable[[str], Any], config: RecordConfig = RecordConfig()
-) -> Callable[[], None]:
-    """
-    Gives a function, that:
-    On first stroke, starts recording keystrokes and mouse clicks, and position of the mouse during these actions.
-    On second stroke, stops recording, transforms recorded actions into a string that can be supplied to tapper.send
-        and calls the callback with this string.
-
-    :param callback: What to do with resulting string
-    :param config: config settings
-    :return: callable toggle, to be set into a Tap
-    """
-    return partial(recorder.toggle_recording, callback, config)

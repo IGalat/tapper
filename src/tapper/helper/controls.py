@@ -21,5 +21,5 @@ def terminate() -> None:
 
 
 def _terminate() -> None:
-    atexit._run_exitfuncs()
+    atexit._run_exitfuncs()  # run all @atexit functions
     os.kill(os.getpid(), signal.SIGINT)

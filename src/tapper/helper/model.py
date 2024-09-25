@@ -6,9 +6,10 @@ class RecordConfig:
     """Config for record function. And properties of transformation to string."""
 
     max_recording_time: float = 15 * 60
-    """Max time of recording. If this is reached, toggle will switch to activating new recording."""
+    """Max time of recording, in seconds.
+    If this is reached, toggle will switch to activating new recording."""
 
-    non_compress_action_delay: float = 0.5
+    max_compress_action_interval: float = 0.5
     """If time between signals is longer than this, it won't be compressed."""
 
     down_up_as_click: bool = True
@@ -19,3 +20,6 @@ class RecordConfig:
 
     shorten_to_aliases: bool = True
     """Will swap "left_mouse_button" with "lmb", "left_control" with "lctrl" etc."""
+
+    cut_start_stop: bool = True
+    """Will cut start and stop keys out of recording."""

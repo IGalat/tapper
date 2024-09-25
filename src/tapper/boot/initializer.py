@@ -14,6 +14,7 @@ from tapper.model import keyboard
 from tapper.model import mouse
 from tapper.model.send import CursorMoveInstruction
 from tapper.model.send import KeyInstruction
+from tapper.model.send import SendInstruction
 from tapper.model.send import SleepInstruction
 from tapper.model.send import WheelInstruction
 from tapper.model.tap_tree import Group
@@ -39,17 +40,23 @@ def default_keeper_pressed(os: str | None = None) -> keeper.Pressed:
     return keeper.Pressed(registered_symbols=config.keys_held_down(os))
 
 
-def default_send_parser(os: str | None = None) -> SendParser:
-    send_parser = SendParser()
-    send_parser.set_wrap(config.send_combo_wrap)
+def get_symbols(os: str | None = None) -> dict[str, type[SendInstruction]]:
+    symbols: dict[str, type[SendInstruction]] = {}
     for symbol in [
         *keyboard.get_keys(os).keys(),
         *mouse.regular_buttons,
         *mouse.button_aliases.keys(),
     ]:
-        send_parser.symbols[symbol] = KeyInstruction
+        symbols[symbol] = KeyInstruction
     for wheel in [*mouse.wheel_buttons, *mouse.wheel_aliases.keys()]:
-        send_parser.symbols[wheel] = WheelInstruction
+        symbols[wheel] = WheelInstruction
+    return symbols
+
+
+def default_send_parser(os: str | None = None) -> SendParser:
+    send_parser = SendParser()
+    send_parser.set_wrap(config.send_combo_wrap)
+    send_parser.symbols = get_symbols(os)
     for alias, references in [*keyboard.aliases.items(), *mouse.aliases.items()]:
         send_parser.aliases[alias] = references[0]
 

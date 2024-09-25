@@ -36,10 +36,6 @@ def sleep_signal(time_s: str | float) -> tuple[str, KeyDirBool]:
     return f"Sleep {time_s}", KeyDirBool.DOWN
 
 
-def append(arr: list[Any], item: Any) -> None:
-    arr.append(item)
-
-
 def ends_with(outer: list[Any], sub: list[Any]) -> bool:
     return len(outer) >= len(sub) and outer[-len(sub) :] == sub
 
@@ -57,12 +53,13 @@ class Fixture:
 
     def act(self, n: int) -> Callable[[], partial[Any]]:
         if n not in self._acts:
-            self._acts[n] = partial(append, self.actions, n)
+            self._acts[n] = partial(self.actions.append, n)
         return self._acts[n]
 
 
 @pytest.fixture
 def f(dummy: Dummy, is_debug: bool, make_group: Callable) -> Fixture:
+    """Emulation of the entire tapper setup."""
     debug_sleep_mult = 5 if is_debug else 1
 
     # restore default before each

@@ -411,19 +411,21 @@ One `ctrl+l` click will start sending the phrase immediately and every 27 sec, a
 You can record your actions, then get a string you can `send`.
 
 ```python
-recording: str = ""
+recording_: str = ""
+
 
 def set_recording(new_recording: str) -> None:
-    global recording
-    recording = new_recording
+  global recording_
+  recording = new_recording
 
-root.add(Group("recording").add(        {
-            "f7": actions.record_toggle(set_recording),
-            "ctrl+f7": actions.record_start(),
-            "alt+f7": actions.record_stop(set_recording),
-            "f8": lambda: send(recording, interval=0.1, speed=2),
-            "ctrl+f8": lambda: pyperclip.copy(recording),
-        }))
+
+root.add(Group("recording").add({
+  "f7": actions.toggle(set_recording),
+  "ctrl+f7": actions.start(),
+  "alt+f7": actions.stop(set_recording),
+  "f8": lambda: send(recording_, interval=0.1, speed=2),
+  "ctrl+f8": lambda: pyperclip.copy(recording_),
+}))
 ```
 
 On pressing `f7` or `ctrl+f7`, it'll start recording, then on `f7` or `alt+f7` recording will stop, transform to string,
