@@ -181,7 +181,7 @@ def get_find_raw(
 def snip(
     prefix: str | None = "snip",
     bbox_to_name: bool = True,
-    bbox_callback: Callable[[BboxT], Any] | None = None,
+    bbox_callback: Callable[[int, int, int, int], Any] | None = None,
     picture_callback: Callable[[ImagePixelMatrixT], Any] | None = None,
 ) -> Callable[[], None]:
     """
