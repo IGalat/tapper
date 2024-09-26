@@ -41,6 +41,7 @@ def raise_io_error() -> None:
 @pytest.fixture(autouse=True)
 def assert_clean_state_after_test() -> Generator:
     yield
+    time.sleep(0)
     assert repeat_util.running_repeatable is None
 
 
