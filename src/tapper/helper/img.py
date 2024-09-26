@@ -3,10 +3,10 @@ import time
 from functools import partial
 from typing import Any
 from typing import Callable
+from typing import Iterable
 from typing import Union
 
 import tapper
-from numpy import ndarray
 from tapper.helper._util.image_util import _find_in_image
 from tapper.helper._util.image_util import _find_in_image_raw
 from tapper.helper._util.image_util import _finish_snip
@@ -15,22 +15,26 @@ from tapper.helper._util.image_util import _normalize
 from tapper.helper._util.image_util import _pixel_find
 from tapper.helper._util.image_util import _pixel_str
 from tapper.helper._util.image_util import _toggle_snip
+from tapper.helper.model_types import BboxT
+from tapper.helper.model_types import ImagePixelMatrixT
+from tapper.helper.model_types import PixelColorT
+from tapper.helper.model_types import XyCoordsT
 
 STD_PRECISION = 0.999
 
-SearchableImage = Union[
+SearchableImageT = Union[
     str,
-    tuple[str, tuple[int, int, int, int]],
-    tuple[ndarray, tuple[int, int, int, int]],
-    ndarray,
+    tuple[str, BboxT],
+    tuple[ImagePixelMatrixT, BboxT],
+    ImagePixelMatrixT,
 ]
 """
 Image to be searched for. May be:
     - numpy array: pimg = numpy.array(PIL.Image.open('Image.jpg')). RGB is expected.
-    - numpy array with bounding box: (pimg, (0, 0, 200, 50)), where coordinates are x_left, y_top, x_right, y_bottom
+    - numpy array with bounding box
     - file path, absolute or relative: pic_name = "my_button.png"
     - file path with bounding box: (pic_name, (0, 0, 200, 50))
-    - file path with bounding box in the name: pic_name = "my_button(BBOX_-100_213_-56_412).png"
+    - file path with bounding box in the name: pic_name = "my_button(BBOX_100_213_156_412).png"
         Pattern is: (BBOX_{int}_{int}_{int}_{int})
         If bounding box is specified separately, BBOX in the name will be ignored.
 Coordinates of bounding box may be negative on win32 with multiple screens.
@@ -42,10 +46,10 @@ _bbox_pattern = re.compile(r"\(BBOX_-?\d+_-?\d+_-?\d+_-?\d+\)")
 
 
 def find(
-    image: SearchableImage,
-    outer: str | ndarray | None = None,
+    image: SearchableImageT,
+    outer: str | ImagePixelMatrixT | None = None,
     precision: float = STD_PRECISION,
-) -> tuple[int, int] | None:
+) -> XyCoordsT | None:
     """
     Search a region of the screen for an image.
 
@@ -63,10 +67,10 @@ def find(
 
 
 def find_one_of(
-    images: list[SearchableImage],
-    outer: str | ndarray | None = None,
+    images: list[SearchableImageT],
+    outer: str | ImagePixelMatrixT | None = None,
     precision: float = STD_PRECISION,
-) -> SearchableImage | None:
+) -> SearchableImageT | None:
     """
     Get first image found.
 
@@ -85,11 +89,11 @@ def find_one_of(
 
 
 def wait_for(
-    image: SearchableImage,
+    image: SearchableImageT,
     timeout: int | float = 5,
     interval: float = 0.2,
     precision: float = STD_PRECISION,
-) -> tuple[int, int] | None:
+) -> XyCoordsT | None:
     """
     Regularly search the screen or region of the screen for image,
     returning coordinates when it appears, or None if timeout.
@@ -112,11 +116,11 @@ def wait_for(
 
 
 def wait_for_one_of(
-    images: list[SearchableImage],
+    images: list[SearchableImageT],
     timeout: int | float = 5,
     interval: float = 0.4,
     precision: float = STD_PRECISION,
-) -> SearchableImage | None:
+) -> SearchableImageT | None:
     """
     Regularly search the screen or region of the screen for images,
     returning first that appears, or None if timeout.
@@ -159,8 +163,8 @@ def wait_for_one_of(
 
 
 def get_find_raw(
-    image: SearchableImage, outer: str | ndarray | None = None
-) -> tuple[float, tuple[int, int]]:
+    image: SearchableImageT, outer: str | ImagePixelMatrixT | None = None
+) -> tuple[float, XyCoordsT]:
     """
     Find an image within a region of the screen or image, and return raw result.
 
@@ -177,8 +181,8 @@ def get_find_raw(
 def snip(
     prefix: str | None = "snip",
     bbox_to_name: bool = True,
-    bbox_callback: Callable[[int, int, int, int], Any] | None = None,
-    picture_callback: Callable[[ndarray], Any] | None = None,
+    bbox_callback: Callable[[BboxT], Any] | None = None,
+    picture_callback: Callable[[ImagePixelMatrixT], Any] | None = None,
 ) -> Callable[[], None]:
     """
     Click twice to get a picture(.png) of a region the screen.
@@ -206,10 +210,10 @@ def snip(
 
 
 def get_snip(
-    bbox: tuple[int, int, int, int] | None,
+    bbox: BboxT | None,
     prefix: str | None = None,
     bbox_in_name: bool = True,
-) -> ndarray:
+) -> ImagePixelMatrixT:
     """
     Screenshot with specified bounding box, or entire screen. Optionally saves to disk.
 
@@ -231,8 +235,8 @@ def get_snip(
 
 
 def pixel_info(
-    callback: Callable[[tuple[int, int, int], tuple[int, int]], Any],
-    outer: str | ndarray | None = None,
+    callback: Callable[[PixelColorT, XyCoordsT], Any],
+    outer: str | ImagePixelMatrixT | None = None,
 ) -> Callable[[], Any]:
     """
     Click to get pixel color and coordinates and call the callback with it.
@@ -250,7 +254,7 @@ def pixel_info(
 
 
 def pixel_str(
-    callback: Callable[[str], Any], outer: str | ndarray | None = None
+    callback: Callable[[str], Any], outer: str | ImagePixelMatrixT | None = None
 ) -> Callable[[], Any]:
     """
     Click to get pixel color and coordinates in as text and call the callback with it.
@@ -270,8 +274,8 @@ def pixel_str(
 
 
 def pixel_get_color(
-    coords: tuple[int, int], outer: str | ndarray | None = None
-) -> tuple[int, int, int]:
+    coords: XyCoordsT, outer: str | ImagePixelMatrixT | None = None
+) -> PixelColorT:
     """
     Get pixel color.
 
@@ -285,11 +289,11 @@ def pixel_get_color(
 
 
 def pixel_find(
-    color: tuple[int, int, int],
-    bbox_or_coords: tuple[int, int, int, int] | tuple[int, int] | None = None,
-    outer: str | ndarray | None = None,
+    color: PixelColorT,
+    bbox_or_coords: BboxT | XyCoordsT | None = None,
+    outer: str | ImagePixelMatrixT | None = None,
     variation: int = 0,
-) -> tuple[int, int] | None:
+) -> XyCoordsT | None:
     """
     Search a region of the screen or an image for a pixel with matching color.
     :param color: Red, Green, Blue components ranging from 0 to 255.
@@ -307,12 +311,12 @@ def pixel_find(
 
 
 def pixel_wait_for(
-    color: tuple[int, int, int],
-    bbox_or_coords: tuple[int, int, int, int] | tuple[int, int] | None = None,
+    color: PixelColorT,
+    bbox_or_coords: BboxT | XyCoordsT | None = None,
     timeout: int | float = 5,
     interval: float = 0.1,
     variation: int = 0,
-) -> tuple[int, int] | None:
+) -> XyCoordsT | None:
     """
     Regularly search the screen or region of the screen for a pixel,
     returning coordinates when it appears, or None if timeout.
@@ -337,15 +341,11 @@ def pixel_wait_for(
 
 
 def pixel_wait_for_one_of(
-    colors_coords: list[
-        tuple[tuple[int, int, int], tuple[int, int, int, int] | tuple[int, int] | None]
-    ],
+    colors_coords: Iterable[tuple[PixelColorT, BboxT | XyCoordsT | None]],
     timeout: int | float = 5,
     interval: float = 0.1,
     variation: int = 0,
-) -> tuple[
-    tuple[int, int, int], tuple[int, int, int, int] | tuple[int, int] | None
-] | None:
+) -> tuple[PixelColorT, BboxT | XyCoordsT | None] | None:
     """
     Regularly search the screen or region of the screen for pixels,
     returning first that appears, or None if timeout.
@@ -360,9 +360,9 @@ def pixel_wait_for_one_of(
     """
     finish_time = time.perf_counter() + timeout
     while True:
-        for _, col_coo in enumerate(colors_coords):
-            if pixel_find(*col_coo, variation=variation):
-                return col_coo
+        for _, color_coords in enumerate(colors_coords):
+            if pixel_find(*color_coords, variation=variation):
+                return color_coords
         if time.perf_counter() < finish_time:
             return None
         time.sleep(interval)

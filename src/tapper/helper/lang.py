@@ -13,8 +13,9 @@ _combo_pattern = send_parser.parse_wrap(config.send_combo_wrap)
 def to_en(language: str | int | Lang, text: str) -> str:
     """
     Transliterates to en_US, so tapper can understand your hotkeys/actions.
-
     Will only transliterate characters outside $() - or whatever the send_combo_wrap is in your tapper.config
+    :param language: Language name, locale number, or object.
+    :param text: Text to be transliterated.
     """
     lang = languages.get(language)
     if len(lang.charset) != len(keyboard.chars_en):

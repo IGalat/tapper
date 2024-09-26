@@ -31,7 +31,7 @@ class RecordConfig:
 
 @dataclass
 class Repeatable:
-    """Details of repeat functions."""
+    """Repeatable action and properties."""
 
     condition: Callable[[], Any]
     """Will be checked every time, with bool(result) used for evaluating."""
