@@ -61,17 +61,22 @@ def while_pressed(
 
 
 def toggle(
-    action: Callable[[], Any], interval: float = 0.1, max_repeats: int | None = None
+    action: Callable[[], Any],
+    interval: float = 0.1,
+    max_repeats: int | None = None,
+    condition: Callable[[], Any] | None = None,
 ) -> Callable[[], None]:
     """
     When toggled, starts repeating the action until toggled again.
+
+    :param condition: Additional optional condition. If not set, will repeat until toggled off.
 
     See :func:`while_fn` for docs.
     """
     return partial(
         repeat_util.toggle_run,
         Repeatable(
-            condition=lambda: True,
+            condition=condition if condition else lambda: True,
             action=action,
             interval=interval,
             max_repeats=max_repeats,

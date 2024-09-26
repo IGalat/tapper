@@ -1,24 +1,3 @@
-## About
-
-- What is the software application or feature?
-
-Automation tool for macros, remapping keys, and hotkeys, in python
-
-- Who’s it intended for?
-
-Developers, gamers, casuls
-
-- What problem does the software solve?
-
-Conditionally triggering actions/scripts in python; key remapping per-app
-
-- How is it going to work?
-
-By having user configure triggers and corresponding actions, and running a loop waiting for triggers
-
-- What are the main concepts that are involved and how are they related?
-
-"hotkeys" provide the ability to trigger "automation", or remapping
 
 ## Development plans
 
@@ -43,7 +22,6 @@ Potential ideas:
 - Action queue, maybe with time limit when put? i.e. I press "ab" quickly, both are hotkeys, and if "a" is still going
 on the last millisecond, "b" can trigger afterwards. Whole can of worms though.
 - trigger conditions: have IDE autocomplete
-- repeater helper: add argument fn - stop condition
 - add "key was pressed, since now/since X seconds from now". This would allow running something until key was pressed, without helper.toggle
 - add "wait for any key/alphanumeric key/other categories" functionality
 - when Tap is set up incorrectly and function is invoked not passed, you get:
@@ -54,6 +32,7 @@ Fix this, so that errors are clear.
 
 Unable to terminate/pause/unpause actions.
 Would probably need multiprocessing for that.
+Restarting works for terminating actions though.
 
 No hotstrings: made the decision to not implement them.
 
