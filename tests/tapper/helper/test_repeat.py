@@ -38,6 +38,13 @@ def raise_io_error() -> None:
     raise OSError()
 
 
+def wait_for_repeatable() -> None:
+    for _ in range(5):
+        if repeat_util.running_repeatable is not None:
+            break
+    time.sleep(0.001)
+
+
 @pytest.fixture(autouse=True)
 def assert_clean_state_after_test() -> Generator:
     yield
@@ -49,42 +56,42 @@ class TestRepeatWhileFn:
     def test_simplest(self) -> None:
         counter = Counter()
         repeat.while_fn(lambda: counter.count < 1, counter.tick, interval=0)()
-        time.sleep(0.001)
+        wait_for_repeatable()
 
         assert counter.count == 1
 
     def test_several_times(self) -> None:
         counter = Counter()
         repeat.while_fn(lambda: counter.count < 5, counter.tick, interval=0)()
-        time.sleep(0.001)
+        wait_for_repeatable()
 
         assert counter.count == 5
 
     def test_zero_times(self) -> None:
         counter = Counter()
         repeat.while_fn(lambda: False, counter.tick, interval=0)()
-        time.sleep(0.001)
+        wait_for_repeatable()
 
         assert counter.count == 0
 
     def test_max_repeats(self) -> None:
         counter = Counter()
         repeat.while_fn(lambda: True, counter.tick, interval=0, max_repeats=5)()
-        time.sleep(0.001)
+        wait_for_repeatable()
 
         assert counter.count == 5
 
     def test_condition_false_from_start(self) -> None:
         counter = Counter()
         repeat.while_fn(lambda: False, counter.tick, interval=0)()
-        time.sleep(0.001)
+        wait_for_repeatable()
 
         assert counter.count == 0
 
     def test_sleep_time(self, mock_sleep: Any) -> None:
         counter = Counter()
         repeat.while_fn(lambda: True, counter.tick, interval=0.035, max_repeats=2)()
-        time.sleep(0.001)
+        wait_for_repeatable()
         assert counter.count == 2
         assert mock_sleep.call_count == 2
         assert mock_sleep.call_args == call(0.035)
@@ -93,7 +100,7 @@ class TestRepeatWhileFn:
         counter1 = Counter()
         counter2 = Counter()
         repeat.while_fn(lambda: True, counter1.tick, interval=0.05)()
-        time.sleep(0.01)
+        wait_for_repeatable()
         repeat.while_fn(lambda: counter2.count < 5, counter2.tick, interval=0)()
         time.sleep(
             0.05
@@ -104,11 +111,11 @@ class TestRepeatWhileFn:
 
     def test_second_repeat_overrides_without_repeats(self) -> None:
         counter = Counter()
-        repeat.while_fn(lambda: True, counter.tick, interval=0.01)()
-        time.sleep(0.001)
+        repeat.while_fn(lambda: True, counter.tick, interval=0.05)()
+        wait_for_repeatable()
         assert counter.count == 1
         repeat.while_fn(lambda: False, counter.tick, interval=0)()
-        time.sleep(0.02)  # enough for 1st to repeat
+        time.sleep(0.05)  # enough for 1st to repeat
         assert counter.count == 1
 
 
@@ -123,7 +130,10 @@ class TestRepeatWhilePressed:
         counter = Counter()
         counter.action_at_5 = lambda: mock_return_false(mock_pressed)
         repeat.while_pressed("q", counter.tick)()
-        time.sleep(0.001)
+        for _ in range(100):
+            if repeat_util.running_repeatable is not None:
+                break
+        wait_for_repeatable()
         mock_pressed.return_value = False
         assert counter.count == 5
 
@@ -131,13 +141,13 @@ class TestRepeatWhilePressed:
         counter = Counter()
         counter.action_at_5 = lambda: mock_return_false(mock_pressed)
         repeat.while_pressed("q", counter.tick)()
-        time.sleep(0.001)
+        wait_for_repeatable()
 
         mock_pressed.return_value = False
-        time.sleep(0.001)
+        wait_for_repeatable()
 
         mock_pressed.return_value = True
-        time.sleep(0.001)
+        wait_for_repeatable()
 
         assert counter.count == 5
         assert mock_sleep.call_count == 4
@@ -150,7 +160,7 @@ class TestRepeatWhilePressed:
         counter = Counter()
         counter.action_at_5 = lambda: mock_return_false(mock_pressed)
         repeat.while_pressed("q", counter.tick, max_repeats=3)()
-        time.sleep(0.001)
+        wait_for_repeatable()
         mock_pressed.return_value = False
         assert counter.count == 3
 
@@ -161,7 +171,7 @@ class TestRepeatToggle:
         toggle = repeat.toggle(counter.tick)
 
         toggle()
-        time.sleep(0.001)
+        wait_for_repeatable()
         toggle()
         assert counter.count > 0
 
@@ -170,17 +180,17 @@ class TestRepeatToggle:
         toggle = repeat.toggle(counter.tick)
 
         toggle()
-        time.sleep(0.001)
+        wait_for_repeatable()
         toggle()
-        time.sleep(0.001)
+        wait_for_repeatable()
         count_1 = counter.count
         assert counter.count > 0
 
-        time.sleep(0.001)
+        wait_for_repeatable()
         assert counter.count == count_1
 
         toggle()
-        time.sleep(0.001)
+        wait_for_repeatable()
         toggle()
         assert counter.count > count_1
 
@@ -191,17 +201,17 @@ class TestRepeatToggle:
         toggle2 = repeat.toggle(counter2.tick)
 
         toggle1()
-        time.sleep(0.001)
+        wait_for_repeatable()
         toggle2()
-        time.sleep(0.001)
+        wait_for_repeatable()
         count_1 = counter1.count
-        time.sleep(0.001)
+        wait_for_repeatable()
         assert counter1.count == count_1
 
         toggle1()
-        time.sleep(0.001)
+        wait_for_repeatable()
         count_2 = counter2.count
-        time.sleep(0.001)
+        wait_for_repeatable()
         assert counter2.count == count_2
         toggle1()
 
@@ -210,11 +220,11 @@ class TestRepeatToggle:
         toggle = repeat.toggle(counter.tick, max_repeats=2)
 
         toggle()
-        time.sleep(0.001)
+        wait_for_repeatable()
         assert counter.count == 2
 
         toggle()
-        time.sleep(0.001)
+        wait_for_repeatable()
         assert counter.count == 4
 
     def test_toggle_again_after_exception(self, mock_sleep: Any) -> None:
@@ -223,11 +233,11 @@ class TestRepeatToggle:
         toggle = repeat.toggle(counter.tick)
 
         toggle()
-        time.sleep(0.001)
+        wait_for_repeatable()
         assert counter.count == 5
 
         toggle()
-        time.sleep(0.001)
+        wait_for_repeatable()
         toggle()
         assert counter.count > 5
 
@@ -236,6 +246,6 @@ class TestRepeatToggle:
         toggle = repeat.toggle(counter.tick, condition=lambda: counter.count < 3)
 
         toggle()
-        time.sleep(0.001)
+        wait_for_repeatable()
 
         assert counter.count == 3
