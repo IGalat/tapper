@@ -2,7 +2,7 @@ from functools import partial
 from typing import Any
 from typing import Callable
 
-from tapper.helper._util import repeat_util
+from tapper.helper._util import repeat_util as _repeat_util
 from tapper.helper.model import Repeatable
 
 
@@ -26,7 +26,7 @@ def while_fn(
     :return: callable toggle, to be set into a Tap.
     """
     return partial(
-        repeat_util.run_action,
+        _repeat_util.run_action,
         Repeatable(
             condition=condition,
             action=action,
@@ -50,9 +50,9 @@ def while_pressed(
     See :func:`while_fn` for other docs.
     """
     return partial(
-        repeat_util.run_action,
+        _repeat_util.run_action,
         Repeatable(
-            condition=repeat_util.to_pressed_condition(symbol),
+            condition=_repeat_util.to_pressed_condition(symbol),
             action=action,
             interval=interval,
             max_repeats=max_repeats,
@@ -74,7 +74,7 @@ def toggle(
     See :func:`while_fn` for docs.
     """
     return partial(
-        repeat_util.toggle_run,
+        _repeat_util.toggle_run,
         Repeatable(
             condition=condition if condition else lambda: True,
             action=action,

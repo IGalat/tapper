@@ -34,7 +34,7 @@ def from_path(pathlike: str) -> ndarray:
     return numpy.asarray(pil_img)
 
 
-def _normalize(
+def normalize(
     data_in: Union[
         None,
         str,
@@ -77,7 +77,7 @@ def get_screenshot_if_none_and_cut(
     return numpy.asarray(pil_rgb)
 
 
-def _find_in_image_raw(
+def find_in_image_raw(
     inner_image_bbox: tuple[ndarray, tuple[int, int, int, int] | None],
     outer: ndarray | None = None,
 ) -> tuple[float, tuple[int, int]]:
@@ -89,7 +89,7 @@ def _find_in_image_raw(
     return confidence, (x_start + coords[0], y_start + coords[1])
 
 
-def _find_in_image(
+def find_in_image(
     inner_image_bbox: tuple[ndarray, tuple[int, int, int, int] | None],
     outer: ndarray | None = None,
     precision: float = 1.0,
@@ -130,7 +130,7 @@ def win32_coords_start() -> tuple[int, int]:
 snip_start_coords: tuple[int, int] | None = None
 
 
-def _toggle_snip(
+def toggle_snip(
     prefix: str | None = None,
     bbox_to_name: bool = True,
     bbox_callback: Callable[[int, int, int, int], Any] | None = None,
@@ -163,14 +163,14 @@ def finish_snip_with_callback(
     bbox_callback: Callable[[int, int, int, int], Any] | None = None,
     picture_callback: Callable[[ndarray], Any] | None = None,
 ) -> None:
-    nd_sct, bbox = _finish_snip(prefix, bbox, bbox_to_name)
+    nd_sct, bbox = finish_snip(prefix, bbox, bbox_to_name)
     if bbox and bbox_callback:
         bbox_callback(*bbox)
     if picture_callback:
         picture_callback(nd_sct)
 
 
-def _finish_snip(
+def finish_snip(
     prefix: str | None = None,
     bbox: tuple[int, int, int, int] | None = None,
     bbox_to_name: bool = True,
@@ -213,18 +213,18 @@ coords_to_bbox_1_pixel = lambda coords: (
 )
 
 
-def _get_pixel_color(
+def get_pixel_color(
     coords: tuple[int, int], outer: str | ndarray | None
 ) -> tuple[int, int, int]:
-    outer, _ = _normalize(outer)  # type: ignore
+    outer, _ = normalize(outer)  # type: ignore
     bbox = coords_to_bbox_1_pixel(coords)
     outer = get_screenshot_if_none_and_cut(outer, bbox)
     nd_pixel = outer[0][0]
     return tuple(c for c in nd_pixel)  # type: ignore
 
 
-def _pixel_str(coords: tuple[int, int], outer: str | ndarray | None) -> str:
-    color = _get_pixel_color(coords, outer)
+def pixel_str(coords: tuple[int, int], outer: str | ndarray | None) -> str:
+    color = get_pixel_color(coords, outer)
     return f"({color[0]}, {color[1]}, {color[2]}), ({coords[0]}, {coords[1]})"
 
 
@@ -243,7 +243,7 @@ px_between = lambda im, min_mask, max_mask: (
 )
 
 
-def _pixel_find(
+def pixel_find(
     color: tuple[int, int, int],
     bbox_or_coords: tuple[int, int, int, int] | tuple[int, int] | None,
     outer: ndarray | None,
