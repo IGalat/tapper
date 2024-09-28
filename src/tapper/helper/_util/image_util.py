@@ -258,7 +258,7 @@ def get_pixel_color(coords: XyCoordsT, outer: ImageT | None) -> PixelColorT:
     return tuple(c for c in nd_pixel)  # type: ignore
 
 
-def pixel_str(coords: tuple[int, int], outer: str | ndarray | None) -> str:
+def pixel_str(coords: XyCoordsT, outer: ImageT | None) -> str:
     color = get_pixel_color(coords, outer)
     return f"({color[0]}, {color[1]}, {color[2]}), ({coords[0]}, {coords[1]})"
 
@@ -279,14 +279,14 @@ px_between = lambda im, min_mask, max_mask: (
 
 
 def pixel_find(
-    color: tuple[int, int, int],
-    bbox_or_coords: tuple[int, int, int, int] | tuple[int, int] | None,
+    color: PixelColorT,
+    bbox_or_coords: BboxT | XyCoordsT | None,
     outer: ndarray | None,
     variation: int,
-) -> tuple[int, int] | None:
+) -> XyCoordsT | None:
     start_x, start_y = get_start_coords(outer, bbox_or_coords)
 
-    bbox: tuple[int, int, int, int] | None = None
+    bbox: BboxT | None = None
     if isinstance(bbox_or_coords, tuple):
         if len(bbox_or_coords) == 2:
             bbox = coords_to_bbox_1_pixel(bbox_or_coords)
