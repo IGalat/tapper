@@ -47,7 +47,7 @@ def helpers() -> None:
         Group("img").add(
             {
                 "num1": lambda: print(
-                    img.find(("small_test_img.png", (500, -1080, 600, -900)))
+                    img.find("small_test_img.png", (500, -1080, 600, -900))
                 ),  # open this pic when testing
                 "num2": img.snip(),
                 "num3": lambda: print(

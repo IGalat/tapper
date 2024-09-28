@@ -4,28 +4,27 @@ from typing import Union
 
 from numpy import ndarray
 
-PixelColorT = tuple[int, int, int]
+PixelColorT: TypeAlias = tuple[int, int, int]
 """RGB color of a pixel, 0-255 values."""
 
-XyCoordsT = tuple[int, int]
+XyCoordsT: TypeAlias = tuple[int, int]
 """ x, y coordinates on an image or screen."""
+
+BboxT: TypeAlias = tuple[int, int, int, int]
+"""Bounding box for an image (rectangle), defined by two points.
+x1 y1 x2 y2. Top left is point 1 (x1 y1), bottom right is point 2 (x2 y2)."""
 
 ImagePixelMatrixT: TypeAlias = ndarray
 """List of lists of pixel colors.
 
-2x2 green pixels:
+example, picture with 2x2 green pixels: (not a python's list, but a numpy array)
 [[[0, 255, 0], [0, 255, 0]],
 [[0, 255, 0], [0, 255, 0]]]
 """
 
-BboxT = tuple[int, int, int, int]
-"""Bounding box for an image.
-x1 y1 x2 y2. usually top left is x1 y1, and bottom right is x2 y2."""
+ImagePathT: TypeAlias = Union[str, bytes, "os.PathLike[str]", "os.PathLike[bytes]"]
 
-
-ImagePathT = Union[str, bytes, "os.PathLike[str]", "os.PathLike[bytes]"]
-
-ImageT = Union[ImagePixelMatrixT, ImagePathT]
+ImageT: TypeAlias = Union[ImagePixelMatrixT, ImagePathT]
 """ Can be:
 - Image as numpy RGB array.
 - str or bytes path to an image.

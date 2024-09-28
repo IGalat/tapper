@@ -8,7 +8,9 @@ from typing import Union
 import tapper
 from tapper.helper._util import image_util as _image_util
 from tapper.helper.model_types import BboxT
+from tapper.helper.model_types import ImagePathT
 from tapper.helper.model_types import ImagePixelMatrixT
+from tapper.helper.model_types import ImageT
 from tapper.helper.model_types import PixelColorT
 from tapper.helper.model_types import XyCoordsT
 
@@ -37,25 +39,50 @@ For performance, it's highly recommended to specify bounding box: searching smal
 """
 
 
+def _check_dependencies() -> None:
+    try:
+        pass
+    except ImportError as e:
+        raise ImportError(
+            "Looks like you're missing dependencies for tapper img helper."
+            "Try `pip install tapper[img]` or `pip install tapper[all]`.",
+            e,
+        )
+
+
+def from_path(pathlike: ImagePathT) -> ImagePixelMatrixT:
+    """Get image from file path."""
+    _check_dependencies()
+    return _image_util.from_path(pathlike)  # type: ignore
+
+
 def find(
-    image: SearchableImageT,
-    outer: str | ImagePixelMatrixT | None = None,
+    target: ImageT,
+    bbox: BboxT | None = None,
+    outer: ImageT | None = None,
     precision: float = STD_PRECISION,
 ) -> XyCoordsT | None:
     """
     Search a region of the screen for an image.
 
-    :param image: see `SearchableImage`.
-    :param outer: Optional image in which to find, pathname or numpy array. If not specified, will search on screen.
+    :param target: what to find. Path to an image, or image object(numpy array).
+    :param bbox: bounding box of where to search in the outer.
+    :param outer: Optional image in which to find, path or numpy array. If not specified, will search on screen.
     :param precision: A number between 0 and 1 to indicate the allowed deviation from the searched image.
         0.95 is a difference visible to the eye, and random images can sometimes match up to 0.8.
-        To calibrate, use get_find_raw method below.
+        To calibrate, use get_find_raw function.
 
     :return: Coordinates X and Y of top-left of the found image relative to the bounding box (if any).
         If image not found, None is returned.
     """
-    norm_outer = _image_util.normalize(outer)[0] if outer is not None else None  # type: ignore
-    return _image_util.find_in_image(_image_util.normalize(image), norm_outer, precision=precision)  # type: ignore
+    _check_dependencies()
+    if target is None:
+        raise ValueError("img.find nees something to search for.")
+    target_image = _image_util.to_pixel_matrix(target)
+    outer_image = _image_util.to_pixel_matrix(outer)
+    return _image_util.find_in_image(
+        target_image, bbox, outer_image, precision=precision  # type: ignore
+    )
 
 
 def find_one_of(

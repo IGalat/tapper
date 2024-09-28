@@ -7,7 +7,6 @@ from typing import Callable
 from typing import Union
 
 import mss
-import numpy
 import numpy as np
 import PIL.Image
 import PIL.ImageGrab
@@ -15,6 +14,9 @@ import tapper
 from mss.base import MSSBase
 from numpy import ndarray
 from tapper.helper._util import image_fuzz
+from tapper.helper.model_types import ImagePathT
+from tapper.helper.model_types import ImagePixelMatrixT
+from tapper.helper.model_types import ImageT
 from tapper.model import constants
 
 _bbox_pattern = re.compile(r"\(BBOX_-?\d+_-?\d+_-?\d+_-?\d+\)")
@@ -28,10 +30,23 @@ def get_mss() -> MSSBase:
     return mss_instance
 
 
-@lru_cache
-def from_path(pathlike: str) -> ndarray:
+@lru_cache(maxsize=5)
+def from_path(pathlike: ImagePathT) -> ImagePixelMatrixT:
+    if isinstance(pathlike, str):
+        pathlike = os.path.abspath(pathlike)
     pil_img = PIL.Image.open(pathlike).convert("RGB")
-    return numpy.asarray(pil_img)
+    return np.asarray(pil_img)
+
+
+def to_pixel_matrix(image: ImageT | None) -> ImagePixelMatrixT | None:
+    if image is None:
+        return None
+    elif isinstance(image, ndarray):
+        return image
+    elif isinstance(image, (str, bytes, os.PathLike)):
+        return from_path(os.path.abspath(image))
+    else:
+        raise TypeError(f"Unexpected type, {type(image)} of {image}")
 
 
 def normalize(
@@ -55,7 +70,7 @@ def normalize(
         if not bbox and (str_bbox := _bbox_pattern.search(data_in)):
             sx = str_bbox.group().split("_")
             bbox = int(sx[1]), int(sx[2]), int(sx[3]), int(sx[4].rstrip(")"))
-        return from_path(os.path.abspath(data_in)), bbox
+        return from_path(data_in), bbox
     raise TypeError(f"Unexpected type, {type(data_in)} of {data_in}")
 
 
@@ -66,7 +81,7 @@ def get_screenshot_if_none_and_cut(
         if bbox:
             return maybe_image[bbox[1] : bbox[3], bbox[0] : bbox[2]]
         return maybe_image
-    if bbox:
+    if bbox is not None:
         try:
             sct = get_mss().grab(bbox)
         except Exception as e:
@@ -74,7 +89,7 @@ def get_screenshot_if_none_and_cut(
     else:
         sct = get_mss().grab(get_mss().monitors[0])
     pil_rgb = PIL.Image.frombytes("RGB", sct.size, sct.bgra, "raw", "BGRX")
-    return numpy.asarray(pil_rgb)
+    return np.asarray(pil_rgb)
 
 
 def find_in_image_raw(
@@ -90,14 +105,14 @@ def find_in_image_raw(
 
 
 def find_in_image(
-    inner_image_bbox: tuple[ndarray, tuple[int, int, int, int] | None],
+    target: ImagePixelMatrixT,
+    bbox: tuple[int, int, int, int] | None,
     outer: ndarray | None = None,
     precision: float = 1.0,
 ) -> tuple[int, int] | None:
-    image_arr, bbox = inner_image_bbox
     x_start, y_start = get_start_coords(outer, bbox)
     outer = get_screenshot_if_none_and_cut(outer, bbox)
-    confidence, coords = image_fuzz.find(outer, image_arr)
+    confidence, coords = image_fuzz.find(outer, target)
 
     if confidence < precision:
         return None
@@ -108,7 +123,7 @@ def get_start_coords(
     outer: ndarray | None,
     bbox_or_coords: tuple[int, int, int, int] | tuple[int, int] | None,
 ) -> tuple[int, int]:
-    if bbox_or_coords:
+    if bbox_or_coords is not None:
         return bbox_or_coords[0], bbox_or_coords[1]
     screenshot_required = outer is None
     if screenshot_required and sys.platform == constants.OS.win32:
@@ -216,7 +231,7 @@ coords_to_bbox_1_pixel = lambda coords: (
 def get_pixel_color(
     coords: tuple[int, int], outer: str | ndarray | None
 ) -> tuple[int, int, int]:
-    outer, _ = normalize(outer)  # type: ignore
+    outer = to_pixel_matrix(outer)  # type: ignore
     bbox = coords_to_bbox_1_pixel(coords)
     outer = get_screenshot_if_none_and_cut(outer, bbox)
     nd_pixel = outer[0][0]
