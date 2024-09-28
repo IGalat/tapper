@@ -56,6 +56,8 @@ def from_path(pathlike: ImagePathT) -> ImagePixelMatrixT:
     return _image_util.from_path(pathlike)  # type: ignore
 
 
+# todo return middle of searched area, not top left
+# 100x100 target that is found at 300, 300 should return 350, 350
 def find(
     target: ImageT,
     bbox: BboxT | None = None,
@@ -143,7 +145,9 @@ def wait_for_one_of(
     """
     Regularly search the screen or region of the screen for images,
     returning first that appears, or None if timeout.
-    This is blocking until timeout, obviously.
+    This is blocking until timeout or until found something.
+    For performance it's recommended to use images and not filenames as targets.
+        see :func:from_path.
 
     :param images: see `SearchableImage`.
     :param timeout: see `wait_for` param.
@@ -256,7 +260,7 @@ def get_snip(
 
 def pixel_info(
     callback: Callable[[PixelColorT, XyCoordsT], Any],
-    outer: str | ImagePixelMatrixT | None = None,
+    outer: ImageT | None = None,
 ) -> Callable[[], Any]:
     """
     Click to get pixel color and coordinates and call the callback with it.
@@ -294,6 +298,7 @@ def pixel_str(
     return lambda: callback(_image_util.pixel_str(tapper.mouse.get_pos(), outer))
 
 
+# todo method to get color #FFFFFF?
 def pixel_get_color(
     coords: XyCoordsT, outer: str | ImagePixelMatrixT | None = None
 ) -> PixelColorT:
@@ -309,6 +314,7 @@ def pixel_get_color(
     return _image_util.get_pixel_color(coords, outer)
 
 
+# todo accept color #FFFFFF
 def pixel_find(
     color: PixelColorT,
     bbox_or_coords: BboxT | XyCoordsT | None = None,

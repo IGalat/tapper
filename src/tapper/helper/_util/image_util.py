@@ -14,9 +14,12 @@ import tapper
 from mss.base import MSSBase
 from numpy import ndarray
 from tapper.helper._util import image_fuzz
+from tapper.helper.model_types import BboxT
 from tapper.helper.model_types import ImagePathT
 from tapper.helper.model_types import ImagePixelMatrixT
 from tapper.helper.model_types import ImageT
+from tapper.helper.model_types import PixelColorT
+from tapper.helper.model_types import XyCoordsT
 from tapper.model import constants
 
 _bbox_pattern = re.compile(r"\(BBOX_-?\d+_-?\d+_-?\d+_-?\d+\)")
@@ -52,13 +55,11 @@ def to_pixel_matrix(image: ImageT | None) -> ImagePixelMatrixT | None:
 def normalize(
     data_in: Union[
         None,
-        str,
-        tuple[str, tuple[int, int, int, int]],
-        tuple[ndarray, tuple[int, int, int, int]],
-        tuple[ndarray, None],
-        ndarray,
+        ImageT,
+        tuple[ImageT, BboxT],
+        tuple[ImageT, None],
     ]
-) -> tuple[ndarray | None, tuple[int, int, int, int] | None]:
+) -> tuple[ImagePixelMatrixT | None, BboxT | None]:
     if data_in is None:
         return None, None
     bbox = None
@@ -71,12 +72,12 @@ def normalize(
             sx = str_bbox.group().split("_")
             bbox = int(sx[1]), int(sx[2]), int(sx[3]), int(sx[4].rstrip(")"))
         return from_path(data_in), bbox
-    raise TypeError(f"Unexpected type, {type(data_in)} of {data_in}")
+    raise TypeError(f"Unexpected type {type(data_in)} of {data_in!r}")
 
 
 def get_screenshot_if_none_and_cut(
-    maybe_image: ndarray | None, bbox: tuple[int, int, int, int] | None
-) -> ndarray:
+    maybe_image: ImagePixelMatrixT | None, bbox: BboxT | None
+) -> ImagePixelMatrixT:
     if maybe_image is not None:
         if bbox:
             return maybe_image[bbox[1] : bbox[3], bbox[0] : bbox[2]]
@@ -93,9 +94,9 @@ def get_screenshot_if_none_and_cut(
 
 
 def find_in_image_raw(
-    inner_image_bbox: tuple[ndarray, tuple[int, int, int, int] | None],
-    outer: ndarray | None = None,
-) -> tuple[float, tuple[int, int]]:
+    inner_image_bbox: tuple[ndarray, BboxT | None],
+    outer: ImagePixelMatrixT | None = None,
+) -> tuple[float, XyCoordsT]:
     image_arr, bbox = inner_image_bbox
     x_start, y_start = get_start_coords(outer, bbox)
     outer = get_screenshot_if_none_and_cut(outer, bbox)
@@ -104,9 +105,30 @@ def find_in_image_raw(
     return confidence, (x_start + coords[0], y_start + coords[1])
 
 
+def image_find(
+    target: ImageT,
+    bbox: tuple[int, int, int, int] | None,
+    outer: ImageT | None = None,
+    precision: float = 1.0,
+) -> XyCoordsT | None:
+    if target is None:
+        raise ValueError("image_find nees something to search for.")
+    target_image = to_pixel_matrix(target)
+    assert target_image is not None  # for mypy
+    outer_image = to_pixel_matrix(outer)
+    # has to be before screenshot is taken, for Windows multi-monitor case
+    x_start, y_start = get_start_coords(outer_image, bbox)
+    certain_outer = get_screenshot_if_none_and_cut(outer_image, bbox)
+    confidence, coords = image_fuzz.find(certain_outer, target_image)
+
+    if confidence < precision:
+        return None
+    return x_start + coords[0], y_start + coords[1]
+
+
 def find_in_image(
     target: ImagePixelMatrixT,
-    bbox: tuple[int, int, int, int] | None,
+    bbox: BboxT | None,
     outer: ndarray | None = None,
     precision: float = 1.0,
 ) -> tuple[int, int] | None:
@@ -121,8 +143,8 @@ def find_in_image(
 
 def get_start_coords(
     outer: ndarray | None,
-    bbox_or_coords: tuple[int, int, int, int] | tuple[int, int] | None,
-) -> tuple[int, int]:
+    bbox_or_coords: BboxT | XyCoordsT | None,
+) -> XyCoordsT:
     if bbox_or_coords is not None:
         return bbox_or_coords[0], bbox_or_coords[1]
     screenshot_required = outer is None
@@ -131,7 +153,7 @@ def get_start_coords(
     return 0, 0
 
 
-def win32_coords_start() -> tuple[int, int]:
+def win32_coords_start() -> XyCoordsT:
     """Win32 may start with negative coords when multiscreen."""
     import winput
     from win32api import GetSystemMetrics
@@ -142,14 +164,14 @@ def win32_coords_start() -> tuple[int, int]:
     return x, y
 
 
-snip_start_coords: tuple[int, int] | None = None
+snip_start_coords: XyCoordsT | None = None
 
 
 def toggle_snip(
     prefix: str | None = None,
     bbox_to_name: bool = True,
     bbox_callback: Callable[[int, int, int, int], Any] | None = None,
-    picture_callback: Callable[[ndarray], Any] | None = None,
+    picture_callback: Callable[[ImagePixelMatrixT], Any] | None = None,
 ) -> None:
     global snip_start_coords
     if not snip_start_coords:
@@ -174,9 +196,9 @@ def start_snip() -> None:
 def finish_snip_with_callback(
     prefix: str | None = None,
     bbox_to_name: bool = True,
-    bbox: tuple[int, int, int, int] | None = None,
+    bbox: BboxT | None = None,
     bbox_callback: Callable[[int, int, int, int], Any] | None = None,
-    picture_callback: Callable[[ndarray], Any] | None = None,
+    picture_callback: Callable[[ImagePixelMatrixT], Any] | None = None,
 ) -> None:
     nd_sct, bbox = finish_snip(prefix, bbox, bbox_to_name)
     if bbox and bbox_callback:
@@ -187,9 +209,9 @@ def finish_snip_with_callback(
 
 def finish_snip(
     prefix: str | None = None,
-    bbox: tuple[int, int, int, int] | None = None,
+    bbox: BboxT | None = None,
     bbox_to_name: bool = True,
-) -> tuple[ndarray, tuple[int, int, int, int] | None]:
+) -> tuple[ImagePixelMatrixT, BboxT | None]:
     sct = get_screenshot_if_none_and_cut(None, bbox)
     if prefix is not None:
         save_to_disk(sct, prefix, bbox, bbox_to_name)
@@ -197,9 +219,9 @@ def finish_snip(
 
 
 def save_to_disk(
-    sct: ndarray,
+    sct: ImagePixelMatrixT,
     prefix: str,
-    bbox: tuple[int, int, int, int] | None,
+    bbox: BboxT | None,
     bbox_in_name: bool,
 ) -> None:
     bbox_str = (
@@ -228,13 +250,11 @@ coords_to_bbox_1_pixel = lambda coords: (
 )
 
 
-def get_pixel_color(
-    coords: tuple[int, int], outer: str | ndarray | None
-) -> tuple[int, int, int]:
-    outer = to_pixel_matrix(outer)  # type: ignore
+def get_pixel_color(coords: XyCoordsT, outer: ImageT | None) -> PixelColorT:
+    outer_image = to_pixel_matrix(outer)
     bbox = coords_to_bbox_1_pixel(coords)
-    outer = get_screenshot_if_none_and_cut(outer, bbox)
-    nd_pixel = outer[0][0]
+    outer_certain = get_screenshot_if_none_and_cut(outer_image, bbox)
+    nd_pixel = outer_certain[0][0]
     return tuple(c for c in nd_pixel)  # type: ignore
 
 
