@@ -41,6 +41,10 @@ def from_path(pathlike: ImagePathT) -> ImagePixelMatrixT:
     return np.asarray(pil_img)
 
 
+def get_image_size(image: ImagePixelMatrixT) -> tuple[int, int]:
+    return image.shape[1], image.shape[0]
+
+
 def to_pixel_matrix(image: ImageT | None) -> ImagePixelMatrixT | None:
     if image is None:
         return None
@@ -105,7 +109,31 @@ def find_in_image_raw(
     return confidence, (x_start + coords[0], y_start + coords[1])
 
 
-def image_find(
+def check_bbox_smaller_or_eq(image: ImagePixelMatrixT, bbox: BboxT | None) -> None:
+    if image is None or bbox is None:
+        return
+    bbox_x = abs(bbox[2] - bbox[0])
+    bbox_y = abs(bbox[3] - bbox[1])
+    image_x, image_y = get_image_size(image)
+    if bbox_x > image_x or bbox_y > image_y:
+        raise ValueError(
+            f"Bbox should NOT be bigger, but got {bbox_x}x{bbox_y} vs image {image_x}x{image_y}"
+        )
+
+
+def check_bbox_bigger_or_eq(image: ImagePixelMatrixT, bbox: BboxT | None) -> None:
+    if image is None or bbox is None:
+        return
+    bbox_x = abs(bbox[2] - bbox[0])
+    bbox_y = abs(bbox[3] - bbox[1])
+    image_x, image_y = get_image_size(image)
+    if bbox_x < image_x or bbox_y < image_y:
+        raise ValueError(
+            f"Bbox should NOT be smaller, but got {bbox_x}x{bbox_y} vs image {image_x}x{image_y}"
+        )
+
+
+def find(
     target: ImageT,
     bbox: tuple[int, int, int, int] | None,
     outer: ImageT | None = None,
@@ -115,15 +143,18 @@ def image_find(
         raise ValueError("image_find nees something to search for.")
     target_image = to_pixel_matrix(target)
     assert target_image is not None  # for mypy
-    outer_image = to_pixel_matrix(outer)
-    # has to be before screenshot is taken, for Windows multi-monitor case
-    x_start, y_start = get_start_coords(outer_image, bbox)
-    certain_outer = get_screenshot_if_none_and_cut(outer_image, bbox)
-    confidence, coords = image_fuzz.find(certain_outer, target_image)
+    check_bbox_bigger_or_eq(target_image, bbox)
 
+    outer_image = to_pixel_matrix(outer)
+    check_bbox_smaller_or_eq(outer_image, bbox)
+    outer_certain = get_screenshot_if_none_and_cut(outer_image, bbox)
+
+    confidence, coords = image_fuzz.find(outer_certain, target_image)
     if confidence < precision:
         return None
-    return x_start + coords[0], y_start + coords[1]
+    target_x, target_y = get_image_size(target_image)
+    x_start, y_start = get_start_coords(outer_image, bbox)
+    return x_start + coords[0] + target_x // 2, y_start + coords[1] + target_y // 2
 
 
 def find_in_image(

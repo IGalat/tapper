@@ -78,13 +78,7 @@ def find(
         If image not found, None is returned.
     """
     _check_dependencies()
-    if target is None:
-        raise ValueError("img.find nees something to search for.")
-    target_image = _image_util.to_pixel_matrix(target)
-    outer_image = _image_util.to_pixel_matrix(outer)
-    return _image_util.find_in_image(
-        target_image, bbox, outer_image, precision=precision  # type: ignore
-    )
+    return _image_util.find(target, bbox, outer, precision=precision)  # type: ignore
 
 
 def find_one_of(
@@ -201,6 +195,7 @@ def get_find_raw(
     return _image_util.find_in_image_raw(_image_util.normalize(image), _image_util.normalize(outer)[0])  # type: ignore
 
 
+# todo add param bool to overwrite existing on save to disk / add (2) etc
 def snip(
     prefix: str | None = "snip",
     bbox_to_name: bool = True,
@@ -298,10 +293,8 @@ def pixel_str(
     return lambda: callback(_image_util.pixel_str(tapper.mouse.get_pos(), outer))
 
 
-# todo method to get color #FFFFFF?
-def pixel_get_color(
-    coords: XyCoordsT, outer: str | ImagePixelMatrixT | None = None
-) -> PixelColorT:
+# todo method to get color #FFFFFF? or remove this, and use format on pixel_str
+def pixel_get_color(coords: XyCoordsT, outer: ImageT | None = None) -> PixelColorT:
     """
     Get pixel color.
 

@@ -23,3 +23,23 @@ def get_picture(name: str) -> ndarray:
 
 def absolutes() -> ndarray:
     return get_picture("absolutes.png")
+
+
+def btn_all() -> ndarray:
+    return get_picture("btn_all.png")
+
+
+def btn_red() -> ndarray:
+    return get_picture("btn_red.png")
+
+
+def btn_yellow() -> ndarray:
+    return get_picture("btn_yellow.png")
+
+
+def btn_blue() -> ndarray:
+    return get_picture("btn_blue.png")
+
+
+def btn_pink() -> ndarray:
+    return get_picture("btn_pink.png")
