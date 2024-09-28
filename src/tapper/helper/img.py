@@ -7,6 +7,8 @@ from typing import Union
 
 import tapper
 from tapper.helper._util import image_util as _image_util
+from tapper.helper._util.image import base as _base_util
+from tapper.helper._util.image import find_util as _find_util
 from tapper.helper.model_types import BboxT
 from tapper.helper.model_types import ImagePathT
 from tapper.helper.model_types import ImagePixelMatrixT
@@ -41,7 +43,10 @@ For performance, it's highly recommended to specify bounding box: searching smal
 
 def _check_dependencies() -> None:
     try:
-        pass
+        import PIL
+        import mss
+        import cv2
+        import numpy
     except ImportError as e:
         raise ImportError(
             "Looks like you're missing dependencies for tapper img helper."
@@ -53,7 +58,7 @@ def _check_dependencies() -> None:
 def from_path(pathlike: ImagePathT) -> ImagePixelMatrixT:
     """Get image from file path."""
     _check_dependencies()
-    return _image_util.from_path(pathlike)  # type: ignore
+    return _base_util.from_path(pathlike)  # type: ignore
 
 
 # todo return middle of searched area, not top left
@@ -78,7 +83,7 @@ def find(
         If image not found, None is returned.
     """
     _check_dependencies()
-    return _image_util.find(target, bbox, outer, precision=precision)  # type: ignore
+    return _find_util.api_find(target, bbox, outer, precision=precision)  # type: ignore
 
 
 def find_one_of(

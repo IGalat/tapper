@@ -74,7 +74,7 @@ class TestFind:
         """Touches internals to simulate taking screenshot."""
         sct = img_test_util.btn_all()
         with patch(
-            "tapper.helper._util.image_util" ".get_screenshot_if_none_and_cut"
+            "tapper.helper._util.image.base.get_screenshot_if_none_and_cut"
         ) as mock_get_sct:
             mock_get_sct.return_value = sct
             xy = img.find(img_test_util.btn_red(), precision=0.999)
@@ -115,11 +115,3 @@ class TestFindFuzz:
             img_test_util.btn_pink(), outer=img_test_util.btn_all(), precision=0.98
         )
         assert xy_jpg == xy_png == pytest.approx(btn_pink_xy, abs=10)
-
-
-class TestSnip:
-    def test_simplest(self) -> None:
-        pass
-
-    def test_saved_image_same_as_on_disk(self) -> None:
-        pass
