@@ -40,7 +40,7 @@ def raise_io_error() -> None:
 
 def wait_for_repeatable() -> None:
     """Less flaky compared to just time.sleep"""
-    for _ in range(5):
+    for _ in range(25):
         if repeat_util.running_repeatable is not None:
             break
         time.sleep(0.001)
