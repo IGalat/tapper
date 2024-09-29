@@ -1,28 +1,10 @@
-import os.path
-import re
-import sys
-from functools import lru_cache
-from lib2to3.pytree import convert
-from sys import prefix
-from typing import Any
-from typing import Callable
-from typing import Union
+import time
 
-import mss
-import numpy as np
-import PIL.Image
-import PIL.ImageGrab
-import tapper
-from mss.base import MSSBase
-from numpy import ndarray
 from tapper.helper._util.image import base
 from tapper.helper.model_types import BboxT
-from tapper.helper.model_types import ImagePathT
 from tapper.helper.model_types import ImagePixelMatrixT
 from tapper.helper.model_types import ImageT
-from tapper.helper.model_types import PixelColorT
 from tapper.helper.model_types import XyCoordsT
-from tapper.model import constants
 
 
 def find_raw(
@@ -36,13 +18,13 @@ def find_raw(
 
 
 def api_find_raw(
-    image: ImagePixelMatrixT,
+    target: ImagePixelMatrixT,
     bbox: BboxT | None,
     outer_maybe: ImagePixelMatrixT | None = None,
 ) -> tuple[float, XyCoordsT]:
     x_start, y_start = base.get_start_coords(outer_maybe, bbox)
     outer = base.outer_to_image(outer_maybe, bbox)
-    confidence, xy = find_raw(image, outer)
+    confidence, xy = find_raw(target, outer)
     return confidence, (x_start + xy[0], y_start + xy[1])
 
 
@@ -61,8 +43,8 @@ def find(
 def api_find(
     target: ImageT,
     bbox: BboxT | None,
-    outer_or_path_maybe: ImageT | None = None,
-    precision: float = 1.0,
+    outer_or_path_maybe: ImageT | None,
+    precision: float,
 ) -> XyCoordsT | None:
     if target is None:
         raise ValueError("image_find nees something to search for.")
@@ -75,13 +57,60 @@ def api_find(
     return x_start + found[0], y_start + found[1]
 
 
-def find_one_of() -> None:
-    pass
+def find_one_of(
+    targets_normalized: list[tuple[ImagePixelMatrixT, BboxT | None, ImageT]],
+    outer_or_path_maybe: ImageT | None,
+    precision: float,
+) -> tuple[ImageT, XyCoordsT] | tuple[None, None]:
+    outer = base.outer_to_image(outer_or_path_maybe, None)
+    for target, bbox, original in targets_normalized:
+        outer_cut = base.outer_to_image(outer, bbox)
+        if (xy := find(target, outer_cut, precision)) is not None:
+            return original, xy
+    return None, None
 
 
-def wait_for() -> None:
-    pass
+def api_find_one_of(
+    targets: list[ImageT]
+    | tuple[list[ImageT], BboxT]
+    | list[tuple[ImageT, BboxT | None]],
+    outer_or_path_maybe: ImageT | None,
+    precision: float,
+) -> tuple[ImageT, XyCoordsT] | tuple[None, None]:
+    targets_normalized = base.targets_normalize(targets)
+    return find_one_of(targets_normalized, outer_or_path_maybe, precision)
 
 
-def wait_for_one_of() -> None:
-    pass
+def wait_for(
+    target: ImageT,
+    bbox: BboxT | None,
+    timeout: int | float,
+    interval: float,
+    precision: float,
+) -> XyCoordsT | None:
+    target_image = base.target_to_image(target, bbox)
+    finish_time = time.perf_counter() + timeout
+    while time.perf_counter() < finish_time:
+        outer = base.outer_to_image(None, bbox)
+        if found := find(target_image, outer, precision):
+            return found
+        time.sleep(interval)
+    return None
+
+
+def wait_for_one_of(
+    targets: list[ImageT]
+    | tuple[list[ImageT], BboxT]
+    | list[tuple[ImageT, BboxT | None]],
+    timeout: int | float,
+    interval: float,
+    precision: float,
+) -> tuple[ImageT, XyCoordsT] | tuple[None, None]:
+    targets_normalized = base.targets_normalize(targets)
+    finish_time = time.perf_counter() + timeout
+    while time.perf_counter() < finish_time:
+        found, xy = find_one_of(targets_normalized, None, precision)
+        if found is not None and xy is not None:
+            return found, xy
+        time.sleep(interval)
+    return None, None

@@ -3,7 +3,6 @@ from functools import partial
 from typing import Any
 from typing import Callable
 from typing import Iterable
-from typing import Union
 
 import tapper
 from tapper.helper._util import image_util as _image_util
@@ -18,35 +17,13 @@ from tapper.helper.model_types import XyCoordsT
 
 STD_PRECISION = 0.999
 
-SearchableImageT = (
-    Union[  # todo remove and use ImageT in methods, with bbox as separate arg
-        str,
-        tuple[str, BboxT],
-        tuple[ImagePixelMatrixT, BboxT],
-        ImagePixelMatrixT,
-    ]
-)
-"""
-Image to be searched for. May be:
-    - numpy array: pimg = numpy.array(PIL.Image.open('Image.jpg')). RGB is expected.
-    - numpy array with bounding box
-    - file path, absolute or relative: pic_name = "my_button.png"
-    - file path with bounding box: (pic_name, (0, 0, 200, 50))
-    - file path with bounding box in the name. Example: "my_button(BBOX_100_213_156_412).png"
-        Pattern is: (BBOX_{int}_{int}_{int}_{int})
-        If bounding box is specified separately, BBOX in the name will be ignored.
-Coordinates of bounding box may be negative on win32 with multiple screens.
-If bounding box is not specified as tuple or in the name, the whole screen will be searched.
-For performance, it's highly recommended to specify bounding box: searching smaller area is faster.
-"""
-
 
 def _check_dependencies() -> None:
     try:
-        import PIL
-        import mss
-        import cv2
-        import numpy
+        import PIL  # noqa
+        import mss  # noqa
+        import cv2  # noqa
+        import numpy  # noqa
     except ImportError as e:
         raise ImportError(
             "Looks like you're missing dependencies for tapper img helper."
@@ -61,8 +38,6 @@ def from_path(pathlike: ImagePathT) -> ImagePixelMatrixT:
     return _base_util.from_path(pathlike)  # type: ignore
 
 
-# todo return middle of searched area, not top left
-# 100x100 target that is found at 300, 300 should return 350, 350
 def find(
     target: ImageT,
     bbox: BboxT | None = None,
@@ -87,29 +62,31 @@ def find(
 
 
 def find_one_of(
-    images: list[SearchableImageT],
+    targets: list[ImageT]
+    | tuple[list[ImageT], BboxT]
+    | list[tuple[ImageT, BboxT | None]],
     outer: str | ImagePixelMatrixT | None = None,
     precision: float = STD_PRECISION,
-) -> SearchableImageT | None:
+) -> tuple[ImageT, XyCoordsT] | tuple[None, None]:
     """
-    Get first image found.
+    Get first image found. Faster than several calls to :func:find
+    due to not taking screenshot every time.
 
-    :param images: see `SearchableImage`.
-    :param outer: see `find` param.
-    :param precision: see `find` param.
-    :return: First image detected, or None if timeout.
+    :param targets: what to find. Can be just a list of targets, a list with one bbox, or
+        pairs of target and bbox.
+    :param outer: see the same param of :func:find
+    :param precision: see the same param of :func:find
+    :return: First image detected and coords, if found.
         Will return object supplied in the list if it finds corresponding image.
-        In case many images are present, first found in the `images` list will be returned.
+        In case many images could match, first match in the `images` list will be returned.
     """
-    normalized = [_image_util.normalize(image) for image in images]  # type: ignore
-    for i in range(len(normalized)):
-        if _image_util.find_in_image(normalized[i], outer, precision=precision):  # type: ignore
-            return images[i]
-    return None
+    _check_dependencies()
+    return _find_util.api_find_one_of(targets, outer, precision)
 
 
 def wait_for(
-    image: SearchableImageT,
+    target: ImageT,
+    bbox: BboxT | None = None,
     timeout: int | float = 5,
     interval: float = 0.2,
     precision: float = STD_PRECISION,
@@ -119,85 +96,77 @@ def wait_for(
     returning coordinates when it appears, or None if timeout.
     This is blocking until timeout, obviously.
 
-    :param image: see `SearchableImage`.
+    :param target: what to find. Path to an image, or image object(numpy array).
+    :param bbox: bounding box of where to search in the outer.
     :param timeout: If this many seconds elapsed, return None.
     :param interval: Time between searches. Note that search can take significant time as well,
         and actual frequency may be lower than you expect because of this.
     :param precision: see `find` param.
     :return: Coordinates X and Y of top-left of the found image relative to the bounding box (if any).
     """
-    finish_time = time.perf_counter() + timeout
-    normalized = _image_util.normalize(image)  # type: ignore
-    while time.perf_counter() < finish_time:
-        if found := _image_util.find_in_image(normalized, precision=precision):  # type: ignore
-            return found
-        time.sleep(interval)
-    return None
+    _check_dependencies()
+    return _find_util.wait_for(target, bbox, timeout, interval, precision)
 
 
 def wait_for_one_of(
-    images: list[SearchableImageT],
+    targets: list[ImageT]
+    | tuple[list[ImageT], BboxT]
+    | list[tuple[ImageT, BboxT | None]],
     timeout: int | float = 5,
     interval: float = 0.4,
     precision: float = STD_PRECISION,
-) -> SearchableImageT | None:
+) -> tuple[ImageT, XyCoordsT] | tuple[None, None]:
     """
     Regularly search the screen or region of the screen for images,
     returning first that appears, or None if timeout.
     This is blocking until timeout or until found something.
-    For performance it's recommended to use images and not filenames as targets.
+    For performance, it's recommended to use images and not filenames as targets.
         see :func:from_path.
 
-    :param images: see `SearchableImage`.
-    :param timeout: see `wait_for` param.
-    :param interval: see `wait_for` param.
+    :param targets: what to find. Can be just a list of targets, a list with one bbox, or
+        pairs of target and bbox.
+    :param timeout: If this many seconds elapsed, return None.
+    :param interval: Time between searches. Note that search can take significant time as well,
+        and actual frequency may be lower than you expect because of this.
     :param precision: see `find` param.
 
-    :return: First image detected, or None if timeout.
+    :return: First image detected, or (None, None) if timeout.
         Will return object supplied in the list if it finds corresponding image.
         In case many images appear in one search (e.g. there were none and then 2 appeared),
         first found in the `images` list will be returned.
 
-    Usage:
-        yes_btn = "yes.png", (-100, 213, -56, 412)
-        no_btn = "no(BBOX_-100_213_-56_412).png"
+    Usage example:
+        yes_btn = "yes.png"
+        no_btn = "no.png"
         close_btn = "close.png"
 
-        btn = img.wait_for_one_of([yes_btn, no_btn, close_btn])
+        btn, btn_xy = img.wait_for_one_of(([yes_btn, no_btn, close_btn], (100, 213, 256, 412)))
 
-        if btn == yes_btn:
-            continue_flow()
-        elif btn == no_btn:
-            warn()
-        elif btn == close_btn:
-            close_app()
-        else:
-            raise ValueError
+        if btn == yes_btn:  click(btn_xy)
+        elif btn == no_btn:  warn()
+        elif btn == close_btn:  close_app()
+        else:  raise ValueError
     """
-    finish_time = time.perf_counter() + timeout
-    normalized = [_image_util.normalize(image) for image in images]  # type: ignore
-    while time.perf_counter() < finish_time:
-        for i in range(len(normalized)):
-            if _image_util.find_in_image(normalized[i], precision=precision):  # type: ignore
-                return images[i]
-        time.sleep(interval)
-    return None
+    _check_dependencies()
+    return _find_util.wait_for_one_of(targets, timeout, interval, precision)
 
 
 def get_find_raw(
-    image: SearchableImageT, outer: str | ImagePixelMatrixT | None = None
+    target: ImageT, bbox: BboxT | None = None, outer: ImageT | None = None
 ) -> tuple[float, XyCoordsT]:
     """
     Find an image within a region of the screen or image, and return raw result.
 
     Immediate function, wrap in lambda if setting as action of Tap.
 
-    :param image: see `find` param.
-    :param outer: see `find` param.
+
+    :param target: what to find. Path to an image, or image object(numpy array).
+    :param bbox: bounding box of where to search in the outer.
+    :param outer: Optional image in which to find, path or numpy array. If not specified, will search on screen.
     :return: Match precision, and coordinates.
     """
-
-    return _image_util.find_in_image_raw(_image_util.normalize(image), _image_util.normalize(outer)[0])  # type: ignore
+    _check_dependencies()
+    return _find_util.api_find_raw(target, bbox, outer)
 
 
 # todo add param bool to overwrite existing on save to disk / add (2) etc

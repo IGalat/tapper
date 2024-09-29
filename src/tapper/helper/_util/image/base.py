@@ -1,24 +1,17 @@
 import os.path
-import re
 import sys
 from functools import lru_cache
-from typing import Any
-from typing import Callable
-from typing import Union
 
 import mss
 import numpy as np
 import PIL.Image
 import PIL.ImageGrab
-import tapper
 from mss.base import MSSBase
 from numpy import ndarray
-from tapper.helper._util import image_fuzz
 from tapper.helper.model_types import BboxT
 from tapper.helper.model_types import ImagePathT
 from tapper.helper.model_types import ImagePixelMatrixT
 from tapper.helper.model_types import ImageT
-from tapper.helper.model_types import PixelColorT
 from tapper.helper.model_types import XyCoordsT
 from tapper.model import constants
 
@@ -147,7 +140,9 @@ def target_to_image(target: ImageT, bbox: BboxT | None) -> ImagePixelMatrixT:
     return target_image
 
 
-def outer_to_image(outer_or_path_maybe: ImageT | None, bbox: BboxT | None) -> ImagePixelMatrixT:
+def outer_to_image(
+    outer_or_path_maybe: ImageT | None, bbox: BboxT | None
+) -> ImagePixelMatrixT:
     """Transform and verify target from API input (or screenshot) to workable image-array."""
     outer_maybe = to_pixel_matrix(outer_or_path_maybe)
     if outer_maybe is not None and bbox is not None:
@@ -160,3 +155,24 @@ def outer_to_image(outer_or_path_maybe: ImageT | None, bbox: BboxT | None) -> Im
                 f"but got {bbox_x}x{bbox_y} vs outer {image_x}x{image_y}"
             )
     return get_screenshot_if_none_and_cut(outer_maybe, bbox)
+
+
+def targets_normalize(
+    targets: (
+        list[ImageT] | tuple[list[ImageT], BboxT] | list[tuple[ImageT, BboxT | None]]
+    )
+) -> list[tuple[ImagePixelMatrixT, BboxT | None, ImageT]]:
+    """Transform any variant of input to :func:find_one_of to list[image-array, bbox, original target]"""
+    if not targets:
+        ValueError("find_one_of no targets supplied.")
+    if isinstance(targets, tuple):
+        target_images, bbox = targets
+        return [(to_pixel_matrix(image), bbox, image) for image in target_images]
+    elif isinstance(targets, list) and isinstance(targets[0], tuple):
+        return [(to_pixel_matrix(image), bbox, image) for image, bbox in targets]
+    else:
+        return [(to_pixel_matrix(image), None, image) for image in targets]
+
+
+def save_to_disk(image: ImagePixelMatrixT, full_name_no_ext: ImagePathT) -> None:
+    PIL.Image.fromarray(image).save(full_name_no_ext, "PNG")
