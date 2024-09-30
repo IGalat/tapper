@@ -7,7 +7,6 @@ from typing import Optional
 from tapper.controller.resource_controller import ResourceController
 from tapper.model import constants
 from tapper.state import keeper
-from tapper.validation import report
 
 
 def is_near(current_x: int, current_y: int, x: int, y: int, precision: int) -> bool:
@@ -20,8 +19,6 @@ def calc_move(
     y: Optional[int],
     relative: bool,
 ) -> tuple[int, int]:
-    if x is None and y is None:
-        report.error("MouseCommander move with no coordinates specified.")
     if not relative:
         if x is None:
             x = get_pos()[0]
