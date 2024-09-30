@@ -1,3 +1,4 @@
+import time
 from abc import ABC
 from abc import abstractmethod
 from typing import Callable
@@ -141,7 +142,10 @@ class MouseController(ResourceController):
         self._commander.release(symbol)
 
     def move(
-        self, x: Optional[int] = None, y: Optional[int] = None, relative: bool = False
+        self,
+        x_or_xy: int | tuple[int, int] | None = None,
+        y: int | None = None,
+        relative: bool = False,
     ) -> None:
         """Move mouse cursor.
 
@@ -151,6 +155,10 @@ class MouseController(ResourceController):
         If one coordinate is not specified, only the other will be moved.
         At least one of the coordinates must be specified.
         """
+        if x_or_xy is not None and isinstance(x_or_xy, tuple):
+            x, y = x_or_xy
+        else:
+            x, y = x_or_xy, y
         self._commander.move(x, y, relative)
 
     def memorize_pos(self) -> None:
@@ -161,6 +169,34 @@ class MouseController(ResourceController):
         """Return to cursor to memorized position."""
         if self._memorized_pos:
             self.move(*self._memorized_pos)
+
+    def click(
+        self,
+        x_or_xy: int | tuple[int, int] | None = None,
+        y: int | None = None,
+        relative: bool = False,
+    ) -> None:
+        """Move mouse cursor if coords supplied, then click left mouse button."""
+        if x_or_xy is not None or y is not None:
+            self.move(x_or_xy, y, relative)
+        time.sleep(0)
+        self.press("left_mouse_button")
+        time.sleep(0)
+        self.release("left_mouse_button")
+
+    def right_click(
+        self,
+        x_or_xy: int | tuple[int, int] | None = None,
+        y: int | None = None,
+        relative: bool = False,
+    ) -> None:
+        """Move mouse cursor if coords supplied, then click right mouse button."""
+        if x_or_xy is not None or y is not None:
+            self.move(x_or_xy, y, relative)
+        time.sleep(0)
+        self.press("right_mouse_button")
+        time.sleep(0)
+        self.release("right_mouse_button")
 
 
 def win32_winput() -> tuple[MouseTracker, MouseCommander]:

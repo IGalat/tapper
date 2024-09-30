@@ -46,15 +46,15 @@ send = _send_processor.send
 
 if _kbc := _datastructs.get_first_in(_KeyboardController, config.controllers):
     """Keyboard controller. Mainly useful for getting the state of keys, send is recommended for typing."""
-    kb = _kbc
+    kb: _KeyboardController = _kbc
 
 if _mc := _datastructs.get_first_in(_MouseController, config.controllers):
     """Mouse controller. Primarily for moving the cursor and getting the state."""
-    mouse = _mc
+    mouse: _MouseController = _mc
 
 if _wc := _datastructs.get_first_in(_WindowController, config.controllers):
     """Window controller. Command and get state of windows."""
-    window = _wc
+    window: _WindowController = _wc
 
 
 def init() -> None:
