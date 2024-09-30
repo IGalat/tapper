@@ -158,7 +158,7 @@ class MouseController(ResourceController):
         if x_or_xy is not None and isinstance(x_or_xy, tuple):
             x, y = x_or_xy
         else:
-            x, y = x_or_xy, y
+            x = x_or_xy  # type: ignore
         self._commander.move(x, y, relative)
 
     def memorize_pos(self) -> None:
