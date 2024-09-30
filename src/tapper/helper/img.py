@@ -4,16 +4,18 @@ from typing import Any
 from typing import Callable
 from typing import Iterable
 
-import tapper
 from tapper.helper._util import image_util as _image_util
 from tapper.helper._util.image import base as _base_util
 from tapper.helper._util.image import find_util as _find_util
+from tapper.helper._util.image import pixel_util as _pixel_util
 from tapper.helper._util.image import snip_util as _snip_util
 from tapper.helper.model_types import BboxT
 from tapper.helper.model_types import ImagePathT
 from tapper.helper.model_types import ImagePixelMatrixT
 from tapper.helper.model_types import ImageT
 from tapper.helper.model_types import PixelColorT
+from tapper.helper.model_types import PixelHexColorT
+from tapper.helper.model_types import PixelStrFormatT
 from tapper.helper.model_types import XyCoordsT
 
 STD_PRECISION = 0.999
@@ -216,7 +218,6 @@ def get_snip(
 ) -> ImagePixelMatrixT:
     """
     Screenshot with specified bounding box, or entire screen. Optionally saves to disk.
-
     Immediate function, wrap in lambda if setting as action of Tap.
 
     :param bbox: Bounding box of the screenshot or image. If None, the whole screen or image is snipped.
@@ -240,72 +241,72 @@ def get_snip(
 
 
 def pixel_info(
-    callback: Callable[[PixelColorT, XyCoordsT], Any],
-    outer: ImageT | None = None,
+    callback_for_str: Callable[[str], Any] | None = None,
+    str_format: PixelStrFormatT = "({r}, {g}, {b}), ({x}, {y})",
+    callback_for_data: Callable[[PixelColorT, XyCoordsT], Any] | None = None,
 ) -> Callable[[], Any]:
     """
-    Click to get pixel color and coordinates and call the callback with it.
+    Click to get pixel color and coordinates at mouse cursor, and call the callbacks with it.
+    This should be used as action of Tap.
 
-    :param callback: Action to do with resulting data.
-        Data example:
-        (255, 255, 255), (1919, 1079)
-         Red Green Blue    X      Y
-    :param outer: Optional image in which to find, pathname or numpy array. If not specified, will search on screen.
+    :param callback_for_str: Action to do with resulting str representation.
+    :param str_format: data and format to be used in callback_for_str, see PixelStrFormatT for details.
+    :param callback_for_data: Action to do with resulting data.
+        Data example: (255, 255, 255), (1919, 1079)
     :return: callable toggle, to be set into a Tap.
     """
-    return lambda: callback(
-        pixel_get_color(tapper.mouse.get_pos(), outer), tapper.mouse.get_pos()
+    _check_dependencies()
+    if callback_for_str is None and callback_for_data is None:
+        raise ValueError("pixel_info must have a callback.")
+    return partial(
+        _pixel_util.pixel_info,
+        callback_for_str=callback_for_str,
+        str_format=str_format,
+        callback_for_data=callback_for_data,
     )
 
 
-# todo custom format? like format=r"({r}, {g}, {b}), ({x}, {y})"
-def pixel_str(
-    callback: Callable[[str], Any], outer: str | ImagePixelMatrixT | None = None
-) -> Callable[[], Any]:
-    """
-    Click to get pixel color and coordinates in as text and call the callback with it.
-
-    :param callback: Action to do with resulting data.
-        Data example:
-        "(255, 255, 255), (1919, 1079)"
-    :param outer: Optional image in which to find, pathname or numpy array. If not specified, will search on screen.
-    :return: callable toggle, to be set into a Tap.
-
-    Example usage:
-    {"a": img.pixel_str(pyperclip.copy)}
-    ... then press "a" to get pixel, and paste it into another script:
-    img.pixel_find((255, 255, 255), (1919, 1079))
-    """
-    return lambda: callback(_image_util.pixel_str(tapper.mouse.get_pos(), outer))
-
-
-# todo method to get color #FFFFFF? or remove this, and use format on pixel_str
 def pixel_get_color(coords: XyCoordsT, outer: ImageT | None = None) -> PixelColorT:
     """
     Get pixel color.
-
     Immediate function, wrap in lambda if setting as action of Tap.
 
     :param coords: x, y coordinates of the pixel, absolute to screen, or relative to outer.
     :param outer: Optional image, pathname or numpy array. If not specified, will get color from screen.
     :return: Decimal values of Red, Green, and Blue components of the pixel color.
     """
-    return _image_util.get_pixel_color(coords, outer)
+    _check_dependencies()
+    return _pixel_util.get_pixel_color(coords, outer)
+
+
+def pixel_get_color_hex(
+    coords: XyCoordsT, outer: ImageT | None = None
+) -> PixelHexColorT:
+    """
+    Get hex pixel color, like #ffffff .
+    Immediate function, wrap in lambda if setting as action of Tap.
+
+    :param coords: x, y coordinates of the pixel, absolute to screen, or relative to outer.
+    :param outer: Optional image, pathname or numpy array. If not specified, will get color from screen.
+    :return: Hashtag, followed by hex-color. see https://g.co/kgs/P9JkiRJ
+    """
+    _check_dependencies()
+    return _pixel_util.get_pixel_color_hex(coords, outer)
 
 
 # todo accept color #FFFFFF
 def pixel_find(
-    color: PixelColorT,
+    color: PixelColorT | PixelHexColorT,
     bbox_or_coords: BboxT | XyCoordsT | None = None,
     outer: str | ImagePixelMatrixT | None = None,
     variation: int = 0,
 ) -> XyCoordsT | None:
     """
     Search a region of the screen or an image for a pixel with matching color.
-    :param color: Red, Green, Blue components ranging from 0 to 255.
+    :param color: Red, Green, Blue components ranging from 0 to 255, or hex color like #ffffff .
     :param outer: Optional image in which to find, pathname or numpy array. If not specified, will search on screen.
-    :param bbox_or_coords: Bounding box of the screenshot or image. If None, the whole screen or image is snipped.
-        If coordinates are supplied, only one pixel at those coordinates will be checked.
+    :param bbox_or_coords: Bounding box of the screenshot or image. If None, the whole screen or image is outer.
+        If xy coordinates are supplied, only one pixel at those coordinates will be checked.
     :param variation: Allowed number of shades of variation in either direction for the intensity of the
         red, green, and blue components, 0-255.
         For example, if 2 is specified and color is (10, 10, 10),

@@ -7,6 +7,22 @@ from numpy import ndarray
 PixelColorT: TypeAlias = tuple[int, int, int]
 """RGB color of a pixel, 0-255 values."""
 
+PixelHexColorT: TypeAlias = str
+"""Hexadecimal color, like '#FFFFFF' """
+
+PixelStrFormatT: TypeAlias = str
+""" Format for pixel's data, f-string that gets filled with data:
+- {x}, {y} - coordinates of pixel.
+- {r}, {g}, {b} - decimal values of Red, Green, and Blue components of the pixel color.
+- {hex} - Hexadecimal color, like '#FFFFFF'
+
+For example, on green pixel at 100x150:
+"{x}, {y}" -> "100, 150"
+"({r}, {g}, {b}), ({x}, {y})" -> "(0, 255, 0), (100, 150)"
+"{hex}, {x}x{y}" -> "#00ff00, 100x150"
+"x{{{x}}}y{{{y}}}" -> "x{100}y{150}"   - this one is useful to put in `send`
+"""
+
 XyCoordsT: TypeAlias = tuple[int, int]
 """ x, y coordinates on an image or screen."""
 
