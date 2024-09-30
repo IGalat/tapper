@@ -8,6 +8,7 @@ import tapper
 from tapper.helper._util import image_util as _image_util
 from tapper.helper._util.image import base as _base_util
 from tapper.helper._util.image import find_util as _find_util
+from tapper.helper._util.image import snip_util as _snip_util
 from tapper.helper.model_types import BboxT
 from tapper.helper.model_types import ImagePathT
 from tapper.helper.model_types import ImagePixelMatrixT
@@ -32,10 +33,10 @@ def _check_dependencies() -> None:
         )
 
 
-def from_path(pathlike: ImagePathT) -> ImagePixelMatrixT:
+def from_path(pathlike: ImagePathT, cache: bool = True) -> ImagePixelMatrixT:
     """Get image from file path."""
     _check_dependencies()
-    return _base_util.from_path(pathlike)  # type: ignore
+    return _base_util.api_from_path(pathlike, cache)  # type: ignore
 
 
 def find(
@@ -62,9 +63,9 @@ def find(
 
 
 def find_one_of(
-    targets: list[ImageT]
-    | tuple[list[ImageT], BboxT]
-    | list[tuple[ImageT, BboxT | None]],
+    targets: (
+        list[ImageT] | tuple[list[ImageT], BboxT] | list[tuple[ImageT, BboxT | None]]
+    ),
     outer: str | ImagePixelMatrixT | None = None,
     precision: float = STD_PRECISION,
 ) -> tuple[ImageT, XyCoordsT] | tuple[None, None]:
@@ -109,9 +110,9 @@ def wait_for(
 
 
 def wait_for_one_of(
-    targets: list[ImageT]
-    | tuple[list[ImageT], BboxT]
-    | list[tuple[ImageT, BboxT | None]],
+    targets: (
+        list[ImageT] | tuple[list[ImageT], BboxT] | list[tuple[ImageT, BboxT | None]]
+    ),
     timeout: int | float = 5,
     interval: float = 0.4,
     precision: float = STD_PRECISION,
@@ -156,9 +157,7 @@ def get_find_raw(
 ) -> tuple[float, XyCoordsT]:
     """
     Find an image within a region of the screen or image, and return raw result.
-
     Immediate function, wrap in lambda if setting as action of Tap.
-
 
     :param target: what to find. Path to an image, or image object(numpy array).
     :param bbox: bounding box of where to search in the outer.
@@ -169,11 +168,11 @@ def get_find_raw(
     return _find_util.api_find_raw(target, bbox, outer)
 
 
-# todo add param bool to overwrite existing on save to disk / add (2) etc
 def snip(
     prefix: str | None = "snip",
     bbox_to_name: bool = True,
-    bbox_callback: Callable[[int, int, int, int], Any] | None = None,
+    override_existing: bool = True,
+    bbox_callback: Callable[[tuple[int, int, int, int]], Any] | None = None,
     picture_callback: Callable[[ImagePixelMatrixT], Any] | None = None,
 ) -> Callable[[], None]:
     """
@@ -184,8 +183,9 @@ def snip(
         has to be a path, absolute or relative to that dir.
     :param bbox_to_name: If true, will include in the name "-(BBOX_{x1}_{y1}_{x2}_{y2})", with actual coordinates.
         This is useful for precise-position search with `find` and `wait_for` methods.
+    :param override_existing: Will override existing file if prefix exists, otherwise will save as prefix(2).png
     :param bbox_callback: Action to be applied to bbox coordinates when snip is taken.
-        This is an alternative to bbox_in_name, if you want to supply it separately later.
+        This is an alternative to bbox_to_name, if you want to supply it separately later.
     :param picture_callback: Action to be applied to the array of resulting picture RGB.
     :return: callable toggle, to be set into a Tap
 
@@ -194,19 +194,25 @@ def snip(
             Mouseover a corner of desired snip, click "a", mouseover diagonal corner, click "a",
             and you'll get an image with default name and bounding box in the name in the working dir of the script.
 
-        {"a": img.snip("image", False, pyperclip.copy)}
-            Same procedure to get an image, but this will be called "image.png" without bounding box in the name,
-            instead it will be copied to your clipboard. Package pyperclip if required for this.
+        {"a": img.snip(prefix=None, bbox_callback=pyperclip.copy)}
+            This will only copy bounding box to your clipboard. Package pyperclip if required for this.
     """
+    _check_dependencies()
     return partial(
-        _image_util.toggle_snip, prefix, bbox_to_name, bbox_callback, picture_callback
+        _snip_util.toggle_snip,
+        prefix=prefix,
+        bbox_to_name=bbox_to_name,
+        override_existing=override_existing,
+        bbox_callback=bbox_callback,
+        picture_callback=picture_callback,
     )
 
 
 def get_snip(
     bbox: BboxT | None,
     prefix: str | None = None,
-    bbox_in_name: bool = True,
+    bbox_to_name: bool = True,
+    override_existing: bool = True,
 ) -> ImagePixelMatrixT:
     """
     Screenshot with specified bounding box, or entire screen. Optionally saves to disk.
@@ -216,7 +222,8 @@ def get_snip(
     :param bbox: Bounding box of the screenshot or image. If None, the whole screen or image is snipped.
     :param prefix: Optional name, may be a path of image to save, without extension. If not specified,
     will not be saved to disk.
-    :param bbox_in_name: If true, will append to the name -(BBOX_{x1}_{y1}_{x2}_{y2}), with corner coordinates.
+    :param bbox_to_name: If true, will append to the name "-BBOX({x1},{y1},{x2},{y2})", with corner coordinates.
+    :param override_existing: Will override existing file if prefix exists, otherwise will save as prefix(2).png
     :return: Resulting image RGB, transformed to numpy array.
 
     Usage:
@@ -224,7 +231,12 @@ def get_snip(
         ...
         img.wait_for(my_pic)
     """
-    return _image_util.finish_snip(prefix, bbox, bbox_in_name)[0]
+    return _snip_util.finish_snip(
+        bbox=bbox,
+        prefix=prefix,
+        bbox_to_name=bbox_to_name,
+        override_existing=override_existing,
+    )[0]
 
 
 def pixel_info(

@@ -41,6 +41,12 @@ def from_path(pathlike: ImagePathT) -> ImagePixelMatrixT:
     return np.asarray(pil_img)
 
 
+def api_from_path(pathlike: ImagePathT, cache: bool) -> ImagePixelMatrixT:
+    if not cache:
+        from_path.cache_clear()
+    return from_path(pathlike)  # type: ignore
+
+
 def to_pixel_matrix(image: ImageT | None) -> ImagePixelMatrixT | None:
     if image is None:
         return None

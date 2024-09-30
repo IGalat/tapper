@@ -253,11 +253,11 @@ def save_to_disk(
     sct: ImagePixelMatrixT,
     prefix: str,
     bbox: BboxT | None,
-    bbox_in_name: bool,
+    bbox_to_name: bool,
 ) -> None:
     bbox_str = (
         f"-(BBOX_{bbox[0]}_{bbox[1]}_{bbox[2]}_{bbox[3]})"
-        if bbox and bbox_in_name
+        if bbox and bbox_to_name
         else ""
     )
     ending = bbox_str + ".png"
@@ -335,5 +335,5 @@ def pixel_find(
         first_match = matching_px[0]
         x = start_x + first_match[1]
         y = start_y + first_match[0]
-        return x, y
+        return x, y  # noqa - np variables are fine as ints
     return None

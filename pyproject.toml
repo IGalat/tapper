@@ -38,6 +38,7 @@ pythonpath = [
 testpaths = [
     "tests",
 ]
+tmp_path_retention_count = 0
 
 
 [tool.mypy]

@@ -26,8 +26,8 @@ btn_pink_xy = 310, 305
 def mock_get_sct() -> None:
     with patch(
         "tapper.helper._util.image.base.get_screenshot_if_none_and_cut"
-    ) as mock_get_sct:
-        yield mock_get_sct
+    ) as mock_sct:
+        yield mock_sct
 
 
 class TestFind:
