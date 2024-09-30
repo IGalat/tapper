@@ -1,10 +1,7 @@
-import time
 from functools import partial
 from typing import Any
 from typing import Callable
-from typing import Iterable
 
-from tapper.helper._util import image_util as _image_util
 from tapper.helper._util.image import base as _base_util
 from tapper.helper._util.image import find_util as _find_util
 from tapper.helper._util.image import pixel_util as _pixel_util
@@ -276,7 +273,7 @@ def pixel_get_color(coords: XyCoordsT, outer: ImageT | None = None) -> PixelColo
     :return: Decimal values of Red, Green, and Blue components of the pixel color.
     """
     _check_dependencies()
-    return _pixel_util.get_pixel_color(coords, outer)
+    return _pixel_util.get_color(coords, outer)
 
 
 def pixel_get_color_hex(
@@ -291,10 +288,9 @@ def pixel_get_color_hex(
     :return: Hashtag, followed by hex-color. see https://g.co/kgs/P9JkiRJ
     """
     _check_dependencies()
-    return _pixel_util.get_pixel_color_hex(coords, outer)
+    return _pixel_util.get_color_hex(coords, outer)
 
 
-# todo accept color #FFFFFF
 def pixel_find(
     color: PixelColorT | PixelHexColorT,
     bbox_or_coords: BboxT | XyCoordsT | None = None,
@@ -316,13 +312,17 @@ def pixel_find(
         If you specify 255 shades of variation, all colors will match.
     :return: Coordinates X and Y of the first pixel that matches, or None if no match.
     """
-    return _image_util.pixel_find(
-        color, bbox_or_coords, _image_util.normalize(outer)[0], variation
+    _check_dependencies()
+    return _pixel_util.find(
+        color_in=color,
+        bbox_or_coords=bbox_or_coords,
+        outer_maybe=outer,
+        variation=variation,
     )
 
 
 def pixel_wait_for(
-    color: PixelColorT,
+    color: PixelColorT | PixelHexColorT,
     bbox_or_coords: BboxT | XyCoordsT | None = None,
     timeout: int | float = 5,
     interval: float = 0.1,
@@ -340,43 +340,5 @@ def pixel_wait_for(
     :param variation: see `pixel_find` param.
     :return: Coordinates of the pixel if found, else None.
     """
-    finish_time = time.perf_counter() + timeout
-    while True:
-        if found := pixel_find(color, bbox_or_coords, variation=variation):
-            return found
-        if time.perf_counter() > finish_time:
-            return None
-        time.sleep(interval)
-        if time.perf_counter() > finish_time:
-            return None
-
-
-def pixel_wait_for_one_of(
-    colors_coords: Iterable[tuple[PixelColorT, BboxT | XyCoordsT | None]],
-    timeout: int | float = 5,
-    interval: float = 0.1,
-    variation: int = 0,
-) -> tuple[PixelColorT, BboxT | XyCoordsT | None] | None:
-    """
-    Regularly search the screen or region of the screen for pixels,
-    returning first that appears, or None if timeout.
-    This is blocking until timeout, obviously.
-
-    :param colors_coords: list of tuples(color, coords) - for color and coords see pixel_find.
-        Each pixel may have own coords/bbox to be searched in. Coords None will search entire screen.
-    :param timeout: see `pixel_wait_for` param.
-    :param interval: see `pixel_wait_for` param.
-    :param variation: see `pixel_find` param.
-    :return: tuple(color, coords) that was found, else None.
-    """
-    # Todo rework: colors_coords now: (color, coords | None), to: color | (color, coords)
-    finish_time = time.perf_counter() + timeout
-    while True:
-        for _, color_coords in enumerate(colors_coords):
-            if pixel_find(*color_coords, variation=variation):
-                return color_coords
-        if time.perf_counter() < finish_time:
-            return None
-        time.sleep(interval)
-        if time.perf_counter() < finish_time:
-            return None
+    _check_dependencies()
+    return _pixel_util.wait_for(color, bbox_or_coords, timeout, interval, variation)

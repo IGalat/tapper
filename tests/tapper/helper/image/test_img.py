@@ -57,9 +57,6 @@ class TestFind:
         xy = img.find(img_test_util.from_matrix([[gray]]), outer=absolutes)
         assert xy == (0, 4)
 
-    def test_dependencies_not_installed(self) -> None:
-        pass
-
     def test_with_bbox(self) -> None:
         xy = img.find(img_test_util.from_matrix([[white]]), (2, 2, 3, 5), absolutes)
         assert xy == (2, 4)

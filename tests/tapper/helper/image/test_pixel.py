@@ -79,13 +79,31 @@ class TestPixelInfo:
 class TestFind:
     def test_simplest(self) -> None:
         xy = img.pixel_find(green, outer=absolutes)
-        assert xy == (1, 0)
+        assert xy == (0, 1)
 
     def test_not_found(self) -> None:
-        pass
+        xy = img.pixel_find(gray, outer=absolutes)
+        assert xy is None
 
     def test_precise_not_found__approximate_found(self) -> None:
-        pass
+        almost_blue = 0, 8, 240
+        xy = img.pixel_find(almost_blue, outer=absolutes)
+        assert xy is None
+        xy = img.pixel_find(almost_blue, outer=absolutes, variation=20)
+        assert xy == (0, 2)
 
     def test_pixel_color_out_of_bounds(self) -> None:
-        pass
+        with pytest.raises(ValueError):
+            img.pixel_find((1000, -200, 0))
+
+
+class TestWaitFor:
+    def test_simplest(self, mock_get_sct) -> None:
+        mock_get_sct.return_value = absolutes
+        xy = img.pixel_wait_for(green)
+        assert xy == (0, 1)
+
+    def test_not_found(self, mock_get_sct) -> None:
+        mock_get_sct.return_value = absolutes
+        xy = img.pixel_wait_for(gray, timeout=0.001, interval=0.001)
+        assert xy is None
