@@ -128,13 +128,11 @@ class TestRepeatWhilePressed:
             mock_pressed.return_value = True
             yield mock_pressed
 
+    # todo fix: there's an exception in is_end_run because state_keeper isn't there.
     def test_simplest(self, mock_pressed: Any, mock_sleep: Any) -> None:
         counter = Counter()
         counter.action_at_5 = lambda: mock_return_false(mock_pressed)
         repeat.while_pressed("q", counter.tick)()
-        for _ in range(100):
-            if repeat_util.running_repeatable is not None:
-                break
         wait_for_repeatable()
         mock_pressed.return_value = False
         assert counter.count == 5

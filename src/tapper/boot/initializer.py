@@ -36,6 +36,10 @@ def default_action_runner() -> ActionRunner:
     return ActionRunnerImpl(config.action_runner_executors_threads)
 
 
+# crutch, use DI instead.
+keeper_pressed = None
+
+
 def default_keeper_pressed(os: str | None = None) -> keeper.Pressed:
     return keeper.Pressed(registered_symbols=config.keys_held_down(os))
 
@@ -83,6 +87,7 @@ def init(
     send: SendFn,
 ) -> list[SignalListener]:
     """Initialize components with config values."""
+    global keeper_pressed
     os = config.os
 
     transformer = TreeTransformer(
@@ -97,6 +102,7 @@ def init(
     runner = default_action_runner()
     emul_keeper = keeper.Emul()
     state_keeper = default_keeper_pressed()
+    keeper_pressed = state_keeper
 
     signal_processor = SignalProcessor(root, control, state_keeper, runner)
     listener_wrapper = ListenerWrapper(
