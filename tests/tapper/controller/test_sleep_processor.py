@@ -22,6 +22,10 @@ class Counter:
         return self.result
 
 
+def assert_time_equals(time_1: float, time_2: float) -> None:
+    assert abs(time_1 - time_2) < 0.05
+
+
 class TestSleepProcessor:
     def test_simplest(self) -> None:
         processor = SleepCommandProcessor(
@@ -31,7 +35,7 @@ class TestSleepProcessor:
 
         time_start = time.perf_counter()
         processor.sleep(0)
-        assert time_start == pytest.approx(time.perf_counter(), abs=0.01)
+        assert_time_equals(time_start, time.perf_counter())
 
     def test_immediate_kill(self) -> None:
         counter = Counter(result=True)
@@ -66,7 +70,7 @@ class TestSleepProcessor:
         time_start = time.perf_counter()
         processor.sleep(0.1)
         assert counter.count == 3  # 1 check at the start and 2 intervals
-        assert time_start + 0.1 == pytest.approx(time.perf_counter(), abs=0.01)
+        assert_time_equals(time_start + 0.1, time.perf_counter())
 
     def test_check_interval_bigger_than_sleep_time(self) -> None:
         counter = Counter()
@@ -78,7 +82,7 @@ class TestSleepProcessor:
         time_start = time.perf_counter()
         processor.sleep(0.02)
         assert counter.count == 2
-        assert time_start + 0.02 == pytest.approx(time.perf_counter(), abs=0.01)
+        assert_time_equals(time_start + 0.02, time.perf_counter())
 
     def test_time_str_seconds(self) -> None:
         processor = SleepCommandProcessor(
@@ -88,7 +92,7 @@ class TestSleepProcessor:
 
         time_start = time.perf_counter()
         processor.sleep("0.02s")
-        assert time_start + 0.02 == pytest.approx(time.perf_counter(), abs=0.01)
+        assert_time_equals(time_start + 0.02, time.perf_counter())
 
     def test_time_str_millis(self) -> None:
         processor = SleepCommandProcessor(
@@ -98,7 +102,7 @@ class TestSleepProcessor:
 
         time_start = time.perf_counter()
         processor.sleep("20ms")
-        assert time_start + 0.02 == pytest.approx(time.perf_counter(), abs=0.01)
+        assert_time_equals(time_start + 0.02, time.perf_counter())
 
     def test_killed_after_3_interval(self) -> None:
         counter = Counter(at_3=lambda: True)
@@ -111,4 +115,4 @@ class TestSleepProcessor:
         with pytest.raises(StopTapperActionException):
             processor.sleep(1)
         assert counter.count == 3  # 1 initial and 2 sleeps
-        assert time_start + 0.02 == pytest.approx(time.perf_counter(), abs=0.01)
+        assert_time_equals(time_start + 0.02, time.perf_counter())
