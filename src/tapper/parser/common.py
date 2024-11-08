@@ -44,6 +44,15 @@ class CURSOR_MOVE(ParsedProp):
     fn = parse_xy
 
 
+def parse_sleep_time(prop: str) -> float | None:
+    """If doesn't match sleep pattern, will return None."""
+    if SECONDS.regex.fullmatch(prop):
+        return SECONDS.fn(prop)
+    if MILLIS.regex.fullmatch(prop):
+        return MILLIS.fn(prop)
+    return None
+
+
 def split(text: str, delimiter: str) -> list[str]:
     """Split str, with minimum length of tokens same as delimiter.
 

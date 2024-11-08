@@ -117,10 +117,8 @@ def resolve_chain_opening_with_props(
 
 
 def sleep_prop(prop: str) -> Optional[SleepInstruction]:
-    if common.SECONDS.regex.fullmatch(prop):
-        return SleepInstruction(common.SECONDS.fn(prop))
-    if common.MILLIS.regex.fullmatch(prop):
-        return SleepInstruction(common.MILLIS.fn(prop))
+    if (parsed := common.parse_sleep_time(prop)) is not None:
+        return SleepInstruction(parsed)
     return None
 
 
