@@ -12,6 +12,10 @@ class StopTapperActionException(Exception):
 def parse_sleep_time(length_of_time: float | str) -> float:
     if isinstance(length_of_time, str):
         sleep_time = common.parse_sleep_time(length_of_time)
+        if sleep_time is None:
+            raise ValueError(
+                f"tapper.sleep length_of_time {length_of_time} could not be parsed."
+            )
     elif isinstance(length_of_time, (float, int)):
         sleep_time = length_of_time
     else:
