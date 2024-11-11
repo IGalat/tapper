@@ -18,7 +18,7 @@ class SleepFixture:
     mock_actual_sleep: MagicMock | Callable[[Any], None]
 
     def get_time_slept(self) -> float:
-        return sum(call.args[0] for call in self.mock_actual_sleep.call_args_list)
+        return sum(call_.args[0] for call_ in self.mock_actual_sleep.call_args_list)
 
 
 @pytest.fixture

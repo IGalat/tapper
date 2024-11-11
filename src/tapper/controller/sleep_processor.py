@@ -53,7 +53,8 @@ class SleepCommandProcessor:
         self.kill_if_required()
         self.pause_if_required()
         sleep_time = parse_sleep_time(length_of_time)
-        while round(sleep_time, 3) > 0:
+        while sleep_time > 0:
+            sleep_time = round(sleep_time, 3)
             to_sleep = min(self.check_interval, sleep_time)
             self.actual_sleep_fn(to_sleep)
             sleep_time = sleep_time - to_sleep
