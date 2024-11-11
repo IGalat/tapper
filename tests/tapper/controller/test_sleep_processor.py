@@ -18,7 +18,9 @@ class SleepFixture:
     mock_actual_sleep: MagicMock | Callable[[Any], None]
 
     def get_time_slept(self) -> float:
-        return sum(call_.args[0] for call_ in self.mock_actual_sleep.call_args_list)
+        return round(
+            sum(call_.args[0] for call_ in self.mock_actual_sleep.call_args_list), 5
+        )
 
 
 @pytest.fixture
@@ -35,20 +37,6 @@ def sleep_fixture() -> SleepFixture:
         sleep=processor.sleep,
         mock_actual_sleep=processor.actual_sleep_fn,
     )
-
-
-@dataclass
-class Counter:
-    count: int = 0
-    ticks: list[float] = field(default_factory=list)
-    result: bool = False
-    at_3: Callable[[], bool] | None = None
-
-    def tick(self) -> bool:
-        self.count += 1
-        if self.count == 3 and self.at_3 is not None:
-            return self.at_3()
-        return self.result
 
 
 class TestSleep:
@@ -126,6 +114,20 @@ class TestSleepPause:
 
 def assert_time_equals(time_1: float, time_2: float) -> None:
     assert abs(time_1 - time_2) < 0.05
+
+
+@dataclass
+class Counter:
+    count: int = 0
+    ticks: list[float] = field(default_factory=list)
+    result: bool = False
+    at_3: Callable[[], bool] | None = None
+
+    def tick(self) -> bool:
+        self.count += 1
+        if self.count == 3 and self.at_3 is not None:
+            return self.at_3()
+        return self.result
 
 
 class TestRealSleep:
