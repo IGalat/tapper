@@ -56,6 +56,9 @@ only_visible_windows = True
 """Limit windows to visible - ones that are open on the taskbar.
 Reduces WindowController lag, and junk windows caught into filters."""
 
+sleep_check_interval = 0.1
+"""How often tapper.sleep checks for pause/kill."""
+
 """
 ------------------------------------
 SECTION 3: Extending the functionality.

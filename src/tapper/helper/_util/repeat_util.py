@@ -4,8 +4,9 @@ from typing import Callable
 
 import tapper
 from tapper.action.wrapper import ActionConfig
-from tapper.action.wrapper import config_thread_local_storage
 from tapper.boot import initializer
+from tapper.controller import flow_control
+from tapper.controller.flow_control import config_thread_local_storage
 from tapper.helper.model import Repeatable
 
 TIME_SPLIT = 0.1
@@ -34,6 +35,7 @@ def _run_task(repeatable: Repeatable) -> None:
     config_thread_local_storage.action_config = ActionConfig(
         send_interval=tapper.root.send_interval,  # type: ignore
         send_press_duration=tapper.root.send_press_duration,  # type: ignore
+        kill_id=flow_control.kill_id,
     )
     for i in range(repeatable.max_repeats or 99999999999999):
         if is_end_run(repeatable):

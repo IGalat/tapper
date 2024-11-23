@@ -68,8 +68,8 @@ def f(dummy: Dummy, is_debug: bool, make_group: Callable) -> Fixture:
     tapper.root = make_group("root")
     tapper.control_group = make_group("control_group")
     tapper._initialized = False
-    tapper.action.wrapper.config_thread_local_storage.action_config = (
-        wrapper.ActionConfig(0, 0)
+    tapper.controller.flow_control.config_thread_local_storage.action_config = (
+        wrapper.ActionConfig(0, 0, tapper.controller.flow_control.kill_id)
     )
 
     listener = dummy.Listener.get_for_os("")
@@ -92,25 +92,25 @@ def f(dummy: Dummy, is_debug: bool, make_group: Callable) -> Fixture:
     wtc = dummy.WinTC([])
     tapper.window._tracker, tapper.window._commander = wtc, wtc
 
-    def sleep_logged(time_s: float, signals: list[Signal]) -> None:
-        signals.append(sleep_signal(time_s))
-        time.sleep(time_s)
-
-    sender = tapper._send_processor
-    sender.sleep_fn = partial(sleep_logged, signals=fixture.emul_signals)
-
-    def send_and_sleep(send: SendFn, command: str) -> None:
-        send(command)
-        time.sleep(0.01 * debug_sleep_mult)  # so actions can run their course
-
-    real_sender = SendCommandProcessor.from_none()
-    fixture.send_real = partial(send_and_sleep, real_sender.send)
-
     def start() -> None:
         tapper.init()  # this will init sender
+
+        def sleep_logged(time_s: float, signals: list[Signal]) -> None:
+            signals.append(sleep_signal(time_s))
+            time.sleep(time_s)
+
+        def send_and_sleep(send: SendFn, command: str) -> None:
+            send(command)
+            time.sleep(0.01 * debug_sleep_mult)  # so actions can run their course
+
+        sender = tapper._send_processor
+        sender.sleep_fn = partial(sleep_logged, signals=fixture.emul_signals)
+
+        real_sender = SendCommandProcessor.from_none()
         real_sender.os = sender.os
         real_sender.parser = sender.parser
         real_sender.sleep_fn = partial(sleep_logged, signals=fixture.real_signals)
+        fixture.send_real = partial(send_and_sleep, real_sender.send)
 
         emul_keeper = keeper.Emul()
 

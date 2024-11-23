@@ -1,6 +1,8 @@
-import threading
 from dataclasses import dataclass
+from uuid import UUID
 
+from tapper.controller import flow_control
+from tapper.controller.flow_control import config_thread_local_storage
 from tapper.model import types_
 from tapper.model.tap_tree_shadow import STap
 
@@ -11,15 +13,15 @@ class ActionConfig:
 
     send_interval: float
     send_press_duration: float
+    kill_id: UUID
 
     @classmethod
     def from_tap(cls, tap: STap) -> "ActionConfig":
         return ActionConfig(
-            send_interval=tap.send_interval, send_press_duration=tap.send_press_duration
+            send_interval=tap.send_interval,
+            send_press_duration=tap.send_press_duration,
+            kill_id=flow_control.kill_id,
         )
-
-
-config_thread_local_storage = threading.local()
 
 
 def wrapped_action(tap: STap) -> types_.Action:

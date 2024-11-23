@@ -7,6 +7,9 @@ from tapper.controller.mouse.mouse_api import MouseController as _MouseControlle
 from tapper.controller.send_processor import (
     SendCommandProcessor as _SendCommandProcessor,
 )
+from tapper.controller.sleep_processor import (
+    SleepCommandProcessor as _SleepCommandProcessor,
+)
 from tapper.controller.window.window_api import WindowController as _WindowController
 from tapper.model import tap_tree as _tap_tree
 from tapper.signal.base_listener import SignalListener as _SignalListener
@@ -15,6 +18,7 @@ from tapper.util import datastructs as _datastructs
 _listeners: list[_SignalListener]
 
 _send_processor = _SendCommandProcessor.from_none()
+_sleep_processor = _SleepCommandProcessor.from_none()
 _initialized = False
 _blocking = True
 
@@ -44,6 +48,9 @@ If user doesn't add any controls, default ones will be added on init.
 send = _send_processor.send
 """A versatile command, allows sending many instructions in one str."""
 
+sleep = _sleep_processor.sleep
+"""Use this instead of time.sleep to be able to pause and kill running actions."""
+
 if _kbc := _datastructs.get_first_in(_KeyboardController, config.controllers):
     """Keyboard controller. Mainly useful for getting the state of keys, send is recommended for typing."""
     kb: _KeyboardController = _kbc
@@ -62,7 +69,9 @@ def init() -> None:
     global _listeners
     global _initialized
     _initializer.set_default_controls_if_empty(control_group)
-    _listeners = _initializer.init(root, control_group, _send_processor, send)
+    _listeners = _initializer.init(
+        root, control_group, _send_processor, _sleep_processor
+    )
     _initialized = True
 
 

@@ -1,12 +1,9 @@
 import time
+from dataclasses import dataclass
 from typing import Callable
 
-from attr import dataclass
+from tapper.controller.flow_control import StopTapperActionException
 from tapper.parser import common
-
-
-class StopTapperActionException(Exception):
-    """Normal way to interrupt tapper's action. Will not cause error logs etc."""
 
 
 def parse_sleep_time(length_of_time: float | str) -> float:
@@ -38,8 +35,13 @@ class SleepCommandProcessor:
     actual_sleep_fn: Callable[[float], None] = time.sleep
     get_time_fn: Callable[[], float] = time.perf_counter
 
+    @classmethod
+    def from_none(cls) -> "SleepCommandProcessor":
+        """To be filled during init."""
+        return SleepCommandProcessor(None, None, None)  # type: ignore
+
     def __post_init__(self) -> None:
-        if self.check_interval <= 0:
+        if self.check_interval is not None and self.check_interval <= 0:
             raise ValueError(
                 "SleepCommandProcessor check_interval must be greater than 0."
             )

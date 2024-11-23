@@ -1,7 +1,6 @@
-import time
 from typing import Callable
 
-from tapper.action.wrapper import config_thread_local_storage
+from tapper.controller.flow_control import config_thread_local_storage
 from tapper.controller.keyboard.kb_api import KeyboardController
 from tapper.controller.mouse.mouse_api import MouseController
 from tapper.model import constants
@@ -23,8 +22,7 @@ class SendCommandProcessor:
     parser: SendParser
     kb_controller: KeyboardController
     mouse_controller: MouseController
-    sleep_fn: Callable[[float], None] = time.sleep
-    default_interval: Callable[[], float]
+    sleep_fn: Callable[[float], None]
 
     def __init__(
         self,
@@ -32,16 +30,18 @@ class SendCommandProcessor:
         parser: SendParser,
         kb_controller: KeyboardController,
         mouse_controller: MouseController,
+        sleep_fn: Callable[[float], None],
     ) -> None:
         self.os = os
         self.parser = parser
         self.kb_controller = kb_controller
         self.mouse_controller = mouse_controller
+        self.sleep_fn = sleep_fn
 
     @classmethod
     def from_none(cls) -> "SendCommandProcessor":
         """To be filled during init."""
-        return SendCommandProcessor(None, None, None, None)  # type: ignore
+        return SendCommandProcessor(None, None, None, None, None)  # type: ignore
 
     def send(
         self,

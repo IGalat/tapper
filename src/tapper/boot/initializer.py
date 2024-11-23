@@ -4,9 +4,11 @@ from tapper.action.runner import ActionRunner
 from tapper.action.runner import ActionRunnerImpl
 from tapper.boot import tray_icon
 from tapper.boot.tree_transformer import TreeTransformer
+from tapper.controller import flow_control
 from tapper.controller.keyboard.kb_api import KeyboardController
 from tapper.controller.mouse.mouse_api import MouseController
 from tapper.controller.send_processor import SendCommandProcessor
+from tapper.controller.sleep_processor import SleepCommandProcessor
 from tapper.controller.window.window_api import WindowController
 from tapper.helper import controls
 from tapper.model import constants
@@ -18,7 +20,6 @@ from tapper.model.send import SendInstruction
 from tapper.model.send import SleepInstruction
 from tapper.model.send import WheelInstruction
 from tapper.model.tap_tree import Group
-from tapper.model.types_ import SendFn
 from tapper.parser.send_parser import SendParser
 from tapper.parser.trigger_parser import TriggerParser
 from tapper.signal.base_listener import SignalListener
@@ -84,14 +85,14 @@ def init(
     iroot: Group,
     icontrol: Group,
     send_processor: SendCommandProcessor,
-    send: SendFn,
+    sleep_processor: SleepCommandProcessor,
 ) -> list[SignalListener]:
     """Initialize components with config values."""
     global keeper_pressed
     os = config.os
 
     transformer = TreeTransformer(
-        send, default_trigger_parser(os), config.kw_trigger_conditions
+        send_processor.send, default_trigger_parser(os), config.kw_trigger_conditions
     )
     verify_settings_exist(iroot)
     root = transformer.transform(iroot)
@@ -126,11 +127,15 @@ def init(
         wc._only_visible_windows = config.only_visible_windows
     [c._init() for c in controllers]
 
+    sleep_processor.check_interval = config.sleep_check_interval
+    sleep_processor.kill_check_fn = flow_control.should_be_killed
+    sleep_processor.pause_check_fn = flow_control.should_be_paused
+
     send_processor.os = os
     send_processor.parser = default_send_parser(os)
     send_processor.kb_controller = kbc  # type: ignore
     send_processor.mouse_controller = mc  # type: ignore
-    send_processor.default_interval = lambda: config.default_send_interval  # type: ignore
+    send_processor.sleep_fn = sleep_processor.sleep
 
     return listeners
 

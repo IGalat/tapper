@@ -3,6 +3,8 @@ import time
 import pytest
 from tapper.action import wrapper
 from tapper.boot import initializer
+from tapper.controller import flow_control
+from tapper.controller.flow_control import config_thread_local_storage
 from tapper.controller.keyboard.kb_api import KeyboardController
 from tapper.controller.mouse.mouse_api import MouseController
 from tapper.controller.send_processor import SendCommandProcessor
@@ -71,12 +73,19 @@ class TestSendCommandProcessor:
         mc._tracker, mc._commander, mc._emul_keeper = mouse_tc, mouse_tc, emul
         self.mc = mc
 
-        self.sender = SendCommandProcessor("", parser, kbc, mc)
-        self.sender.sleep_fn = lambda f: self.all_signals.append(sleep(f))
+        self.sender = SendCommandProcessor(
+            os="",
+            parser=parser,
+            kb_controller=kbc,
+            mouse_controller=mc,
+            sleep_fn=lambda f: self.all_signals.append(sleep(f)),
+        )
 
         event.subscribe(listener.name, lambda signal: self.real_signals.append(signal))
 
-        wrapper.config_thread_local_storage.action_config = wrapper.ActionConfig(0, 0)
+        config_thread_local_storage.action_config = wrapper.ActionConfig(
+            0, 0, flow_control.kill_id
+        )
 
     def test_simplest(self) -> None:
         self.sender.send("a")
@@ -121,7 +130,7 @@ class TestSendCommandProcessor:
         ]
 
     def test_interval_config(self) -> None:
-        wrapper.config_thread_local_storage.action_config.send_interval = 0.5
+        config_thread_local_storage.action_config.send_interval = 0.5
         self.sender.send("hello")
         result = []
         for letter in "hello":
@@ -130,7 +139,7 @@ class TestSendCommandProcessor:
         assert self.all_signals == result
 
     def test_interval_variable_overrides_config(self) -> None:
-        wrapper.config_thread_local_storage.action_config.send_interval = 0.1
+        config_thread_local_storage.action_config.send_interval = 0.1
         self.sender.send("hi")
         self.sender.send("qq", interval=10)
         assert self.all_signals == [
@@ -167,7 +176,7 @@ class TestSendCommandProcessor:
         ]
 
     def test_press_duration_config(self) -> None:
-        wrapper.config_thread_local_storage.action_config.send_press_duration = 0.1
+        config_thread_local_storage.action_config.send_press_duration = 0.1
         self.sender.send("sp")
         assert self.all_signals == [
             down("s"),
@@ -179,7 +188,7 @@ class TestSendCommandProcessor:
         ]
 
     def test_press_duration_variable_overrides_config(self) -> None:
-        wrapper.config_thread_local_storage.action_config.send_press_duration = 0.3
+        config_thread_local_storage.action_config.send_press_duration = 0.3
         self.sender.send("mz", press_duration=1)
         assert self.all_signals == [
             down("m"),
