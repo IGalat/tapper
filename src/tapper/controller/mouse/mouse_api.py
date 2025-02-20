@@ -6,7 +6,13 @@ from typing import Optional
 
 from tapper.controller.resource_controller import ResourceController
 from tapper.model import constants
+from tapper.model import mouse
 from tapper.state import keeper
+
+mouse_buttons_w_aliases = {
+    **mouse.button_aliases,
+    **{b: [b] for b in mouse.regular_buttons},
+}
 
 
 def is_near(current_x: int, current_y: int, x: int, y: int, precision: int) -> bool:
@@ -106,7 +112,7 @@ class MouseController(ResourceController):
 
     def pressed(self, symbol: str) -> bool:
         """Is key held down. Not applicable to wheel."""
-        return symbol in self._state_keeper.pressed_keys
+        return mouse_buttons_w_aliases[symbol][0] in self._state_keeper.pressed_keys
 
     def toggled(self, symbol: str) -> bool:
         """Is key toggled. Not applicable to wheel."""

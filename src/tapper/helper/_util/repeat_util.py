@@ -38,7 +38,6 @@ def _run_task(repeatable: Repeatable) -> None:
         kill_id=flow_control.kill_id,
     )
     for i in range(repeatable.max_repeats or 99999999999999):
-        print("iter ", i)
         if is_end_run(repeatable):
             running_repeatable = None
             return
@@ -83,10 +82,9 @@ def to_pressed_condition(symbol: str) -> Callable[[], bool]:
         device = tapper.kb  # type: ignore
     else:
         raise ValueError(f"Repeat while pressed: '{symbol}' not recognised.")
-    return (
-        lambda: device.pressed(symbol)
-        or symbol in initializer.keeper_pressed.pressed_keys  # type: ignore
-    )
+    return lambda: (
+        device.pressed(symbol) or symbol in initializer.keeper_pressed.pressed_keys
+    )  # type: ignore
 
 
 def toggle_run(repeatable: Repeatable) -> None:
