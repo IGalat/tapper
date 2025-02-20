@@ -83,8 +83,8 @@ def to_pressed_condition(symbol: str) -> Callable[[], bool]:
     else:
         raise ValueError(f"Repeat while pressed: '{symbol}' not recognised.")
     return lambda: (
-        device.pressed(symbol) or symbol in initializer.keeper_pressed.pressed_keys
-    )  # type: ignore
+        device.pressed(symbol) or symbol in initializer.keeper_pressed.pressed_keys  # type: ignore
+    )
 
 
 def toggle_run(repeatable: Repeatable) -> None:
