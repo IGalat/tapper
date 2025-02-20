@@ -89,6 +89,7 @@ class MouseController(ResourceController):
     _tracker: MouseTracker
     _commander: MouseCommander
     _emul_keeper: keeper.Emul
+    _state_keeper: keeper.Pressed
     _memorized_pos: tuple[int, int] | None = None
 
     def _init(self) -> None:
@@ -105,7 +106,7 @@ class MouseController(ResourceController):
 
     def pressed(self, symbol: str) -> bool:
         """Is key held down. Not applicable to wheel."""
-        return self._tracker.pressed(symbol)
+        return symbol in self._state_keeper.pressed_keys
 
     def toggled(self, symbol: str) -> bool:
         """Is key toggled. Not applicable to wheel."""

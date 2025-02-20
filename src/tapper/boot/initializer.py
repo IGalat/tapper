@@ -122,6 +122,7 @@ def init(
     if mc := datastructs.get_first_in(MouseController, controllers):
         mc._os = os
         mc._emul_keeper = emul_keeper
+        mc._state_keeper = state_keeper
     if wc := datastructs.get_first_in(WindowController, controllers):
         wc._os = os
         wc._only_visible_windows = config.only_visible_windows
