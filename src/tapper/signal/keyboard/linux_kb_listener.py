@@ -2,7 +2,7 @@ from functools import partial
 from threading import Thread
 
 import evdev
-from evdev import UInput
+from evdev import UInput  # type: ignore
 from tapper.model import constants
 from tapper.model import keyboard
 from tapper.model.constants import EvdevKeyDir
@@ -18,7 +18,7 @@ def key_action(virtual_kb: UInput, code: int, evdev_direction: int) -> None:
 
 
 class LinuxKeyboardSignalListener(KeyboardSignalListener):
-    real_kbs: list[evdev.InputDevice]
+    real_kbs: list[evdev.InputDevice]  # type: ignore
     virtual_kb: UInput
 
     @classmethod
@@ -34,7 +34,7 @@ class LinuxKeyboardSignalListener(KeyboardSignalListener):
     def stop(self) -> None:
         pass
 
-    def keyboard_loop(self, kb: evdev.InputDevice) -> None:
+    def keyboard_loop(self, kb: evdev.InputDevice) -> None:  # type: ignore
         for pressed_key_code in kb.active_keys():
             key_action(
                 self.virtual_kb, pressed_key_code, EvdevReverseKeyDir[KeyDirBool.UP]

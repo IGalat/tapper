@@ -2,7 +2,7 @@ import sys
 import time
 
 import evdev
-from evdev import UInput
+from evdev import UInput  # type: ignore
 from tapper.controller.keyboard.kb_api import KeyboardCommander
 from tapper.controller.keyboard.kb_api import KeyboardTracker
 from tapper.model import keyboard
@@ -26,7 +26,7 @@ modifier_led_indices = {"caps": 1, "caps_lock": 1, "num_lock": 0, "scroll_lock":
 
 
 class LinuxKeyboardTrackerCommander(KeyboardTracker, KeyboardCommander):
-    real_kbs: list[evdev.InputDevice]
+    real_kbs: list[evdev.InputDevice]  # type: ignore
     virtual_kb: UInput
 
     def start(self) -> None:
