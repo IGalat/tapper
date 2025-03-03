@@ -53,8 +53,8 @@ def helpers() -> None:
                 "num3": lambda: print(
                     img.wait_for("snip_test-(BBOX_6_-1043_103_-1017).png")
                 ),
-                "num4": img.pixel_info(print_pixel),
-                "num5": img.pixel_str(print),
+                "num4": img.pixel_info(callback_for_data=print_pixel),
+                "num5": img.pixel_info(print),
                 "num6": lambda: print(img.pixel_find((62, 134, 160), (39, 43))),
             }
         ),

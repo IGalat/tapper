@@ -3,7 +3,6 @@
 
 - Tree and config validation with tkinter warnings
 - Error handling
-- Logging
 - Moar trackers: kb lang, process, device connect/disconnect, service/daemon, file, resource(cpu/gpu/network) load
 - Group actions when it goes on/off, timer for checking group states? Tap without trigger, only for on/off active
 - Good docs, with sphinx/readthedocs/doctest
@@ -30,15 +29,12 @@ Fix this, so that errors are clear.
 
 ## Limitations of the current design
 
-Unable to terminate/pause/unpause actions.
-Would probably need multiprocessing for that.
-Restarting works for terminating actions though.
-
 No hotstrings: made the decision to not implement them.
 
 On win32, shift+insert is not emulatable, shift is raised before insert is pressed.
 
 Cannot do mass things, like lock all buttons until something is pressed.
+Also, no temporary hotkeys.
 
 
 ## Possible extensions to think about for the future

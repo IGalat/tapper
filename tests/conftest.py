@@ -2,6 +2,7 @@ import sys
 from typing import Callable
 
 import pytest
+import tapper.config
 from tapper.model.tap_tree import Group
 from testutil_model import Dummy
 
@@ -25,3 +26,8 @@ def make_group() -> Callable[[str], Group]:
 @pytest.fixture
 def is_debug() -> bool:
     return hasattr(sys, "gettrace") and (sys.gettrace() is not None)
+
+
+@pytest.fixture(autouse=True)
+def disable_file_logs() -> None:
+    tapper.config.loglevel_file = None

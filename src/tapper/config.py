@@ -1,3 +1,4 @@
+import logging
 import sys
 import time
 
@@ -58,6 +59,11 @@ Reduces WindowController lag, and junk windows caught into filters."""
 
 sleep_check_interval = 0.1
 """How often tapper.sleep checks for pause/kill."""
+
+
+loglevel_console = logging.DEBUG
+loglevel_file = logging.DEBUG
+"""Can be set too None to disable logging."""
 
 """
 ------------------------------------
