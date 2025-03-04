@@ -73,7 +73,6 @@ def init() -> None:
     """Initializes all underlying tools."""
     global _listeners
     global _initialized
-    _initializer.set_default_controls_if_empty(control_group)
     _listeners = _initializer.init(
         root, control_group, _send_processor, _sleep_processor
     )
