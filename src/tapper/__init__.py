@@ -11,6 +11,7 @@ from tapper.controller.sleep_processor import (
     SleepCommandProcessor as _SleepCommandProcessor,
 )
 from tapper.controller.window.window_api import WindowController as _WindowController
+from tapper.feedback import logger as _logger
 from tapper.model import tap_tree as _tap_tree
 from tapper.signal.base_listener import SignalListener as _SignalListener
 from tapper.util import datastructs as _datastructs
@@ -62,6 +63,10 @@ if _mc := _datastructs.get_first_in(_MouseController, config.controllers):
 if _wc := _datastructs.get_first_in(_WindowController, config.controllers):
     """Window controller. Command and get state of windows."""
     window: _WindowController = _wc
+
+
+log = _logger.log
+"""This logger will log into both console and logfile, by default."""
 
 
 def init() -> None:

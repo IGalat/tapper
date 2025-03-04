@@ -61,9 +61,16 @@ sleep_check_interval = 0.1
 """How often tapper.sleep checks for pause/kill."""
 
 
-loglevel_console = logging.DEBUG
-loglevel_file = logging.DEBUG
-"""Can be set too None to disable logging."""
+"""Note: all log configs are set on tapper.start()."""
+tapper_logging_config = True
+"""If False, will not setup logging to file and stdout.
+Tapper will still log to whatever you config python's logging to."""
+log_level_console = logging.DEBUG
+"""Can be set to None to disable logging."""
+log_level_file = logging.DEBUG
+"""Can be set to None to disable logging."""
+log_folder = "."
+
 
 """
 ------------------------------------

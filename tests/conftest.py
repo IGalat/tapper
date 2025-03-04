@@ -30,4 +30,4 @@ def is_debug() -> bool:
 
 @pytest.fixture(autouse=True)
 def disable_file_logs() -> None:
-    tapper.config.loglevel_file = None
+    tapper.config.log_level_file = None

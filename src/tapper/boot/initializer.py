@@ -10,6 +10,8 @@ from tapper.controller.mouse.mouse_api import MouseController
 from tapper.controller.send_processor import SendCommandProcessor
 from tapper.controller.sleep_processor import SleepCommandProcessor
 from tapper.controller.window.window_api import WindowController
+from tapper.feedback import logger
+from tapper.feedback.logger import log
 from tapper.helper import controls
 from tapper.model import constants
 from tapper.model import keyboard
@@ -88,6 +90,14 @@ def init(
     sleep_processor: SleepCommandProcessor,
 ) -> list[SignalListener]:
     """Initialize components with config values."""
+    if config.tapper_logging_config:
+        logger.setup_logging(
+            log_level_console=config.log_level_console,
+            log_level_file=config.log_level_file,
+            log_folder=config.log_folder,
+        )
+    log.info("Initializing tapper")
+
     global keeper_pressed
     os = config.os
 
@@ -138,12 +148,14 @@ def init(
     send_processor.mouse_controller = mc  # type: ignore
     send_processor.sleep_fn = sleep_processor.sleep
 
+    log.info("Tapper init complete")
     return listeners
 
 
 def set_default_controls_if_empty(icontrol: Group) -> None:
     """Sets default controls if none."""
     if not icontrol._children:
+        log.info("Controls not customized, using default control hotkeys")
         icontrol.add(
             {
                 "f3": controls.restart,
@@ -166,13 +178,14 @@ def verify_settings_exist(group: Group) -> None:
         or group.send_interval is None
         or group.send_press_duration is None
     ):
-        raise AttributeError(
-            f"Group '{group.name}' does not have mandatory configs set."
-        )
+        e_text = f"Group '{group.name}' does not have mandatory configs set."
+        log.error(e_text)
+        raise AttributeError(e_text)
 
 
 def start(listeners: list[SignalListener]) -> None:
     """Starts the application. Should be called after init"""
+    log.info("Starting tapper")
     for controller in config.controllers:
         controller._start()
     for listener in listeners:
