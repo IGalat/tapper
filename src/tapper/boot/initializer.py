@@ -155,7 +155,7 @@ def init(
 def set_default_controls_if_empty(icontrol: Group) -> None:
     """Sets default controls if none."""
     if not icontrol._children:
-        log.info("Controls not customized, using default control hotkeys")
+        log.debug("Controls not customized, using default control hotkeys")
         icontrol.add(
             {
                 "f3": controls.restart,

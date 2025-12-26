@@ -12,7 +12,6 @@ from tapper.helper.model import Repeatable
 TIME_SPLIT = 0.1
 
 executor = ThreadPoolExecutor(max_workers=1)
-sleep = time.sleep  # for testing
 
 
 running_repeatable: Repeatable | None = None
@@ -51,12 +50,12 @@ def _run_task(repeatable: Repeatable) -> None:
             return
         # if long wait, break into chunks to check if to end runnable
         if repeatable.interval <= TIME_SPLIT:
-            sleep(repeatable.interval)
+            tapper.sleep(repeatable.interval)
         else:
             started_at = time.perf_counter()
             elapsed = 0.0
             while repeatable.interval - elapsed > 0.0:
-                time.sleep(min(TIME_SPLIT, repeatable.interval - elapsed))
+                tapper.sleep(min(TIME_SPLIT, repeatable.interval - elapsed))
                 elapsed = time.perf_counter() - started_at
                 if is_end_run(repeatable):
                     running_repeatable = None

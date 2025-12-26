@@ -57,7 +57,7 @@ class Tap(TapGeneric):
         self.action = action
         self.executor = executor
         self.suppress_trigger = (
-            ListenerResult(suppress_trigger) if suppress_trigger else None
+            ListenerResult(suppress_trigger) if suppress_trigger is not None else None
         )
         self.send_interval = send_interval
         self.send_press_duration = send_press_duration
@@ -113,7 +113,7 @@ class Group(TapGeneric):
         self.name = name
         self.executor = executor
         self.suppress_trigger = (
-            ListenerResult(suppress_trigger) if suppress_trigger else None
+            ListenerResult(suppress_trigger) if suppress_trigger is not None else None
         )
         self.send_interval = send_interval
         self.send_press_duration = send_press_duration

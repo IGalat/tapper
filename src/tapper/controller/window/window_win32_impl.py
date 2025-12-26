@@ -1,12 +1,16 @@
 import ctypes.wintypes
+import logging
 import os
 import time
 from typing import Any
 from typing import Callable
 from typing import Optional
 
+import pywintypes
+import win32api
 import win32con
 import win32gui
+import win32process
 from tapper.controller.window.window_api import WindowCommander
 from tapper.controller.window.window_api import WindowTracker
 from tapper.model.window import Window
@@ -183,15 +187,56 @@ class Win32WindowTrackerCommander(WindowTracker, WindowCommander):
         process_id: Optional[int] = None,
         handle: Any = None,
     ) -> bool:
-        return self.window_commands(
-            [win32gui.SetForegroundWindow],
-            window_or_exec_or_title,
-            title,
-            exec,
-            strict,
-            process_id,
-            handle,
-        )
+        try:
+            result = self.window_commands(
+                [win32gui.SetForegroundWindow],
+                window_or_exec_or_title,
+                title,
+                exec,
+                strict,
+                process_id,
+                handle,
+            )
+        except pywintypes.error as e:
+            logging.warn(e)
+            result = self._win_explorer_to_active(handle)
+        if result:
+            win32gui.ShowWindow(handle, win32con.SW_RESTORE)  # un-minimize
+            return True
+        else:
+            return False
+
+    def _win_explorer_to_active(self, handle: Any) -> bool:
+        try:
+            fg = user32.GetForegroundWindow()
+            cur_tid = win32api.GetCurrentThreadId()
+            tgt_tid, _ = win32process.GetWindowThreadProcessId(handle)
+            fg_tid, _ = win32process.GetWindowThreadProcessId(fg or 0)
+            if tgt_tid and tgt_tid != cur_tid:
+                user32.AttachThreadInput(cur_tid, tgt_tid, True)
+            if fg_tid and fg_tid != cur_tid:
+                user32.AttachThreadInput(cur_tid, fg_tid, True)
+
+            user32.BringWindowToTop(handle)
+            user32.SetActiveWindow(handle)
+            user32.SetForegroundWindow(handle)
+            return True
+        except Exception as e:
+            logging.error(e)
+            return False
+
+    def to_next_of_same_group(self) -> bool:
+        active = self.active()
+        if not active or not active.handle:
+            return False
+
+        all_of_this_exec = self.get_open(exec=active.exec)
+        if len(all_of_this_exec) < 2:
+            return False
+        if all_of_this_exec[0].exec != active.exec:
+            return False
+
+        return self.to_active(handle=all_of_this_exec[1].handle)
 
     def close(
         self,
@@ -338,5 +383,9 @@ class Win32WindowTrackerCommander(WindowTracker, WindowCommander):
         )
         if not open_win:
             return False
-        [cmd(open_win[0].handle) for cmd in commands_for_handle]
+        try:
+            [cmd(open_win[0].handle) for cmd in commands_for_handle]
+        except Exception as e:
+            logging.error(e)
+            return False
         return True

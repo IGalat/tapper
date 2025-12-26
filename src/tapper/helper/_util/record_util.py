@@ -3,6 +3,7 @@ from dataclasses import dataclass
 from typing import Any
 from typing import Callable
 
+import tapper
 from tapper import config as tapper_config
 from tapper import controller
 from tapper import model
@@ -70,7 +71,7 @@ def start_recording() -> None:
     global recording_
     recording_ = []
 
-    time.sleep(0)  # or it sometimes records DOWN of trigger
+    tapper.sleep(0)  # or it sometimes records DOWN of trigger
     event.subscribe("keyboard", record_signal)
     event.subscribe("mouse", record_signal)
 
@@ -90,7 +91,7 @@ def stop_recording(callbacks: list[Callable[[str], Any]], config: RecordConfig) 
 
 def transform_recording(records: list[SignalRecord], config: RecordConfig) -> str:
     if config.cut_start_stop:
-        records = cut_start_stop(records)
+        records = cut_start_stop(records, config.end_cut_time)
     if records:
         reduce_time(records, config.max_compress_action_interval)
         reduce_mouse_moves(records, config.min_mouse_movement)
@@ -102,16 +103,25 @@ def transform_recording(records: list[SignalRecord], config: RecordConfig) -> st
     return result
 
 
-def cut_start_stop(records: list[SignalRecord]) -> list[SignalRecord]:
-    start_buttons_number = first_with_dir(records, KeyDirBool.DOWN)
-    inverted_stop = first_with_dir(list(reversed(records)), KeyDirBool.UP)
+def cut_start_stop(
+    records: list[SignalRecord], end_cut_time: float
+) -> list[SignalRecord]:
+    if len(records) == 0:
+        raise ValueError(
+            "util.recording not properly invoked: zero events happened. "
+            "Please read the documentation on how to use it."
+        )
 
-    if start_buttons_number == -1 or inverted_stop == -1:
-        raise ValueError("No start/stop buttons detected.")
-    if len(records) < start_buttons_number + inverted_stop + 1:
+    start_buttons_number = first_with_dir(records[1:], KeyDirBool.DOWN) + 1
+    cut_from_time = time.perf_counter() - end_cut_time
+    records = [r for r in records if r.time < cut_from_time]
+
+    if start_buttons_number == -1:
+        raise ValueError("No start buttons detected.")
+    if len(records) <= start_buttons_number:
         return []
 
-    return records[start_buttons_number:-inverted_stop]
+    return records[start_buttons_number:]
 
 
 def first_with_dir(records: list[SignalRecord], dir: KeyDirBool) -> int:
@@ -208,5 +218,8 @@ def to_strings(instructions: list[SendInstruction]) -> list[str]:
 
 
 def join_parsed_instructions(instructions: list[str]) -> str:
-    prefix, suffix = tapper_config.send_combo_wrap.split("_")
-    return "$(" + ";".join(instructions) + ")"
+    prefix, suffix = tapper_config.send_combo_wrap.replace("\\", "").split("_")
+    if instructions:
+        return prefix + ";".join(instructions) + suffix
+    else:
+        return ""

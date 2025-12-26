@@ -2,6 +2,7 @@ import atexit
 import os
 from typing import Any
 
+from tapper.feedback.logger import log
 from tapper.helper import controls
 
 
@@ -24,6 +25,8 @@ def create() -> None:
         import pystray
     except ModuleNotFoundError:
         return
+
+    log.debug("Creating tray icon")
 
     logo = PIL.Image.open(get_logo_path())
 

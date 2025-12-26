@@ -13,9 +13,11 @@ def restart() -> None:
     log.info("Restarting tapper...")
     popen_args = [sys.executable] + sys.argv
     if sys.platform == "win32":
-        subprocess.Popen(popen_args, creationflags=subprocess.DETACHED_PROCESS)
+        subprocess.Popen(
+            popen_args, creationflags=subprocess.DETACHED_PROCESS, close_fds=True
+        )
     else:
-        subprocess.Popen(popen_args, start_new_session=True)
+        subprocess.Popen(popen_args, start_new_session=True, close_fds=True)
     _terminate()
 
 

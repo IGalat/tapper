@@ -2,6 +2,7 @@ import time
 
 from tapper.action import wrapper
 from tapper.action.runner import ActionRunner
+from tapper.feedback.logger import LogExceptions
 from tapper.model.constants import KeyDirBool
 from tapper.model.constants import ListenerResult
 from tapper.model.tap_tree_shadow import SGroup
@@ -30,6 +31,7 @@ class SignalProcessor:
         self.state_keeper = state_keeper
         self.runner = runner
 
+    @LogExceptions()
     def on_signal(self, signal: Signal) -> ListenerResult:
         """
         This method is used in wrapped listeners.

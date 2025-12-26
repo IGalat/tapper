@@ -3,6 +3,7 @@ from threading import Thread
 
 import evdev
 from evdev import UInput  # type: ignore
+from tapper.feedback.logger import LogExceptions
 from tapper.model import constants
 from tapper.model import keyboard
 from tapper.model.constants import EvdevKeyDir
@@ -25,15 +26,18 @@ class LinuxKeyboardSignalListener(KeyboardSignalListener):
     def get_possible_signal_symbols(cls) -> list[str]:
         return keyboard.get_key_list(constants.OS.linux)
 
+    @LogExceptions()
     def start(self) -> None:
         self.real_kbs = evdev_common.get_real_keyboards()
         self.virtual_kb = evdev_common.get_virtual_kb()
         for kb in self.real_kbs:
             Thread(target=partial(self.keyboard_loop, kb)).start()
 
+    @LogExceptions()
     def stop(self) -> None:
         pass
 
+    @LogExceptions()
     def keyboard_loop(self, kb: evdev.InputDevice) -> None:  # type: ignore
         for pressed_key_code in kb.active_keys():
             key_action(

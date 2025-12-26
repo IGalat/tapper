@@ -1,5 +1,6 @@
 import time
 
+import tapper
 from tapper.helper._util.image import base
 from tapper.helper.model_types import BboxT
 from tapper.helper.model_types import ImagePixelMatrixT
@@ -18,13 +19,14 @@ def find_raw(
 
 
 def api_find_raw(
-    target: ImagePixelMatrixT,
+    target: ImageT,
     bbox: BboxT | None,
     outer_maybe: ImagePixelMatrixT | None = None,
 ) -> tuple[float, XyCoordsT]:
+    target_image = base.target_to_image(target, bbox)
     x_start, y_start = base.get_start_coords(outer_maybe, bbox)
     outer = base.outer_to_image(outer_maybe, bbox)
-    confidence, xy = find_raw(target, outer)
+    confidence, xy = find_raw(target_image, outer)
     return confidence, (x_start + xy[0], y_start + xy[1])
 
 
@@ -94,8 +96,25 @@ def wait_for(
         outer = base.outer_to_image(None, bbox)
         if found := find(target_image, outer, precision):
             return found
-        time.sleep(interval)
+        tapper.sleep(interval)
     return None
+
+
+def wait_for_disappear(
+    target: ImageT,
+    bbox: BboxT | None,
+    timeout: int | float,
+    interval: float,
+    precision: float,
+) -> bool:
+    target_image = base.target_to_image(target, bbox)
+    finish_time = time.perf_counter() + timeout
+    while time.perf_counter() < finish_time:
+        outer = base.outer_to_image(None, bbox)
+        if not find(target_image, outer, precision):
+            return True
+        tapper.sleep(interval)
+    return False
 
 
 def wait_for_one_of(
@@ -112,5 +131,5 @@ def wait_for_one_of(
         found, xy = find_one_of(targets_normalized, None, precision)
         if found is not None and xy is not None:
             return found, xy
-        time.sleep(interval)
+        tapper.sleep(interval)
     return None, None

@@ -1,13 +1,17 @@
 from __future__ import annotations
 
 from collections import defaultdict
+from dataclasses import dataclass
 from typing import Any
+from typing import Callable
+from unittest.mock import MagicMock
 
 from tapper.action.runner import ActionRunner
 from tapper.controller.keyboard.kb_api import KeyboardCommander
 from tapper.controller.keyboard.kb_api import KeyboardTracker
 from tapper.controller.mouse.mouse_api import MouseCommander
 from tapper.controller.mouse.mouse_api import MouseTracker
+from tapper.controller.sleep_processor import SleepCommandProcessor
 from tapper.controller.window.window_api import WindowCommander
 from tapper.controller.window.window_api import WindowTracker
 from tapper.model import constants
@@ -280,6 +284,9 @@ class DummyWindowTrackerCommander(WindowTracker, WindowCommander):
     ) -> bool:
         pass
 
+    def to_next_of_same_group(self) -> bool:
+        pass
+
 
 class DummyActionRunner(ActionRunner):
     actions_ran: defaultdict[int, list[types_.Action]]
@@ -303,3 +310,32 @@ class Dummy:
     MouseTC = DummyMouseTrackerCommander
     WinTC = DummyWindowTrackerCommander
     ActionRunner = DummyActionRunner
+
+
+@dataclass
+class SleepFixture:
+    sleep: Callable[[Any], None]
+    processor: SleepCommandProcessor
+    mock_actual_sleep: MagicMock | Callable[[Any], None]
+
+    def get_time_slept(self) -> float:
+        return round(
+            sum(call_.args[0] for call_ in self.mock_actual_sleep.call_args_list), 5
+        )
+
+
+class FakeClock:
+    def __init__(self):
+        self._t = 0.0
+
+    def __call__(self):
+        return self._t
+
+    def advance(self, s):
+        self._t += s
+
+    def rewind(self, s):
+        self._t -= s
+
+    def set(self, v):
+        self._t = v

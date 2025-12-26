@@ -8,7 +8,6 @@ from tapper.controller.mouse.mouse_api import MouseController
 from tapper.controller.window.window_api import WindowController
 from tapper.model import keyboard
 from tapper.model import mouse
-from tapper.model.constants import ListenerResult
 from tapper.model.types_ import KwTriggerConditions
 from tapper.signal.keyboard.keyboard_listener import KeyboardSignalListener
 from tapper.signal.mouse.mouse_listener import MouseSignalListener
@@ -18,14 +17,6 @@ from tapper.util.datastructs import get_first_in
 ------------------------------------
 SECTION 1: Most likely to be tweaked.
 ------------------------------------
-"""
-
-default_trigger_suppression = ListenerResult.SUPPRESS
-"""
-Will the triggering signal be suppressed for other apps, when a Tap triggers?
-This is just a default value. You can use a different one individually:
-    Tap("a", "b", suppress_trigger=ListenerResult.PROPAGATE)
-    Group(suppress_trigger=ListenerResult.PROPAGATE)
 """
 
 send_combo_wrap = r"\$\(_\)"
@@ -58,7 +49,8 @@ only_visible_windows = True
 Reduces WindowController lag, and junk windows caught into filters."""
 
 sleep_check_interval = 0.1
-"""How often tapper.sleep checks for pause/kill."""
+"""How often tapper.sleep checks for pause/kill command from user.
+see tapper.helper.controls"""
 
 
 """Note: all log configs are set on tapper.start()."""
@@ -67,7 +59,7 @@ tapper_logging_config = True
 Tapper will still log to whatever you config python's logging to."""
 log_level_console = logging.DEBUG
 """Can be set to None to disable logging."""
-log_level_file = logging.DEBUG
+log_level_file = None
 """Can be set to None to disable logging."""
 log_folder = "."
 

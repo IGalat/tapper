@@ -1,3 +1,4 @@
+import time
 from typing import Any
 from unittest.mock import patch
 
@@ -166,12 +167,14 @@ class TestFindOneOf:
 
 
 class TestWaitFor:
-    def test_simplest(self, mock_get_sct: Any) -> None:
+    def test_simplest(self, monkeypatch: Any, mock_get_sct: Any) -> None:
+        monkeypatch.setattr("tapper.sleep", time.sleep)
         mock_get_sct.return_value = img_test_util.btn_all()
         xy = img.wait_for(img_test_util.btn_yellow())
         assert xy == pytest.approx(btn_yellow_xy, abs=10)
 
-    def test_image_not_found(self, mock_get_sct: Any) -> None:
+    def test_image_not_found(self, monkeypatch: Any, mock_get_sct: Any) -> None:
+        monkeypatch.setattr("tapper.sleep", time.sleep)
         # sct is small and search is for larger image. Is this ok because mock or needs fixing?
         mock_get_sct.return_value = img_test_util.absolutes()
         xy = img.wait_for(img_test_util.btn_yellow(), timeout=0.001, interval=0.001)
@@ -199,7 +202,7 @@ class TestWaitForOneOf:
         assert numpy.array_equal(result, btn_yellow)
         assert xy == pytest.approx(btn_yellow_xy, abs=10)
 
-    def test_no_match(self, mock_get_sct: Any) -> None:
+    def test_no_match(self, mock_get_sct: Any, mock_sleep) -> None:
         mock_get_sct.return_value = img_test_util.btn_all()
         image, xy = img.wait_for_one_of(
             [

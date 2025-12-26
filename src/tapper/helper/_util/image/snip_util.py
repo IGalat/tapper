@@ -15,7 +15,8 @@ def toggle_snip(
     prefix: str | None = None,
     bbox_to_name: bool = True,
     override_existing: bool = True,
-    bbox_callback: Callable[[tuple[int, int, int, int]], Any] | None = None,
+    callback: Callable[[ImagePixelMatrixT, BboxT | None], Any] | None = None,
+    bbox_callback: Callable[[BboxT], Any] | None = None,
     picture_callback: Callable[[ImagePixelMatrixT], Any] | None = None,
 ) -> None:
     global snip_start_coords
@@ -33,6 +34,7 @@ def toggle_snip(
             bbox_to_name,
             (x1, y1, x2, y2),
             override_existing,
+            callback,
             bbox_callback,
             picture_callback,
         )
@@ -48,10 +50,13 @@ def finish_snip_with_callback(
     bbox_to_name: bool = True,
     bbox: BboxT | None = None,
     override_existing: bool = True,
+    callback: Callable[[ImagePixelMatrixT, BboxT | None], Any] | None = None,
     bbox_callback: Callable[[tuple[int, int, int, int]], Any] | None = None,
     picture_callback: Callable[[ImagePixelMatrixT], Any] | None = None,
 ) -> None:
     nd_sct, bbox = finish_snip(prefix, bbox, bbox_to_name, override_existing)
+    if callback:
+        callback(nd_sct, bbox)
     if bbox and bbox_callback:
         bbox_callback(bbox)
     if picture_callback:

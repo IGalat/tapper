@@ -7,7 +7,9 @@ from tapper.helper._util import record_util
 from tapper.helper._util.record_util import SignalRecord
 from tapper.helper.model import RecordConfig
 from tapper.model.constants import KeyDirBool
+from tapper.model.types_ import Signal
 from tapper.util import event
+from testutil_model import FakeClock
 
 
 def wrap_in_start_stop(records: list[SignalRecord]) -> list[SignalRecord]:
@@ -21,13 +23,14 @@ def wrap_in_start_stop(records: list[SignalRecord]) -> list[SignalRecord]:
 class TestRecorderTransform:
     def test_simplest(self) -> None:
         result = record_util.transform_recording([], RecordConfig(cut_start_stop=False))
-        assert result == "$()"
+        assert result == ""
 
-    def test_cut_simplest(self) -> None:
+    def test_cut_simplest(self, fake_perf_counter) -> None:
         result = record_util.transform_recording(wrap_in_start_stop([]), RecordConfig())
-        assert result == "$()"
+        fake_perf_counter.set(100)
+        assert result == ""
 
-    def test_cut_with_content(self) -> None:
+    def test_cut_with_content(self, fake_perf_counter) -> None:
         record = wrap_in_start_stop(
             [
                 SignalRecord(("q", KeyDirBool.DOWN), 0, None),
@@ -38,12 +41,13 @@ class TestRecorderTransform:
                 SignalRecord(("e", KeyDirBool.UP), 0, None),
             ]
         )
+        fake_perf_counter.set(100)
         result = record_util.transform_recording(
             record, RecordConfig(down_up_as_click=True)
         )
         assert result == "$(q;w;e)"
 
-    def test_cut_combo_start_wrap(self) -> None:
+    def test_cut_combo_start_wrap(self, fake_perf_counter) -> None:
         record = [
             SignalRecord(("control", KeyDirBool.UP), 0, None),
             SignalRecord(("8", KeyDirBool.UP), 0, None),
@@ -53,15 +57,16 @@ class TestRecorderTransform:
             SignalRecord(("w", KeyDirBool.UP), 0, None),
             SignalRecord(("e", KeyDirBool.DOWN), 0, None),
             SignalRecord(("e", KeyDirBool.UP), 0, None),
-            SignalRecord(("control", KeyDirBool.DOWN), 0, None),
-            SignalRecord(("9", KeyDirBool.DOWN), 0, None),
+            SignalRecord(("control", KeyDirBool.DOWN), 100, None),
+            SignalRecord(("9", KeyDirBool.DOWN), 100, None),
         ]
+        fake_perf_counter.set(100)
         result = record_util.transform_recording(
             record, RecordConfig(down_up_as_click=True)
         )
         assert result == "$(q;w;e)"
 
-    def test_max_compress_action_interval(self) -> None:
+    def test_max_compress_action_interval(self, fake_perf_counter) -> None:
         record = wrap_in_start_stop(
             [
                 SignalRecord(("q", KeyDirBool.DOWN), 0, None),
@@ -72,12 +77,13 @@ class TestRecorderTransform:
                 SignalRecord(("e", KeyDirBool.UP), 6.001, None),  # should be rounded
             ]
         )
+        fake_perf_counter.set(100)
         result = record_util.transform_recording(
             record, RecordConfig(down_up_as_click=False, max_compress_action_interval=1)
         )
         assert result == "$(q down;q up;w down;3s;w up;e down;1.5s;e up)"
 
-    def test_down_up_as_click(self) -> None:
+    def test_down_up_as_click(self, fake_perf_counter) -> None:
         record = wrap_in_start_stop(
             [
                 SignalRecord(("q", KeyDirBool.DOWN), 0, None),
@@ -88,12 +94,13 @@ class TestRecorderTransform:
                 SignalRecord(("e", KeyDirBool.UP), 5.001, None),
             ]
         )
+        fake_perf_counter.set(100)
         result = record_util.transform_recording(
             record, RecordConfig(down_up_as_click=True, max_compress_action_interval=1)
         )
         assert result == "$(q;w down;3s;w up;e)"
 
-    def test_min_mouse_movement(self) -> None:
+    def test_min_mouse_movement(self, fake_perf_counter) -> None:
         record = wrap_in_start_stop(
             [
                 SignalRecord(("q", KeyDirBool.DOWN), 0, (0, 0)),
@@ -107,12 +114,13 @@ class TestRecorderTransform:
                 SignalRecord(("r", KeyDirBool.UP), 0, (200, 216)),
             ]
         )
+        fake_perf_counter.set(100)
         result = record_util.transform_recording(
             record, RecordConfig(down_up_as_click=True, min_mouse_movement=10)
         )
         assert result == "$(x0y0;q;x100y100;w down;x200y200;w up;e;x200y216;r)"
 
-    def test_shorten_to_aliases(self) -> None:
+    def test_shorten_to_aliases(self, fake_perf_counter) -> None:
         record = wrap_in_start_stop(
             [
                 SignalRecord(("escape", KeyDirBool.DOWN), 0, None),
@@ -123,13 +131,21 @@ class TestRecorderTransform:
                 SignalRecord(("right_mouse_button", KeyDirBool.UP), 0, None),
             ]
         )
+        fake_perf_counter.set(100)
         result = record_util.transform_recording(
             record, RecordConfig(down_up_as_click=True, shorten_to_aliases=True)
         )
         assert result == "$(esc;lctrl;rmb)"
 
 
+def push_key(signal: Signal, fake_clock: FakeClock) -> None:
+    event.publish("keyboard", signal)
+    fake_clock.advance(1)
+
+
 class TestRecording:
+    config = RecordConfig(max_compress_action_interval=1.5, end_cut_time=1.5)
+
     @pytest.fixture(autouse=True)
     def mock_mouse_pos(self) -> Generator:
         with patch("tapper.mouse.get_pos") as mock_pos:
@@ -141,74 +157,74 @@ class TestRecording:
         with patch("tapper.helper.recording.send") as mock_send:
             yield mock_send
 
-    def test_simplest(self) -> None:
+    def test_simplest(self, mock_sleep, fake_perf_counter) -> None:
         recording.start()()
 
-        event.publish("keyboard", ("8", KeyDirBool.UP))
+        push_key(("8", KeyDirBool.UP), fake_perf_counter)
 
-        event.publish("keyboard", ("q", KeyDirBool.DOWN))
-        event.publish("keyboard", ("q", KeyDirBool.UP))
-        event.publish("keyboard", ("w", KeyDirBool.DOWN))
-        event.publish("keyboard", ("w", KeyDirBool.UP))
-        event.publish("keyboard", ("e", KeyDirBool.DOWN))
-        event.publish("keyboard", ("e", KeyDirBool.UP))
+        push_key(("q", KeyDirBool.DOWN), fake_perf_counter)
+        push_key(("q", KeyDirBool.UP), fake_perf_counter)
+        push_key(("w", KeyDirBool.DOWN), fake_perf_counter)
+        push_key(("w", KeyDirBool.UP), fake_perf_counter)
+        push_key(("e", KeyDirBool.DOWN), fake_perf_counter)
+        push_key(("e", KeyDirBool.UP), fake_perf_counter)
 
-        event.publish("keyboard", ("8", KeyDirBool.DOWN))
+        push_key(("8", KeyDirBool.DOWN), fake_perf_counter)
 
-        recording.stop()()
+        recording.stop(config=self.config)()
         assert recording.last_recorded == "$(x0y0;q;w;e)"
 
-    def test_toggle(self) -> None:
-        toggle = recording.toggle()
+    def test_toggle(self, mock_sleep, fake_perf_counter) -> None:
+        toggle = recording.toggle(config=self.config)
         toggle()
 
-        event.publish("keyboard", ("8", KeyDirBool.UP))
+        push_key(("8", KeyDirBool.UP), fake_perf_counter)
 
-        event.publish("keyboard", ("q", KeyDirBool.DOWN))
-        event.publish("keyboard", ("q", KeyDirBool.UP))
-        event.publish("keyboard", ("w", KeyDirBool.DOWN))
-        event.publish("keyboard", ("w", KeyDirBool.UP))
-        event.publish("keyboard", ("e", KeyDirBool.DOWN))
-        event.publish("keyboard", ("e", KeyDirBool.UP))
+        push_key(("q", KeyDirBool.DOWN), fake_perf_counter)
+        push_key(("q", KeyDirBool.UP), fake_perf_counter)
+        push_key(("w", KeyDirBool.DOWN), fake_perf_counter)
+        push_key(("w", KeyDirBool.UP), fake_perf_counter)
+        push_key(("e", KeyDirBool.DOWN), fake_perf_counter)
+        push_key(("e", KeyDirBool.UP), fake_perf_counter)
 
-        event.publish("keyboard", ("8", KeyDirBool.DOWN))
-
-        toggle()
-        assert recording.last_recorded == "$(x0y0;q;w;e)"
-
-    def test_start_toggle(self) -> None:
-        toggle = recording.toggle()
-        recording.start()()
-
-        event.publish("keyboard", ("8", KeyDirBool.UP))
-
-        event.publish("keyboard", ("q", KeyDirBool.DOWN))
-        event.publish("keyboard", ("q", KeyDirBool.UP))
-        event.publish("keyboard", ("w", KeyDirBool.DOWN))
-        event.publish("keyboard", ("w", KeyDirBool.UP))
-        event.publish("keyboard", ("e", KeyDirBool.DOWN))
-        event.publish("keyboard", ("e", KeyDirBool.UP))
-
-        event.publish("keyboard", ("8", KeyDirBool.DOWN))
+        push_key(("8", KeyDirBool.DOWN), fake_perf_counter)
 
         toggle()
         assert recording.last_recorded == "$(x0y0;q;w;e)"
 
-    def test_playback_action(self) -> None:
+    def test_start_toggle(self, mock_sleep, fake_perf_counter) -> None:
+        toggle = recording.toggle(config=self.config)
         recording.start()()
 
-        event.publish("keyboard", ("8", KeyDirBool.UP))
+        push_key(("8", KeyDirBool.UP), fake_perf_counter)
 
-        event.publish("keyboard", ("q", KeyDirBool.DOWN))
-        event.publish("keyboard", ("q", KeyDirBool.UP))
-        event.publish("keyboard", ("w", KeyDirBool.DOWN))
-        event.publish("keyboard", ("w", KeyDirBool.UP))
-        event.publish("keyboard", ("e", KeyDirBool.DOWN))
-        event.publish("keyboard", ("e", KeyDirBool.UP))
+        push_key(("q", KeyDirBool.DOWN), fake_perf_counter)
+        push_key(("q", KeyDirBool.UP), fake_perf_counter)
+        push_key(("w", KeyDirBool.DOWN), fake_perf_counter)
+        push_key(("w", KeyDirBool.UP), fake_perf_counter)
+        push_key(("e", KeyDirBool.DOWN), fake_perf_counter)
+        push_key(("e", KeyDirBool.UP), fake_perf_counter)
 
-        event.publish("keyboard", ("8", KeyDirBool.DOWN))
+        push_key(("8", KeyDirBool.DOWN), fake_perf_counter)
 
-        recording.stop()()
+        toggle()
+        assert recording.last_recorded == "$(x0y0;q;w;e)"
+
+    def test_playback_action(self, mock_sleep, fake_perf_counter) -> None:
+        recording.start()()
+
+        push_key(("8", KeyDirBool.UP), fake_perf_counter)
+
+        push_key(("q", KeyDirBool.DOWN), fake_perf_counter)
+        push_key(("q", KeyDirBool.UP), fake_perf_counter)
+        push_key(("w", KeyDirBool.DOWN), fake_perf_counter)
+        push_key(("w", KeyDirBool.UP), fake_perf_counter)
+        push_key(("e", KeyDirBool.DOWN), fake_perf_counter)
+        push_key(("e", KeyDirBool.UP), fake_perf_counter)
+
+        push_key(("8", KeyDirBool.DOWN), fake_perf_counter)
+
+        recording.stop(config=self.config)()
 
         with patch("tapper.helper.recording.send") as mock_send:
             recording.action_playback_last(speed=2)()

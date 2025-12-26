@@ -28,6 +28,10 @@ class RecordConfig:
     cut_start_stop: bool = True
     """Will cut start and stop keys out of recording."""
 
+    end_cut_time: float = 0.05
+    """If cut_start_stop is on, this time before end of recording will be cut.
+    Responsible for not recording hotkeys that stop recording."""
+
 
 @dataclass
 class Repeatable:

@@ -108,6 +108,20 @@ def wait_for(
     return _find_util.wait_for(target, bbox, timeout, interval, precision)
 
 
+def wait_for_disappear(
+    target: ImageT,
+    bbox: BboxT | None = None,
+    timeout: int | float = 5,
+    interval: float = 0.2,
+    precision: float = STD_PRECISION,
+) -> bool:
+    """Inverse of wait_for: regularly checks the screen or region of the screen for image,
+    and returns True as soon as it's not present. If timeout is reached, return False.
+    """
+    _check_dependencies()
+    return _find_util.wait_for_disappear(target, bbox, timeout, interval, precision)
+
+
 def wait_for_one_of(
     targets: (
         list[ImageT] | tuple[list[ImageT], BboxT] | list[tuple[ImageT, BboxT | None]]
@@ -171,7 +185,8 @@ def snip(
     prefix: str | None = "snip",
     bbox_to_name: bool = True,
     override_existing: bool = True,
-    bbox_callback: Callable[[tuple[int, int, int, int]], Any] | None = None,
+    callback: Callable[[ImagePixelMatrixT, BboxT | None], Any] | None = None,
+    bbox_callback: Callable[[BboxT], Any] | None = None,
     picture_callback: Callable[[ImagePixelMatrixT], Any] | None = None,
 ) -> Callable[[], None]:
     """
@@ -183,6 +198,7 @@ def snip(
     :param bbox_to_name: If true, will include in the name "-(BBOX_{x1}_{y1}_{x2}_{y2})", with actual coordinates.
         This is useful for precise-position search with `find` and `wait_for` methods.
     :param override_existing: Will override existing file if prefix exists, otherwise will save as prefix(2).png
+    :param callback: bbox + picture callback.
     :param bbox_callback: Action to be applied to bbox coordinates when snip is taken.
         This is an alternative to bbox_to_name, if you want to supply it separately later.
     :param picture_callback: Action to be applied to the array of resulting picture RGB.
@@ -202,6 +218,7 @@ def snip(
         prefix=prefix,
         bbox_to_name=bbox_to_name,
         override_existing=override_existing,
+        callback=callback,
         bbox_callback=bbox_callback,
         picture_callback=picture_callback,
     )
@@ -294,7 +311,8 @@ def pixel_get_color_hex(
 def pixel_find(
     color: PixelColorT | PixelHexColorT,
     bbox_or_coords: BboxT | XyCoordsT | None = None,
-    outer: str | ImagePixelMatrixT | None = None,
+    return_absolute_coords: bool = True,
+    outer: ImageT | None = None,
     variation: int = 0,
 ) -> XyCoordsT | None:
     """
@@ -303,6 +321,8 @@ def pixel_find(
     :param outer: Optional image in which to find, pathname or numpy array. If not specified, will search on screen.
     :param bbox_or_coords: Bounding box of the screenshot or image. If None, the whole screen or image is outer.
         If xy coordinates are supplied, only one pixel at those coordinates will be checked.
+    :param return_absolute_coords: if bbox_or_coords is supplied, whether result should be relative to that bbox
+        or to the entire image/screen.
     :param variation: Allowed number of shades of variation in either direction for the intensity of the
         red, green, and blue components, 0-255.
         For example, if 2 is specified and color is (10, 10, 10),
@@ -316,6 +336,7 @@ def pixel_find(
     return _pixel_util.find(
         color_in=color,
         bbox_or_coords=bbox_or_coords,
+        return_absolute_coords=return_absolute_coords,
         outer_maybe=outer,
         variation=variation,
     )
@@ -324,6 +345,7 @@ def pixel_find(
 def pixel_wait_for(
     color: PixelColorT | PixelHexColorT,
     bbox_or_coords: BboxT | XyCoordsT | None = None,
+    return_absolute_coords: bool = True,
     timeout: int | float = 5,
     interval: float = 0.1,
     variation: int = 0,
@@ -335,10 +357,50 @@ def pixel_wait_for(
 
     :param color: see `pixel_find` param.
     :param bbox_or_coords: see `pixel_find` param.
+    :param return_absolute_coords: see `pixel_find` param.
     :param timeout: If this many seconds elapsed, return None.
     :param interval: Time between searches, in seconds.
     :param variation: see `pixel_find` param.
     :return: Coordinates of the pixel if found, else None.
     """
     _check_dependencies()
-    return _pixel_util.wait_for(color, bbox_or_coords, timeout, interval, variation)
+    return _pixel_util.wait_for(
+        color, bbox_or_coords, return_absolute_coords, timeout, interval, variation
+    )
+
+
+def pixel_wait_for_disappear(
+    color: PixelColorT | PixelHexColorT,
+    bbox_or_coords: BboxT | XyCoordsT | None = None,
+    timeout: int | float = 5,
+    interval: float = 0.1,
+    variation: int = 0,
+) -> bool:
+    """Inverse of pixel_wait_for: regularly checks the screen or region of the screen for pixel,
+    and returns True as soon as it's not present. If timeout is reached, return False.
+    """
+    _check_dependencies()
+    return _pixel_util.wait_for_disappear(
+        color, bbox_or_coords, timeout, interval, variation
+    )
+
+
+def pixel_get_with_best_match_color(
+    color: PixelColorT | PixelHexColorT,
+    bbox_or_coords: BboxT | XyCoordsT | None = None,
+    outer: ImageT | None = None,
+    max_variation: int = 255,
+) -> None:
+    _check_dependencies()
+    return _pixel_util.pixel_get_with_best_match_color  # todo
+
+
+def pixel_get_with_best_match_color_near(
+    color: PixelColorT | PixelHexColorT,
+    xy_position: tuple[int, int],
+    max_distance: int = 50,
+    outer: ImageT | None = None,
+    max_variation: int = 255,
+) -> None:
+    _check_dependencies()
+    return _pixel_util.pixel_get_with_best_match_color_near  # todo

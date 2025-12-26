@@ -1,7 +1,11 @@
 import atexit
 import logging.config
 import os
+from functools import wraps
 from typing import Any
+from typing import Callable
+from typing import cast
+from typing import TypeVar
 
 log = logging.getLogger("tapper")
 
@@ -79,3 +83,27 @@ def setup_logging(
     if queue_handler is not None:
         queue_handler.listener.start()  # type: ignore
         atexit.register(queue_handler.listener.stop)  # type: ignore
+
+
+TFun = TypeVar("TFun", bound=Callable[..., Any])
+
+
+class LogExceptions:
+    log_level: int
+
+    def __init__(self, log_level: int = logging.ERROR) -> None:
+        self.log_level = log_level
+
+    def __call__(self, f: TFun) -> TFun:
+        @wraps(f)
+        def wrapper(*args, **kwargs) -> Any:  # type: ignore
+            try:
+                return f(*args, **kwargs)
+            except Exception as e:
+                log.log(
+                    self.log_level,
+                    f"Exception while performing action: {repr(e)}",
+                    exc_info=True,
+                )
+
+        return cast(TFun, wrapper)

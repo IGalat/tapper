@@ -183,7 +183,7 @@ class MouseController(ResourceController):
         """Move mouse cursor if coords supplied, then click left mouse button."""
         if x_or_xy is not None or y is not None:
             self.move(x_or_xy, y, relative)
-        time.sleep(0)
+        time.sleep(0.01)
         self.press("left_mouse_button")
         time.sleep(0)
         self.release("left_mouse_button")

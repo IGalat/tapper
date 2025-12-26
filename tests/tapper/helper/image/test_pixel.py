@@ -1,9 +1,11 @@
+import time
 from unittest.mock import MagicMock
 from unittest.mock import patch
 
 import img_test_util
 import pytest
 from tapper.helper import img
+from typing_extensions import Any
 
 red = 255, 0, 0
 green = 0, 255, 0
@@ -79,7 +81,7 @@ class TestPixelInfo:
 class TestFind:
     def test_simplest(self) -> None:
         xy = img.pixel_find(green, outer=absolutes)
-        assert xy == (0, 1)
+        assert xy == (1, 0)
 
     def test_not_found(self) -> None:
         xy = img.pixel_find(gray, outer=absolutes)
@@ -90,7 +92,7 @@ class TestFind:
         xy = img.pixel_find(almost_blue, outer=absolutes)
         assert xy is None
         xy = img.pixel_find(almost_blue, outer=absolutes, variation=20)
-        assert xy == (0, 2)
+        assert xy == (2, 0)
 
     def test_pixel_color_out_of_bounds(self) -> None:
         with pytest.raises(ValueError):
@@ -101,9 +103,10 @@ class TestWaitFor:
     def test_simplest(self, mock_get_sct) -> None:
         mock_get_sct.return_value = absolutes
         xy = img.pixel_wait_for(green)
-        assert xy == (0, 1)
+        assert xy == (1, 0)
 
-    def test_not_found(self, mock_get_sct) -> None:
+    def test_not_found(self, monkeypatch: Any, mock_get_sct) -> None:
         mock_get_sct.return_value = absolutes
+        monkeypatch.setattr("tapper.sleep", time.sleep)
         xy = img.pixel_wait_for(gray, timeout=0.001, interval=0.001)
         assert xy is None

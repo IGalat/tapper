@@ -66,6 +66,10 @@ class WindowCommander(ABC):
         pass
 
     @abstractmethod
+    def to_next_of_same_group(self) -> bool:
+        pass
+
+    @abstractmethod
     def close(
         self,
         window_or_exec_or_title: Optional[Window | str] = None,
@@ -253,6 +257,19 @@ class WindowController(ResourceController):
         return self._commander.to_active(
             window_or_exec_or_title, title, exec, strict, process_id, handle
         )
+
+    def to_next_of_same_group(self) -> bool:
+        """
+        Switch to the next window of the same group as an active window.
+        On Linux, this is usually "alt+~" hotkey, absent on Windows.
+
+        WARNING: On Windows, explorer(built-in folder browser) reacts to alt being released.
+            This means, if you assign "alt+anything" hotkey to this (such as "alt+~"), and
+                release alt last, the now-active window will be in hotkey highlight mode.
+
+        :return: True if found and switched, else False.
+        """
+        return self._commander.to_next_of_same_group()
 
     def close(
         self,

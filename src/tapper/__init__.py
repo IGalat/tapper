@@ -64,7 +64,6 @@ if _wc := _datastructs.get_first_in(_WindowController, config.controllers):
     """Window controller. Command and get state of windows."""
     window: _WindowController = _wc
 
-
 log = _logger.log
 """This logger will log into both console and logfile, by default."""
 
@@ -79,6 +78,7 @@ def init() -> None:
     _initialized = True
 
 
+@_logger.LogExceptions()
 def start() -> None:
     """
     Initializes all underlying tools, and starts listeners.

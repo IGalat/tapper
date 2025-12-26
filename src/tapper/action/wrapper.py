@@ -1,8 +1,10 @@
+import logging
 from dataclasses import dataclass
 from uuid import UUID
 
 from tapper.controller import flow_control
 from tapper.controller.flow_control import config_thread_local_storage
+from tapper.feedback.logger import LogExceptions
 from tapper.model import types_
 from tapper.model.tap_tree_shadow import STap
 
@@ -33,6 +35,6 @@ def wrapped_action(tap: STap) -> types_.Action:
 
     def wrapped() -> None:
         config_thread_local_storage.action_config = config
-        tap.action()
+        LogExceptions(log_level=logging.WARNING)(tap.action)()
 
     return wrapped

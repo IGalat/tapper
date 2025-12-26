@@ -92,13 +92,14 @@ def get_first_match_coords(
                 and abs(int(px[1]) - color[1]) <= variation
                 and abs(int(px[2]) - color[2]) <= variation
             ):
-                return i, j
+                return j, i  # transposed. why?
     return None
 
 
 def find(
     color_in: PixelColorT | PixelHexColorT,
     bbox_or_coords: BboxT | XyCoordsT | None,
+    return_absolute_coords: bool,
     outer_maybe: ImageT | None,
     variation: int,
 ) -> XyCoordsT | None:
@@ -114,29 +115,54 @@ def find(
     outer = base.get_screenshot_if_none_and_cut(outer_maybe, bbox)
     if variation == 0:
         matching_px = np.argwhere(px_eq(outer, color))
-        if matching_px.size > 0:
-            first_match = matching_px[0]
-            x = start_x + first_match[0]
-            y = start_y + first_match[1]
-            return int(x), int(y)
-        return None
+        if matching_px.size <= 0:
+            return None
+        first_match = matching_px[0]
+        y = first_match[0]
+        x = first_match[1]
+        match = int(x), int(y)
     else:
-        return get_first_match_coords(outer, color, variation)
+        if (match := get_first_match_coords(outer, color, variation)) is None:
+            return None
+
+    if bbox is None or return_absolute_coords is False:
+        return match
+    else:
+        x, y = match
+        return start_x + x, start_y + y
 
 
 def wait_for(
     color: PixelColorT | PixelHexColorT,
     bbox_or_coords: BboxT | XyCoordsT | None,
+    return_absolute_coords: bool,
     timeout: int | float,
     interval: float,
     variation: int,
 ) -> XyCoordsT | None:
     finish_time = time.perf_counter() + timeout
     while True:
-        if found := find(color, bbox_or_coords, None, variation=variation):
+        if found := find(
+            color, bbox_or_coords, return_absolute_coords, None, variation=variation
+        ):
             return found
         if time.perf_counter() > finish_time:
             return None
-        time.sleep(interval)
+        tapper.sleep(interval)
         if time.perf_counter() > finish_time:
             return None
+
+
+def wait_for_disappear(
+    color: PixelColorT | PixelHexColorT,
+    bbox_or_coords: BboxT | XyCoordsT | None,
+    timeout: int | float,
+    interval: float,
+    variation: int,
+) -> bool:
+    finish_time = time.perf_counter() + timeout
+    while time.perf_counter() < finish_time:
+        if not find(color, bbox_or_coords, False, None, variation=variation):
+            return True
+        tapper.sleep(interval)
+    return False
