@@ -32,8 +32,8 @@ def _run_task(repeatable: Repeatable) -> None:
     global running_repeatable
     running_repeatable = repeatable
     config_thread_local_storage.action_config = ActionConfig(
-        send_interval=tapper.root.send_interval,  # type: ignore
-        send_press_duration=tapper.root.send_press_duration,  # type: ignore
+        send_interval=tapper.root.send_interval,
+        send_press_duration=tapper.root.send_press_duration,
         kill_id=flow_control.kill_id,
     )
     for i in range(repeatable.max_repeats or 99999999999999):
@@ -76,13 +76,13 @@ def to_pressed_condition(symbol: str) -> Callable[[], bool]:
         *tapper.model.mouse.regular_buttons,
         *tapper.model.mouse.button_aliases.keys(),
     ]:
-        device = tapper.mouse  # type: ignore
+        device = tapper.mouse
     elif symbol in tapper.model.keyboard.get_keys(tapper.config.os).keys():
-        device = tapper.kb  # type: ignore
+        device = tapper.kb
     else:
         raise ValueError(f"Repeat while pressed: '{symbol}' not recognised.")
     return lambda: (
-        device.pressed(symbol) or symbol in initializer.keeper_pressed.pressed_keys  # type: ignore
+        device.pressed(symbol) or symbol in initializer.keeper_pressed.pressed_keys
     )
 
 

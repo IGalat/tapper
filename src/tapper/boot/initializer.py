@@ -144,8 +144,8 @@ def init(
 
     send_processor.os = os
     send_processor.parser = default_send_parser(os)
-    send_processor.kb_controller = kbc  # type: ignore
-    send_processor.mouse_controller = mc  # type: ignore
+    send_processor.kb_controller = kbc
+    send_processor.mouse_controller = mc
     send_processor.sleep_fn = sleep_processor.sleep
 
     log.info("Tapper init complete")

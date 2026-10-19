@@ -1,4 +1,5 @@
 """All mouse buttons"""
+
 from functools import cache
 
 from tapper.model.types_ import SymbolsWithAliases

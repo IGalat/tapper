@@ -4,6 +4,7 @@ from typing import Callable
 from typing import Optional
 
 import pytest
+
 from tapper.model.window import Window
 
 
@@ -25,11 +26,10 @@ class TestWin32WindowController:
 
     @pytest.fixture
     def win_command(self, command_fns: list[Callable[[Any], Any]]) -> Any:
-        from tapper.controller.window.window_win32_impl import win_filter
-
         from tapper.controller.window.window_win32_impl import (
             Win32WindowTrackerCommander,
         )
+        from tapper.controller.window.window_win32_impl import win_filter
 
         def get_open(
             exec_or_title: Optional[str] = None,

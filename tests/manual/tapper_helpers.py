@@ -3,10 +3,10 @@ import time
 
 from manual.util_mantest import killme_in
 from tapper import Group
+from tapper import Tap
 from tapper import kb
 from tapper import root
 from tapper import start
-from tapper import Tap
 from tapper.helper import img
 from tapper.helper import recording
 from tapper.helper import repeat

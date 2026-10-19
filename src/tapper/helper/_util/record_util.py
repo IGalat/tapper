@@ -50,7 +50,7 @@ class SignalRecord:
 
 recording_: list[SignalRecord] | None = None
 
-record_signal = lambda signal: recording_.append(  # type: ignore
+record_signal = lambda signal: recording_.append(
     SignalRecord(signal, time.perf_counter(), mouse.get_pos())
 )
 
@@ -147,7 +147,11 @@ def reduce_mouse_moves(records: list[SignalRecord], min_movement: int) -> None:
     for i in range(len(records) - 1):
         r = records[i + 1]
         if r.mouse_pos and controller.mouse.mouse_api.is_near(
-            r.mouse_pos[0], r.mouse_pos[1], pos[0], pos[1], min_movement  # type: ignore
+            r.mouse_pos[0],
+            r.mouse_pos[1],
+            pos[0],
+            pos[1],
+            min_movement,
         ):
             r.mouse_pos = None
         else:
@@ -165,7 +169,7 @@ def to_instructions(records: list[SignalRecord]) -> list[SendInstruction]:
         if symbol in preferred_aliases:
             symbol = preferred_aliases[symbol]
         meta_instruction = initializer.get_symbols(tapper_config.os)[symbol]
-        instruction = meta_instruction(symbol)  # type: ignore
+        instruction = meta_instruction(symbol)
         if isinstance(instruction, KeyInstruction):
             if record.signal[1] == KeyDirBool.DOWN:
                 instruction.dir = KeyDir.DOWN

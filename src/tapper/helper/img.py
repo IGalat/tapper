@@ -35,7 +35,7 @@ def _check_dependencies() -> None:
 def from_path(pathlike: ImagePathT, cache: bool = True) -> ImagePixelMatrixT:
     """Get image from file path."""
     _check_dependencies()
-    return _base_util.api_from_path(pathlike, cache)  # type: ignore
+    return _base_util.api_from_path(pathlike, cache)
 
 
 def find(
@@ -58,7 +58,7 @@ def find(
         If image not found, None is returned.
     """
     _check_dependencies()
-    return _find_util.api_find(target, bbox, outer, precision=precision)  # type: ignore
+    return _find_util.api_find(target, bbox, outer, precision=precision)
 
 
 def find_one_of(

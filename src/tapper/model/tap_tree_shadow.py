@@ -1,4 +1,5 @@
 """See tap_tree for docs, same fields as here."""
+
 from abc import ABC
 from abc import abstractmethod
 from dataclasses import dataclass
@@ -53,8 +54,8 @@ class SGroup(STapGeneric):
 
     children: list[STapGeneric] = field(default_factory=list)
 
-    @lru_cache  # type: ignore
-    def get_main_triggers(self, direction: constants.KeyDirBool) -> list[str]:  # type: ignore
+    @lru_cache
+    def get_main_triggers(self, direction: constants.KeyDirBool) -> list[str]:
         nested_non_unique = [
             child.get_main_triggers(direction) for child in self.children
         ]

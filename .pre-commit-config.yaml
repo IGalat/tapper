@@ -1,46 +1,41 @@
-# this only does local pre-commit actions, only when pre-commit is installed.
+# Git hooks via the pre-commit framework.
+#   pre-commit itself is installed by mise ([tools] in mise.toml).
+#   ruff and pyright are the project's own versions from uv.lock, called through `uv run`
+#   (language: system), so hooks, `mise run check` and CI all agree.
 #
-# 1. > pip install pre-commit
-#
-# 2. prepare this file:
-# See https://pre-commit.com for more information
-# See https://pre-commit.com/hooks.html for more hooks
-#
-# 3. install hooks. in root folder:
-# > pre-commit install
+#   mise run install               installs the git hook (pre-commit install) along with the venv
+#   pre-commit run --all-files     run every hook on the whole repo
+#   pre-commit autoupdate          bump the revs of the remote repos below
 
 repos:
-  - repo: https://github.com/psf/black
-    rev: 22.6.0
+  - repo: local
     hooks:
-      - id: black
-        args: [ --safe ]
-
-  - repo: https://github.com/hadialqattan/pycln
-    rev: v2.1.1
-    hooks:
-      - id: pycln
-        args: ['--all']
-
-  - repo: https://github.com/asottile/reorder_python_imports
-    rev: v2.6.0
-    hooks:
-      - id: reorder-python-imports
-        args: [ --application-directories=.src, --py36-plus ]
-
-  - repo: https://github.com/asottile/pyupgrade
-    rev: v2.29.0
-    hooks:
-      - id: pyupgrade
-        args: [ --py36-plus ]
+      - id: ruff-check
+        name: ruff check (lint + auto-fix)
+        entry: mise exec -- uv run ruff check --fix
+        language: system
+        types_or: [python, pyi]
+        require_serial: true
+      - id: ruff-format
+        name: ruff format
+        entry: mise exec -- uv run ruff format
+        language: system
+        types_or: [python, pyi]
+        require_serial: true
+      - id: pyright
+        name: pyright
+        entry: mise exec -- uv run pyright
+        language: system
+        files: ^src/.*\.py$
+        require_serial: true
+        stages: [manual]  # remove when pyright errors are fixed
 
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v3.2.0
+    rev: v6.0.0
     hooks:
       - id: trailing-whitespace
       - id: end-of-file-fixer
       - id: check-yaml
+      - id: check-toml
       - id: check-added-large-files
         args: ['--maxkb=10000']
-      - id: debug-statements
-        language_version: python3

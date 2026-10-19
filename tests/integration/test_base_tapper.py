@@ -2,13 +2,13 @@ import time
 from functools import partial
 
 import tapper
+from integration.conftest import Fixture
 from integration.conftest import click
 from integration.conftest import ends_with
-from integration.conftest import Fixture
 from integration.conftest import sleep_signal
-from tapper import config
 from tapper import Group
 from tapper import Tap
+from tapper import config
 
 
 class TestSimple:

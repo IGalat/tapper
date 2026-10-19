@@ -3,6 +3,7 @@ import sys
 from functools import partial
 
 import pytest
+
 from tapper.model import constants
 from tapper.model import keyboard
 from tapper.model.constants import ListenerResult
@@ -18,8 +19,9 @@ class TestWin32Listener:
     )
 
     def test_all_keys(self) -> None:
-        from tapper.signal.keyboard import win32_kb_listener
         from winput import KeyboardEvent
+
+        from tapper.signal.keyboard import win32_kb_listener
 
         press = list(win32_kb_listener.EVENT_PRESS)[0]
         release = list(win32_kb_listener.EVENT_RELEASE)[0]

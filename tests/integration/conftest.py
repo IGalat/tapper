@@ -4,6 +4,7 @@ from typing import Any
 from typing import Callable
 
 import pytest
+
 import tapper
 from tapper import config
 from tapper.action import wrapper

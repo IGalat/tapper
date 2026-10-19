@@ -300,7 +300,7 @@ class SendParser:
         if instruction_type == KeyInstruction:
             base_ins = KeyInstruction(key.symbol)
         elif instruction_type == WheelInstruction:
-            base_ins = WheelInstruction(key.symbol)  # type: ignore
+            base_ins = WheelInstruction(key.symbol)
         else:
             raise SendParseError
 
@@ -343,7 +343,7 @@ class SendParser:
         if instruction_type == KeyInstruction:
             base_ins = KeyInstruction(key.symbol)
         elif instruction_type == WheelInstruction:
-            base_ins = WheelInstruction(key.symbol)  # type: ignore
+            base_ins = WheelInstruction(key.symbol)
         else:
             raise SendParseError
 
@@ -359,6 +359,6 @@ class SendParser:
         for regex, value in self.regexes.items():
             instruction_type, fn = value
             if regex.fullmatch(symbol):
-                return [instruction_type(fn(symbol))]  # type: ignore
+                return [instruction_type(fn(symbol))]
         else:
             raise SendParseError

@@ -4,6 +4,7 @@ from unittest.mock import MagicMock
 from unittest.mock import patch
 
 import pytest
+
 import tapper.config
 from tapper.controller.sleep_processor import SleepCommandProcessor
 from tapper.model.tap_tree import Group

@@ -4,8 +4,8 @@ import os
 from functools import wraps
 from typing import Any
 from typing import Callable
-from typing import cast
 from typing import TypeVar
+from typing import cast
 
 log = logging.getLogger("tapper")
 
@@ -59,15 +59,15 @@ def get_config(
     include_handlers = []
     if log_level_console is not None:
         logger_stdout_config["level"] = logging.getLevelName(log_level_console)
-        logger_config["handlers"].update({"stdout": logger_stdout_config})  # type: ignore
+        logger_config["handlers"].update({"stdout": logger_stdout_config})
         include_handlers.append("stdout")
     if log_level_file is not None:
         logger_file_config["level"] = logging.getLevelName(log_level_file)
-        logger_file_config["filename"] = log_folder + logger_file_config["filename"]  # type: ignore
+        logger_file_config["filename"] = log_folder + logger_file_config["filename"]
         os.makedirs(log_folder, exist_ok=True)
-        logger_config["handlers"].update({"file": logger_file_config})  # type: ignore
+        logger_config["handlers"].update({"file": logger_file_config})
         include_handlers.append("file")
-    logger_config["handlers"]["queue_handler"]["handlers"] = include_handlers  # type: ignore
+    logger_config["handlers"]["queue_handler"]["handlers"] = include_handlers
     return config
 
 
@@ -81,8 +81,8 @@ def setup_logging(
     logging.config.dictConfig(config)
     queue_handler = logging.getHandlerByName("queue_handler")
     if queue_handler is not None:
-        queue_handler.listener.start()  # type: ignore
-        atexit.register(queue_handler.listener.stop)  # type: ignore
+        queue_handler.listener.start()
+        atexit.register(queue_handler.listener.stop)
 
 
 TFun = TypeVar("TFun", bound=Callable[..., Any])
@@ -96,7 +96,7 @@ class LogExceptions:
 
     def __call__(self, f: TFun) -> TFun:
         @wraps(f)
-        def wrapper(*args, **kwargs) -> Any:  # type: ignore
+        def wrapper(*args, **kwargs) -> Any:
             try:
                 return f(*args, **kwargs)
             except Exception as e:

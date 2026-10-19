@@ -1,4 +1,5 @@
 import pytest
+
 from tapper.model import constants
 from tapper.model import keyboard
 from tapper.model import mouse

@@ -38,7 +38,7 @@ class SleepCommandProcessor:
     @classmethod
     def from_none(cls) -> "SleepCommandProcessor":
         """To be filled during init."""
-        return SleepCommandProcessor(None, None, None)  # type: ignore
+        return SleepCommandProcessor(None, None, None)
 
     def __post_init__(self) -> None:
         if self.check_interval is not None and self.check_interval <= 0:

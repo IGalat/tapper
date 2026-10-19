@@ -3,10 +3,11 @@ from dataclasses import dataclass
 from dataclasses import field
 from typing import Any
 from typing import Callable
-from unittest.mock import call
 from unittest.mock import MagicMock
+from unittest.mock import call
 
 import pytest
+
 from tapper.controller.sleep_processor import SleepCommandProcessor
 from tapper.controller.sleep_processor import StopTapperActionException
 

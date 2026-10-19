@@ -27,12 +27,12 @@ class ListenerWrapper:
         emul_keeper: keeper.Emul | None,
         state_keeper: keeper.Pressed,
     ) -> None:
-        self.on_signal = on_signal  # type: ignore
+        self.on_signal = on_signal
         self.emul_keeper = emul_keeper
         self.state_keeper = state_keeper
 
     def wrap(self, listener: SignalListener) -> SignalListener:
-        listener.on_signal = partial(self._on_signal_wrap, topic=listener.name)  # type: ignore
+        listener.on_signal = partial(self._on_signal_wrap, topic=listener.name)
         return listener
 
     def _on_signal_wrap(self, signal: Signal, topic: str) -> constants.ListenerResult:
@@ -40,7 +40,7 @@ class ListenerWrapper:
         if self.emul_keeper and self.emul_keeper.is_emulated(signal):
             self.state_keeper.key_event(signal)
             return constants.ListenerResult.PROPAGATE
-        result = self.on_signal(signal)  # type: ignore
+        result = self.on_signal(signal)
         event.publish(topic, signal)
         self.state_keeper.key_event(signal)
         return result

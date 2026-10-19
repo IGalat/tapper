@@ -1,4 +1,5 @@
 """See config.tree_possible_kwargs for docs."""
+
 from typing import Any
 from typing import Callable
 
@@ -39,7 +40,7 @@ def mouse(mouse_c: MouseController) -> dict[str, Callable[[Any], Any]]:
     kwargs["mouse_key_not_pressed"] = lambda symbol: not mouse_c.pressed(symbol)
 
     def is_cursor_near(
-        xy_precision: tuple[int, int] | tuple[tuple[int, int], int]
+        xy_precision: tuple[int, int] | tuple[tuple[int, int], int],
     ) -> bool:
         """
         Circle with "precision" radius.

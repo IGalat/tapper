@@ -2,6 +2,7 @@ from functools import partial
 from typing import Callable
 
 import pytest
+
 from tapper import config
 from tapper.boot import initializer
 from tapper.boot.tree_transformer import TreeTransformer

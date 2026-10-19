@@ -3,8 +3,9 @@ from typing import Any
 from typing import Callable
 
 import numpy as np
-import tapper
 from PIL import ImageColor
+
+import tapper
 from tapper.helper._util.image import base
 from tapper.helper.model_types import BboxT
 from tapper.helper.model_types import ImagePixelMatrixT
@@ -111,7 +112,7 @@ def find(
         if len(bbox_or_coords) == 2:
             bbox = coords_to_bbox_1_pixel(bbox_or_coords)
         elif len(bbox_or_coords) == 4:
-            bbox = bbox_or_coords  # type: ignore
+            bbox = bbox_or_coords
     outer = base.get_screenshot_if_none_and_cut(outer_maybe, bbox)
     if variation == 0:
         matching_px = np.argwhere(px_eq(outer, color))

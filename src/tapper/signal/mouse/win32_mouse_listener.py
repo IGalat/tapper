@@ -1,12 +1,13 @@
 from threading import Thread
 
 import winput
+from winput import MouseEvent
+
 from tapper.feedback.logger import LogExceptions
 from tapper.model.constants import KeyDirBool
 from tapper.model.constants import ListenerResult
 from tapper.model.constants import WinputListenerResult
 from tapper.signal.mouse.mouse_listener import MouseSignalListener
-from winput import MouseEvent
 
 
 class Win32MouseSignalListener(MouseSignalListener):

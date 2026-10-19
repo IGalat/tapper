@@ -1,14 +1,14 @@
 from functools import cache
 
 import evdev
+from evdev import UInput
 from evdev import ecodes
-from evdev import UInput  # type: ignore
 from evdev.eventio import EventIO
 
 
 @cache
-def get_real_keyboards() -> list[evdev.InputDevice]:  # type: ignore
-    devices = [evdev.InputDevice(path) for path in evdev.list_devices()]  # type: ignore
+def get_real_keyboards() -> list[evdev.InputDevice]:
+    devices = [evdev.InputDevice(path) for path in evdev.list_devices()]
     result = []
     for d in devices:
         cap = d.capabilities()
@@ -25,10 +25,10 @@ def get_real_keyboards() -> list[evdev.InputDevice]:  # type: ignore
     return result
 
 
-def make_virtual_device_from(real_kbs: list[evdev.InputDevice], name: str) -> UInput:  # type: ignore
+def make_virtual_device_from(real_kbs: list[evdev.InputDevice], name: str) -> UInput:
     try:
         return UInput.from_device(*real_kbs, name="Tapper Virtual " + name)
-    except evdev.UInputError:  # type: ignore
+    except evdev.UInputError:
         raise PermissionError("Cannot make virtual device. Try running as root.")
 
 

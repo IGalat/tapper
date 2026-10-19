@@ -2,9 +2,10 @@ import importlib.resources
 from pathlib import Path
 
 import numpy as np
-import resources
 from numpy import ndarray
 from PIL import Image
+
+import resources
 
 
 def from_matrix(matrix: list[list[tuple[int, int, int]]]) -> ndarray:

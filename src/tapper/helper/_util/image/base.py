@@ -8,6 +8,7 @@ import PIL.Image
 import PIL.ImageGrab
 from mss.base import MSSBase
 from numpy import ndarray
+
 from tapper.helper.model_types import BboxT
 from tapper.helper.model_types import ImagePathT
 from tapper.helper.model_types import ImagePixelMatrixT
@@ -21,7 +22,7 @@ def find_fuzzy_cv2(target: ndarray, outer: ndarray) -> tuple[float, XyCoordsT]:
 
     comparison = cv2.matchTemplate(outer, target, cv2.TM_CCORR_NORMED)
     _, max_val, _, max_loc = cv2.minMaxLoc(comparison)
-    return max_val, max_loc  # type: ignore
+    return max_val, max_loc
 
 
 mss_instance: MSSBase
@@ -44,7 +45,7 @@ def from_path(pathlike: ImagePathT) -> ImagePixelMatrixT:
 def api_from_path(pathlike: ImagePathT, cache: bool) -> ImagePixelMatrixT:
     if not cache:
         from_path.cache_clear()
-    return from_path(pathlike)  # type: ignore
+    return from_path(pathlike)
 
 
 def to_pixel_matrix(image: ImageT | None) -> ImagePixelMatrixT | None:
@@ -166,7 +167,7 @@ def outer_to_image(
 def targets_normalize(
     targets: (
         list[ImageT] | tuple[list[ImageT], BboxT] | list[tuple[ImageT, BboxT | None]]
-    )
+    ),
 ) -> list[tuple[ImagePixelMatrixT, BboxT | None, ImageT]]:
     """Transform any variant of input to :func:find_one_of to list[image-array, bbox, original target]"""
     if not targets:

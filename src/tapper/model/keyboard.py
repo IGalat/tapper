@@ -1,4 +1,5 @@
 """Keyboard keys, including lang-specific, and OS-specific."""
+
 from functools import cache
 
 from tapper.model import constants
@@ -166,7 +167,7 @@ chars_en_upper_to_lower = {
 @cache
 def get_key_list(os: str | None = None) -> list[str]:
     """All keys on en-US keyboard, including platform specific, BUT not aliases."""
-    platform_keys = platform_specific_keys.get(os, [])  # type: ignore
+    platform_keys = platform_specific_keys.get(os, [])
     return [*special_chars, *chars_en, *platform_keys]
 
 

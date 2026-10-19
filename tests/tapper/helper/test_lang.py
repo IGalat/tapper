@@ -1,6 +1,7 @@
 from functools import partial
 
 import pytest
+
 from tapper.helper.lang import to_en
 
 

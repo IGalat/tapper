@@ -98,7 +98,7 @@ class Group(TapGeneric):
         self._children.extend(children)
         for child in children:
             if isinstance(child, TapGeneric):
-                child._parent = self  # type: ignore
+                child._parent = self
         return self
 
     def __init__(

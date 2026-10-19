@@ -1,6 +1,8 @@
 from threading import Thread
 from typing import Final
 
+from winput import winput
+
 from tapper.feedback.logger import LogExceptions
 from tapper.model import constants
 from tapper.model import keyboard
@@ -8,7 +10,6 @@ from tapper.model.constants import KeyDirBool
 from tapper.model.constants import ListenerResult
 from tapper.model.constants import WinputListenerResult
 from tapper.signal.keyboard.keyboard_listener import KeyboardSignalListener
-from winput import winput
 
 EVENT_PRESS: Final[set[int]] = {256, 260}
 EVENT_RELEASE: Final[set[int]] = {257, 261}

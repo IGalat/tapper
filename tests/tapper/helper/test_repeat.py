@@ -7,6 +7,7 @@ from unittest.mock import call
 from unittest.mock import patch
 
 import pytest
+
 from tapper.helper import repeat
 from tapper.helper._util import repeat_util
 

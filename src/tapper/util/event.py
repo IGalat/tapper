@@ -1,14 +1,15 @@
-""" Publisher-subscriber implementation.
+"""Publisher-subscriber implementation.
 
-    Typical usage example:
+Typical usage example:
 
-    To subscribe:
-        event.subscribe(PREDEFINED_TOPIC_NAME, function_that_will_receive_messages)
-    (can be done in a different place than the subscriber)
+To subscribe:
+    event.subscribe(PREDEFINED_TOPIC_NAME, function_that_will_receive_messages)
+(can be done in a different place than the subscriber)
 
-    In publisher:
-        event.publish(PREDEFINED_TOPIC_NAME, message_of_any_type)
+In publisher:
+    event.publish(PREDEFINED_TOPIC_NAME, message_of_any_type)
 """
+
 from typing import Any
 from typing import Callable
 from typing import ClassVar

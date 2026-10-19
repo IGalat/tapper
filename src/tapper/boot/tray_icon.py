@@ -11,7 +11,8 @@ def get_logo_path() -> str:
 
 
 def make_menu() -> Any:
-    from pystray import Menu, MenuItem
+    from pystray import Menu
+    from pystray import MenuItem
 
     return Menu(
         MenuItem("Restart", controls.restart), MenuItem("Exit", controls.terminate)

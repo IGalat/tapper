@@ -7,6 +7,7 @@ import hypothesis
 import hypothesis.strategies as st
 import pytest
 from hypothesis import given
+
 from tapper.action import runner
 from tapper.action.runner import ActionRunner
 from tapper.action.runner import ActionRunnerImpl

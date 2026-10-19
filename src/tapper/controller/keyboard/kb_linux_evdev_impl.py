@@ -2,7 +2,8 @@ import sys
 import time
 
 import evdev
-from evdev import UInput  # type: ignore
+from evdev import UInput
+
 from tapper.controller.keyboard.kb_api import KeyboardCommander
 from tapper.controller.keyboard.kb_api import KeyboardTracker
 from tapper.model import keyboard
@@ -19,14 +20,15 @@ keys_wo_upper = {
 }
 
 symbol_code_map = datastructs.symbols_to_codes(
-    keyboard.linux_evdev_code_to_symbol_map, keys_wo_upper  # type: ignore
+    keyboard.linux_evdev_code_to_symbol_map,
+    keys_wo_upper,
 )
 
 modifier_led_indices = {"caps": 1, "caps_lock": 1, "num_lock": 0, "scroll_lock": 2}
 
 
 class LinuxKeyboardTrackerCommander(KeyboardTracker, KeyboardCommander):
-    real_kbs: list[evdev.InputDevice]  # type: ignore
+    real_kbs: list[evdev.InputDevice]
     virtual_kb: UInput
 
     def start(self) -> None:
@@ -40,7 +42,7 @@ class LinuxKeyboardTrackerCommander(KeyboardTracker, KeyboardCommander):
         evdev_common.uinput_action(
             self.virtual_kb,
             evdev.ecodes.EV_KEY,
-            symbol_code_map[symbol][0],  # type: ignore
+            symbol_code_map[symbol][0],
             EvdevReverseKeyDir[KeyDirBool.DOWN],
         )
         time.sleep(0.001)  # else evdev-lib lock fails to be acquired sometimes.
@@ -49,7 +51,7 @@ class LinuxKeyboardTrackerCommander(KeyboardTracker, KeyboardCommander):
         evdev_common.uinput_action(
             self.virtual_kb,
             evdev.ecodes.EV_KEY,
-            symbol_code_map[symbol][0],  # type: ignore
+            symbol_code_map[symbol][0],
             EvdevReverseKeyDir[KeyDirBool.UP],
         )
 

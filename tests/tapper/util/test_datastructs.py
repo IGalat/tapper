@@ -4,8 +4,9 @@ from typing import Any
 import hypothesis
 import hypothesis.strategies as st
 import pytest
-import strategies
 from hypothesis import given
+
+import strategies
 from tapper.model.types_ import SymbolsWithAliases
 from tapper.util import datastructs
 

@@ -2,6 +2,7 @@
 Transform Tree - user-configured hierarchical API structure,
 into Shadow Tree - identically structured tree with useful for runtime fields.
 """
+
 from functools import partial
 from typing import Any
 
@@ -25,7 +26,7 @@ all_symbols = [*keyboard.get_keys(config.os).keys(), *mouse.get_keys().keys()]
 def find_property(prop_name: str, group: Group) -> Any:
     if (result := getattr(group, prop_name)) is not None:
         return result
-    return find_property(prop_name, group._parent)  # type: ignore
+    return find_property(prop_name, group._parent)
 
 
 def transform_trigger_conditions(
@@ -53,15 +54,17 @@ class TreeTransformer:
         trigger_parser: TriggerParser,
         conditions: KwTriggerConditions,
     ) -> None:
-        self.send = send  # type: ignore
+        self.send = send
         self.trigger_parser = trigger_parser
         self.possible_trigger_conditions = conditions
 
     def transform(self, group: Group) -> SGroup:
         result = SGroup()
         result.original = group
-        result.send_interval = group.send_interval  # type: ignore  # it's not None here
-        result.send_press_duration = group.send_press_duration  # type: ignore  # it's not None here
+        result.send_interval = group.send_interval  # type ignorrr  # it's not None here
+        result.send_press_duration = (
+            group.send_press_duration
+        )  # type ignorrr  # it's not None here
         result.trigger_conditions = transform_trigger_conditions(
             self.possible_trigger_conditions, group.trigger_conditions
         )

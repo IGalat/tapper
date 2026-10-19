@@ -3,13 +3,14 @@ import random
 import shutil
 from pathlib import Path
 from string import ascii_uppercase
-from unittest.mock import call
 from unittest.mock import MagicMock
+from unittest.mock import call
 from unittest.mock import patch
 
 import img_test_util
 import numpy
 import pytest
+
 from tapper.helper import img
 
 absolutes = img_test_util.absolutes()

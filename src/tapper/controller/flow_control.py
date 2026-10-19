@@ -1,7 +1,6 @@
 import threading
 import uuid
 
-
 config_thread_local_storage = threading.local()
 """Used to store config for running actions."""
 

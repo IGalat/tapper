@@ -2,13 +2,14 @@ import sys
 
 import win32con
 import win32gui
+from winput import winput
+
 from tapper.controller.keyboard.kb_api import KeyboardCommander
 from tapper.controller.keyboard.kb_api import KeyboardTracker
 from tapper.model import keyboard
 from tapper.model import languages
 from tapper.model.languages import Lang
 from tapper.util import datastructs
-from winput import winput
 
 keys_wo_upper = {
     k: v
@@ -17,7 +18,8 @@ keys_wo_upper = {
 }
 
 symbol_code_map = datastructs.symbols_to_codes(
-    keyboard.win32_vk_code_to_symbol_map, keys_wo_upper  # type: ignore
+    keyboard.win32_vk_code_to_symbol_map,
+    keys_wo_upper,
 )
 
 user32 = winput.user32
@@ -60,10 +62,10 @@ class Win32KeyboardTrackerCommander(KeyboardTracker, KeyboardCommander):
             return actual
 
     def pressed(self, symbol: str) -> bool:
-        return any(key_state(code) >> 15 == 1 for code in symbol_code_map[symbol])  # type: ignore
+        return any(key_state(code) >> 15 == 1 for code in symbol_code_map[symbol])
 
     def toggled(self, symbol: str) -> bool:
-        return any(key_state(code) & 1 == 1 for code in symbol_code_map[symbol])  # type: ignore
+        return any(key_state(code) & 1 == 1 for code in symbol_code_map[symbol])
 
     def set_lang(self, lang: str | int | Lang, system_wide: bool = False) -> None:
         target_locale = languages.get(lang).locale_id

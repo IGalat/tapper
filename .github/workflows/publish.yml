@@ -1,0 +1,23 @@
+name: Publish to PyPI
+
+# Builds and uploads on a GitHub release. Uses PyPI trusted publishing (OIDC):
+# register this repo + workflow under the project's "Publishing" settings on pypi.org,
+# no API token needed. For a manual upload run `mise run build && uv publish` with UV_PUBLISH_TOKEN set.
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment: pypi
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: jdx/mise-action@v5
+      - run: mise run build
+      - run: uv publish

@@ -1,6 +1,6 @@
 [build-system]
-requires = ["setuptools>=69.1.0", "wheel"]
-build-backend = "setuptools.build_meta"
+requires = ["uv_build>=0.13.1,<0.14"]
+build-backend = "uv_build"
 
 
 [project]
@@ -11,12 +11,14 @@ authors = [{ name = "IGalat", email = "author_email@example.com" }]
 license = { file = "LICENSE" }
 readme = "README.md"
 requires-python = ">=3.12"
-dynamic = ["dependencies", "optional-dependencies"]
 classifiers = [
     "Development Status :: 4 - Beta",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3 :: Only",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Programming Language :: Python :: 3.15",
     "Topic :: System :: Monitoring",
     "Operating System :: Microsoft :: Windows",
     "Operating System :: POSIX",
@@ -24,8 +26,49 @@ classifiers = [
 ]
 
 
+dependencies = [
+    "winput>=1.5.0; sys_platform == 'win32'",
+    "pywin32>=305; sys_platform == 'win32'",
+    "evdev>=1.6.0; sys_platform == 'linux'",
+]
+
+
+[project.optional-dependencies]
+# For users: `pip install tapper[all]`. Contributors get all of them via the dev group below.
+all = ["tapper[tray,img]"]
+# System tray icon
+tray = [
+    "pillow>=9.4.0",
+    "pystray>=0.19.4",
+]
+# Image matching
+img = [
+    "pillow>=9.4.0",
+    "mss>=7.0.1",
+    "numpy>=1.24.1",
+    "opencv-python>=4.7.0.68",
+]
+
+
+[dependency-groups]
+dev = [
+    "tapper[all]",
+    "pytest>=7.1",
+    "pytest-cov>=3",
+    "hypothesis>=6.54.6",
+    "ruff>=0.14",
+    "pyright>=1.1.400",
+]
+
 [project.urls]
 "Homepage" = "https://github.com/IGalat/tapper"
+
+[tool.uv]
+default-groups = ["dev"]
+
+[tool.uv.build-backend]
+# src/tapper is the module root; py.typed and resources/ inside it ship automatically.
+module-name = "tapper"
 
 
 [tool.pytest.ini_options]
@@ -38,17 +81,31 @@ testpaths = [
 ]
 tmp_path_retention_count = 0
 
+[tool.ruff]
+src = ["src", "tests"]
 
-[tool.mypy]
-mypy_path = "src"
-check_untyped_defs = true
-disallow_untyped_defs = true
-disallow_any_generics = false
-ignore_missing_imports = true
-no_implicit_optional = true
-show_error_codes = true
-strict_equality = true
-warn_redundant_casts = true
-warn_unreachable = true
-warn_unused_configs = true
-no_implicit_reexport = true
+[tool.ruff.lint]
+# E/F/W: pycodestyle + pyflakes (what flake8 did), I: import order (replaces reorder-python-imports),
+# T10: leftover breakpoint()/pdb calls.
+# Candidates to enable later: "UP" (pyupgrade), "B" (bugbear).
+select = ["E", "F", "W", "I", "T10"]
+ignore = [
+    "E501",  # line length is handled by the formatter
+    "E731",  # lambda assignment: used deliberately throughout
+]
+
+[tool.ruff.lint.isort]
+force-single-line = true  # same style as the old reorder-python-imports hook
+
+[tool.ruff.format]
+quote-style = "double"
+
+
+[tool.pyright]
+pythonVersion = "3.12"
+venvPath = "."
+venv = ".venv"
+include = ["src"]
+typeCheckingMode = "standard"
+reportMissingImports = "none"  # optional OS/extra deps (winput, pywin32, evdev, cv2...)
+reportMissingModuleSource = "none"

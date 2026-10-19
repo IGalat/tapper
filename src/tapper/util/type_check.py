@@ -1,4 +1,5 @@
 """Type checking"""
+
 from typing import Any
 from typing import TypeGuard
 from typing import TypeVar

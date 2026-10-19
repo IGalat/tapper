@@ -1,6 +1,7 @@
 import time
 
 import pytest
+
 from tapper.boot import initializer
 from tapper.model import constants
 from tapper.model.types_ import Signal

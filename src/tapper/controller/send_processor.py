@@ -41,7 +41,7 @@ class SendCommandProcessor:
     @classmethod
     def from_none(cls) -> "SendCommandProcessor":
         """To be filled during init."""
-        return SendCommandProcessor(None, None, None, None, None)  # type: ignore
+        return SendCommandProcessor(None, None, None, None, None)
 
     def send(
         self,

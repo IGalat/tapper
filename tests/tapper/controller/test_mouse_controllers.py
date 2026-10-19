@@ -1,7 +1,7 @@
 from functools import partial
 
-from tapper.controller.mouse.mouse_api import calc_move
 from tapper.controller.mouse.mouse_api import MouseController
+from tapper.controller.mouse.mouse_api import calc_move
 from tapper.model import constants
 from tapper.state import keeper
 from testutil_model import Dummy

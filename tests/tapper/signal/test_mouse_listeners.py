@@ -3,6 +3,7 @@ import sys
 from functools import partial
 
 import pytest
+
 from tapper.model import constants
 from tapper.model.constants import KeyDirBool
 from tapper.model.constants import ListenerResult
@@ -28,8 +29,9 @@ class TestWin32Listener:
         pass
 
     def test_all_keys(self) -> None:
-        from tapper.signal.mouse import win32_mouse_listener
         from winput import MouseEvent
+
+        from tapper.signal.mouse import win32_mouse_listener
 
         listener: win32_mouse_listener.Win32MouseSignalListener = self.get_listener()
 

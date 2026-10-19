@@ -1,6 +1,7 @@
 from typing import Callable
 
 import pytest
+
 from tapper.boot import initializer
 from tapper.model import constants
 from tapper.model.errors import SendParseError
@@ -9,10 +10,10 @@ from tapper.model.send import KeyInstruction
 from tapper.model.send import SendInstruction
 from tapper.model.send import SleepInstruction
 from tapper.model.send import WheelInstruction
+from tapper.parser.send_parser import SendParser
 from tapper.parser.send_parser import default_shift
 from tapper.parser.send_parser import ki_shift_down
 from tapper.parser.send_parser import ki_shift_up
-from tapper.parser.send_parser import SendParser
 from tapper.util import datastructs
 
 down = constants.KeyDir.DOWN

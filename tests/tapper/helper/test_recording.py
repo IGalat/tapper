@@ -2,6 +2,7 @@ from typing import Generator
 from unittest.mock import patch
 
 import pytest
+
 from tapper.helper import recording
 from tapper.helper._util import record_util
 from tapper.helper._util.record_util import SignalRecord

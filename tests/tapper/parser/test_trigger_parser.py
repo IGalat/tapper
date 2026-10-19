@@ -1,6 +1,7 @@
 from typing import Callable
 
 import pytest
+
 from tapper.boot import initializer
 from tapper.model import constants
 from tapper.model import keyboard

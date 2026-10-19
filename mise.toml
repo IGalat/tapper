@@ -1,0 +1,62 @@
+[tools]
+python = "3.12"
+uv = "0.13"
+"pipx:pre-commit" = { version = "4", python = "3.12" }
+
+
+[env]
+# Create .venv with mise's python and keep it activated in this directory.
+_.python.venv = { path = ".venv", create = true }
+# Make uv reuse mise's interpreter instead of downloading its own.
+UV_PYTHON = { value = "{{ tools.python.path }}", tools = true }
+
+
+[tasks.check-file]
+description = "Check and reformat a single file, used as a macro."
+usage = 'arg "<file>"'
+# {{ usage.file }} is expanded by mise itself, so it works under sh, cmd and PowerShell alike
+# (shell syntax such as ${usage_file?} is cmd-illegal on Windows).
+# `uv run --no-sync` runs the tools from .venv on every OS without the lock/interpreter check
+# (that check is what rebuilt the venv and made this slow); bare `pyright` isn't on PATH on Windows.
+# quiet: don't echo the commands; ruff -q: print only real diagnostics, so normally only pyright speaks;
+# --exit-zero: lint findings are shown but don't stop format + pyright from running.
+quiet = true
+run = [
+    'uv run --no-sync ruff check --fix -q --exit-zero "{{ usage.file }}"',
+    'uv run --no-sync ruff format -q "{{ usage.file }}"',
+    'uv run --no-sync pyright "{{ usage.file }}"',
+]
+
+
+[tasks.install]
+description = "Sync .venv with pyproject.toml / uv.lock (editable tapper + dev tools) and install git hooks"
+run = ["uv sync", "pre-commit install"]
+
+[tasks.test]
+description = "Run pytest with coverage"
+run = "uv run pytest"
+
+[tasks.lint]
+description = "ruff lint + format check over src and tests"
+run = ["uv run ruff check src tests", "uv run ruff format --check src tests"]
+
+[tasks.fix]
+description = "ruff: auto-fix lint issues and format"
+run = ["uv run ruff check --fix src tests", "uv run ruff format src tests"]
+
+[tasks.typecheck]
+description = "pyright over src"
+run = "uv run pyright"
+
+[tasks.check]
+description = "Everything CI runs: tests, lint, typecheck"
+depends = ["test", "lint", "typecheck"]
+
+
+[tasks.upgrade]
+description = "Upgrade every pin in uv.lock to the newest allowed version and re-sync .venv"
+run = ["uv lock --upgrade", "uv sync"]
+
+[tasks.build]
+description = "Build sdist + wheel into dist/"
+run = ["uv run python -c \"import shutil; shutil.rmtree('dist', ignore_errors=True)\"", "uv build"]

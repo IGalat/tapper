@@ -1,0 +1,12 @@
+# Secondary environment: same tasks, upper-bound Python = newest minor release minus one
+# (mise's `sub-0.1:latest`; 3.14 while 3.15 is current, advances by itself when 3.16 ships).
+# One minor behind means every dependency has wheels for it, so a failure here is a real tapper problem.
+# Activate with `mise -E upper <cmd>` (or MISE_ENV=upper), e.g. `mise -E upper run test`.
+# First time: `mise -E upper install && mise -E upper run install`. CI runs the matrix with this.
+
+[tools]
+python = "sub-0.1:latest"
+
+[env]
+_.python.venv = { path = ".venv-upper", create = true }
+UV_PROJECT_ENVIRONMENT = ".venv-upper"

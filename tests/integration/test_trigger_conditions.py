@@ -1,8 +1,9 @@
 import pytest
+
 import tapper
+from integration.conftest import Fixture
 from integration.conftest import click
 from integration.conftest import ends_with
-from integration.conftest import Fixture
 from tapper import Tap
 
 

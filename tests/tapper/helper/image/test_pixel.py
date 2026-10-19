@@ -4,8 +4,9 @@ from unittest.mock import patch
 
 import img_test_util
 import pytest
-from tapper.helper import img
 from typing_extensions import Any
+
+from tapper.helper import img
 
 red = 255, 0, 0
 green = 0, 255, 0

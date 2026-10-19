@@ -40,7 +40,7 @@ def calc_move(
             y = current_y
         else:
             y += current_y
-    return x, y  # type: ignore
+    return x, y
 
 
 class MouseTracker(ABC):
@@ -162,7 +162,7 @@ class MouseController(ResourceController):
         if x_or_xy is not None and isinstance(x_or_xy, tuple):
             x, y = x_or_xy
         else:
-            x = x_or_xy  # type: ignore
+            x = x_or_xy
         self._commander.move(x, y, relative)
 
     def memorize_pos(self) -> None:

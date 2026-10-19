@@ -5,6 +5,7 @@ from hypothesis import example
 from hypothesis import given
 from hypothesis import settings
 from hypothesis.strategies import lists
+
 from tapper.util.type_check import is_list_of
 from tapper.util.type_check import is_tuple_of
 

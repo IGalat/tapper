@@ -101,9 +101,14 @@ celerybeat.pid
 # SageMath parsed files
 *.sage.py
 
+# mise (local overrides)
+mise.local.toml
+.mise.local.toml
+
 # Environments
 .env
 .venv
+.venv-*
 env/
 venv/
 ENV/
@@ -135,3 +140,6 @@ dmypy.json
 *.ipr
 log/
 out/
+
+
+/tmp/
