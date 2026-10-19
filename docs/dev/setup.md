@@ -44,8 +44,7 @@ environment still works too (the build backend is `uv_build`).
 
 Git hooks are the [pre-commit](https://pre-commit.com) framework, configured in `.pre-commit-config.yaml`.
 The ruff and pyright hooks are `language: system` and call `uv run ...`, so they use the versions
-in `uv.lock`, not separately downloaded ones. `uv` must be on PATH when git runs the hook, which
-mise activation (or shims) provides. `pre-commit run --all-files` runs everything on the repo.
+in `uv.lock`, not separately downloaded ones. `pre-commit run --all-files` runs everything on the repo.
 
 Dependencies live only in `pyproject.toml`: runtime deps and user extras (`tray`, `img`, `all`)
 under `[project]`, contributor tools in `[dependency-groups] dev`. After editing them, run

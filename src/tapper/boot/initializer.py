@@ -1,5 +1,4 @@
 from tapper import config
-from tapper import parser
 from tapper.action.runner import ActionRunner
 from tapper.action.runner import ActionRunnerImpl
 from tapper.boot import tray_icon
@@ -22,6 +21,9 @@ from tapper.model.send import SendInstruction
 from tapper.model.send import SleepInstruction
 from tapper.model.send import WheelInstruction
 from tapper.model.tap_tree import Group
+from tapper.parser.common import CURSOR_MOVE
+from tapper.parser.common import MILLIS
+from tapper.parser.common import SECONDS
 from tapper.parser.send_parser import SendParser
 from tapper.parser.trigger_parser import TriggerParser
 from tapper.signal.base_listener import SignalListener
@@ -67,17 +69,17 @@ def default_send_parser(os: str | None = None) -> SendParser:
     for alias, references in [*keyboard.aliases.items(), *mouse.aliases.items()]:
         send_parser.aliases[alias] = references[0]
 
-    send_parser.regexes[parser.common.SECONDS.regex] = (
+    send_parser.regexes[SECONDS.regex] = (
         SleepInstruction,
-        parser.common.SECONDS.fn,
+        SECONDS.fn,
     )
-    send_parser.regexes[parser.common.MILLIS.regex] = (
+    send_parser.regexes[MILLIS.regex] = (
         SleepInstruction,
-        parser.common.MILLIS.fn,
+        MILLIS.fn,
     )
-    send_parser.regexes[parser.common.CURSOR_MOVE.regex] = (
+    send_parser.regexes[CURSOR_MOVE.regex] = (
         CursorMoveInstruction,
-        parser.common.CURSOR_MOVE.fn,
+        CURSOR_MOVE.fn,
     )
 
     return send_parser
@@ -166,7 +168,11 @@ def set_default_controls_if_empty(icontrol: Group) -> None:
 
 def control_config_fill(group: Group) -> None:
     group.executor = group.executor or 0
-    group.suppress_trigger = group.suppress_trigger or constants.ListenerResult.SUPPRESS
+    group.suppress_trigger = (
+        group.suppress_trigger
+        if group.suppress_trigger is not None
+        else constants.ListenerResult.SUPPRESS
+    )
     group.send_interval = group.send_interval or 0
     group.send_press_duration = group.send_press_duration or 0
 
