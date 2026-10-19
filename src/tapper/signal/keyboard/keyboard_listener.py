@@ -14,12 +14,13 @@ class KeyboardSignalListener(base_listener.SignalListener, ABC):
         return "keyboard"
 
     @staticmethod
-    def get_for_os(os: str) -> "KeyboardSignalListener":
+    def get_for_os(os: str) -> "KeyboardSignalListener | None":
         """
         :param os: Result of sys.platform() call, or see model/constants.
         :return: Per-OS implementation of KeyboardSignalListener.
         """
-        return _os_impl_list[os]()()
+        get_impl = _os_impl_list.get(os)
+        return get_impl()() if get_impl else None
 
 
 def _get_win32_impl() -> type[KeyboardSignalListener]:

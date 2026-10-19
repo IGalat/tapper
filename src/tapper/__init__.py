@@ -4,6 +4,9 @@ from tapper import config
 from tapper.boot import initializer as _initializer
 from tapper.controller.keyboard.kb_api import KeyboardController as _KeyboardController
 from tapper.controller.mouse.mouse_api import MouseController as _MouseController
+from tapper.controller.resource_controller import (
+    ResourceController as _ResourceController,
+)
 from tapper.controller.send_processor import (
     SendCommandProcessor as _SendCommandProcessor,
 )
@@ -17,6 +20,7 @@ from tapper.signal.base_listener import SignalListener as _SignalListener
 from tapper.util import datastructs as _datastructs
 
 _listeners: list[_SignalListener]
+_controllers: list[_ResourceController]
 
 _send_processor = _SendCommandProcessor.from_none()
 _sleep_processor = _SleepCommandProcessor.from_none()
@@ -71,8 +75,9 @@ log = _logger.log
 def init() -> None:
     """Initializes all underlying tools."""
     global _listeners
+    global _controllers
     global _initialized
-    _listeners = _initializer.init(
+    _listeners, _controllers = _initializer.init(
         root, control_group, _send_processor, _sleep_processor
     )
     _initialized = True
@@ -84,12 +89,9 @@ def start() -> None:
     Initializes all underlying tools, and starts listeners.
     No changes by user in any elements of tapper are expected after this command.
     """
-    global _listeners
-    global _initialized
-
     if not _initialized:
         init()
-    _initializer.start(_listeners)
+    _initializer.start(_listeners, _controllers)
 
     # Should be blocking for normal usage, flag is for testing.
     # If tray icon is on, it will be blocking anyway.

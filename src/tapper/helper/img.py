@@ -2,10 +2,16 @@ from functools import partial
 from typing import Any
 from typing import Callable
 
-from tapper.helper._util.image import base as _base_util
-from tapper.helper._util.image import find_util as _find_util
-from tapper.helper._util.image import pixel_util as _pixel_util
-from tapper.helper._util.image import snip_util as _snip_util
+try:
+    from tapper.helper._util.image import base as _base_util
+    from tapper.helper._util.image import find_util as _find_util
+    from tapper.helper._util.image import pixel_util as _pixel_util
+    from tapper.helper._util.image import snip_util as _snip_util
+except ImportError as e:
+    raise ImportError(
+        "Looks like you're missing dependencies for tapper img helper. "
+        "Try `pip install tapper[img]` or `pip install tapper[all]`."
+    ) from e
 from tapper.helper.model_types import BboxT
 from tapper.helper.model_types import ImagePathT
 from tapper.helper.model_types import ImagePixelMatrixT
@@ -18,23 +24,8 @@ from tapper.helper.model_types import XyCoordsT
 STD_PRECISION = 0.999
 
 
-def _check_dependencies() -> None:
-    try:
-        import PIL  # noqa
-        import mss  # noqa
-        import cv2  # noqa
-        import numpy  # noqa
-    except ImportError as e:
-        raise ImportError(
-            "Looks like you're missing dependencies for tapper img helper."
-            "Try `pip install tapper[img]` or `pip install tapper[all]`.",
-            e,
-        )
-
-
 def from_path(pathlike: ImagePathT, cache: bool = True) -> ImagePixelMatrixT:
     """Get image from file path."""
-    _check_dependencies()
     return _base_util.api_from_path(pathlike, cache)
 
 
@@ -57,7 +48,6 @@ def find(
     :return: Coordinates X and Y of top-left of the found image relative to the bounding box (if any).
         If image not found, None is returned.
     """
-    _check_dependencies()
     return _find_util.api_find(target, bbox, outer, precision=precision)
 
 
@@ -80,7 +70,6 @@ def find_one_of(
         Will return object supplied in the list if it finds corresponding image.
         In case many images could match, first match in the `images` list will be returned.
     """
-    _check_dependencies()
     return _find_util.api_find_one_of(targets, outer, precision)
 
 
@@ -104,7 +93,6 @@ def wait_for(
     :param precision: see `find` param.
     :return: Coordinates X and Y of top-left of the found image relative to the bounding box (if any).
     """
-    _check_dependencies()
     return _find_util.wait_for(target, bbox, timeout, interval, precision)
 
 
@@ -118,7 +106,6 @@ def wait_for_disappear(
     """Inverse of wait_for: regularly checks the screen or region of the screen for image,
     and returns True as soon as it's not present. If timeout is reached, return False.
     """
-    _check_dependencies()
     return _find_util.wait_for_disappear(target, bbox, timeout, interval, precision)
 
 
@@ -161,7 +148,6 @@ def wait_for_one_of(
         elif btn == close_btn:  close_app()
         else:  raise ValueError
     """
-    _check_dependencies()
     return _find_util.wait_for_one_of(targets, timeout, interval, precision)
 
 
@@ -177,7 +163,6 @@ def get_find_raw(
     :param outer: Optional image in which to find, path or numpy array. If not specified, will search on screen.
     :return: Match precision, and coordinates.
     """
-    _check_dependencies()
     return _find_util.api_find_raw(target, bbox, outer)
 
 
@@ -212,7 +197,6 @@ def snip(
         {"a": img.snip(prefix=None, bbox_callback=pyperclip.copy)}
             This will only copy bounding box to your clipboard. Package pyperclip if required for this.
     """
-    _check_dependencies()
     return partial(
         _snip_util.toggle_snip,
         prefix=prefix,
@@ -269,7 +253,6 @@ def pixel_info(
         Data example: (255, 255, 255), (1919, 1079)
     :return: callable toggle, to be set into a Tap.
     """
-    _check_dependencies()
     if callback_for_str is None and callback_for_data is None:
         raise ValueError("pixel_info must have a callback.")
     return partial(
@@ -289,7 +272,6 @@ def pixel_get_color(coords: XyCoordsT, outer: ImageT | None = None) -> PixelColo
     :param outer: Optional image, pathname or numpy array. If not specified, will get color from screen.
     :return: Decimal values of Red, Green, and Blue components of the pixel color.
     """
-    _check_dependencies()
     return _pixel_util.get_color(coords, outer)
 
 
@@ -304,7 +286,6 @@ def pixel_get_color_hex(
     :param outer: Optional image, pathname or numpy array. If not specified, will get color from screen.
     :return: Hashtag, followed by hex-color. see https://g.co/kgs/P9JkiRJ
     """
-    _check_dependencies()
     return _pixel_util.get_color_hex(coords, outer)
 
 
@@ -332,7 +313,6 @@ def pixel_find(
         If you specify 255 shades of variation, all colors will match.
     :return: Coordinates X and Y of the first pixel that matches, or None if no match.
     """
-    _check_dependencies()
     return _pixel_util.find(
         color_in=color,
         bbox_or_coords=bbox_or_coords,
@@ -363,7 +343,6 @@ def pixel_wait_for(
     :param variation: see `pixel_find` param.
     :return: Coordinates of the pixel if found, else None.
     """
-    _check_dependencies()
     return _pixel_util.wait_for(
         color, bbox_or_coords, return_absolute_coords, timeout, interval, variation
     )
@@ -379,7 +358,6 @@ def pixel_wait_for_disappear(
     """Inverse of pixel_wait_for: regularly checks the screen or region of the screen for pixel,
     and returns True as soon as it's not present. If timeout is reached, return False.
     """
-    _check_dependencies()
     return _pixel_util.wait_for_disappear(
         color, bbox_or_coords, timeout, interval, variation
     )
@@ -391,7 +369,6 @@ def pixel_get_with_best_match_color(
     outer: ImageT | None = None,
     max_variation: int = 255,
 ) -> None:
-    _check_dependencies()
     return _pixel_util.pixel_get_with_best_match_color  # todo
 
 
@@ -402,5 +379,4 @@ def pixel_get_with_best_match_color_near(
     outer: ImageT | None = None,
     max_variation: int = 255,
 ) -> None:
-    _check_dependencies()
     return _pixel_util.pixel_get_with_best_match_color_near  # todo

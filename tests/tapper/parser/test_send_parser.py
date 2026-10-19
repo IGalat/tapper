@@ -369,3 +369,16 @@ class TestShiftIn:
             KI("u", click),
             KI(rshift, down),
         ]
+
+    def test_shift_in_does_not_leak_into_later_parses(self, parser: SendParser) -> None:
+        parser.parse("u", "right_shift")
+        assert parser.parse("Q") == [
+            KI("left_shift", down),
+            KI("q"),
+            KI("left_shift", up),
+        ]
+        assert parser.parse("$(a)", "right_shift") == [
+            KI("right_shift", up),
+            KI("a", click),
+            KI("right_shift", down),
+        ]

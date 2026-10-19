@@ -98,6 +98,9 @@ class MouseController(ResourceController):
     _state_keeper: keeper.Pressed
     _memorized_pos: tuple[int, int] | None = None
 
+    def _supports(self, os: str) -> bool:
+        return hasattr(self, "_tracker") or os in by_os
+
     def _init(self) -> None:
         if not hasattr(self, "_tracker") or not hasattr(self, "_commander"):
             self._tracker, self._commander = by_os[self._os]()

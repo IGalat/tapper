@@ -23,12 +23,13 @@ class MouseSignalListener(base_listener.SignalListener, ABC):
         return temp
 
     @staticmethod
-    def get_for_os(os: str) -> "MouseSignalListener":
+    def get_for_os(os: str) -> "MouseSignalListener | None":
         """
         :param os: Result of sys.platform() call, or see model/constants.
         :return: Per-OS implementation of MouseSignalListener.
         """
-        return _os_impl_list[os]()()
+        get_impl = _os_impl_list.get(os)
+        return get_impl()() if get_impl else None
 
 
 def _get_win32_impl() -> type[MouseSignalListener]:

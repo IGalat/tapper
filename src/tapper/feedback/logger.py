@@ -7,6 +7,8 @@ from typing import Callable
 from typing import TypeVar
 from typing import cast
 
+from tapper.controller.flow_control import StopTapperActionException
+
 log = logging.getLogger("tapper")
 
 logger_config = {
@@ -99,6 +101,8 @@ class LogExceptions:
         def wrapper(*args, **kwargs) -> Any:
             try:
                 return f(*args, **kwargs)
+            except StopTapperActionException:
+                log.debug("Action stopped by tapper.")
             except Exception as e:
                 log.log(
                     self.log_level,

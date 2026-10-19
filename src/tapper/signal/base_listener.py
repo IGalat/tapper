@@ -46,7 +46,7 @@ class SignalListener(ABC):
 
     @staticmethod
     @abstractmethod
-    def get_for_os(os: str) -> "SignalListener":
+    def get_for_os(os: str) -> "SignalListener | None":
         """
         :param os: Result of sys.platform() call, or see model/constants.
         :return: Per-OS implementation of a specific SignalListener.

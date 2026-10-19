@@ -2,6 +2,7 @@ import time
 from dataclasses import dataclass
 from typing import Callable
 
+from tapper.controller import flow_control
 from tapper.controller.flow_control import StopTapperActionException
 from tapper.parser import common
 
@@ -28,9 +29,9 @@ class SleepCommandProcessor:
 
     check_interval: float
     """How often the check is made for whether to continue sleeping."""
-    kill_check_fn: Callable[[], bool]
+    kill_check_fn: Callable[[], bool] = flow_control.should_be_killed
     """Checks whether action should be killed."""
-    pause_check_fn: Callable[[], bool]
+    pause_check_fn: Callable[[], bool] = flow_control.should_be_paused
     """Checks whether action should be paused."""
     actual_sleep_fn: Callable[[float], None] = time.sleep
     get_time_fn: Callable[[], float] = time.perf_counter
@@ -38,7 +39,7 @@ class SleepCommandProcessor:
     @classmethod
     def from_none(cls) -> "SleepCommandProcessor":
         """To be filled during init."""
-        return SleepCommandProcessor(None, None, None)
+        return SleepCommandProcessor(None)
 
     def __post_init__(self) -> None:
         if self.check_interval is not None and self.check_interval <= 0:

@@ -17,6 +17,10 @@ class ResourceController(ABC):
     """
 
     @abstractmethod
+    def _supports(self, os: str) -> bool:
+        """Whether there is an implementation for this OS (or one was injected)."""
+
+    @abstractmethod
     def _init(self) -> None:
         """Initialize underlying components. All required data should be provided as fields beforehand."""
 

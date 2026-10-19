@@ -6,6 +6,7 @@ from tapper.boot.tree_transformer import TreeTransformer
 from tapper.controller import flow_control
 from tapper.controller.keyboard.kb_api import KeyboardController
 from tapper.controller.mouse.mouse_api import MouseController
+from tapper.controller.resource_controller import ResourceController
 from tapper.controller.send_processor import SendCommandProcessor
 from tapper.controller.sleep_processor import SleepCommandProcessor
 from tapper.controller.window.window_api import WindowController
@@ -90,8 +91,9 @@ def init(
     icontrol: Group,
     send_processor: SendCommandProcessor,
     sleep_processor: SleepCommandProcessor,
-) -> list[SignalListener]:
-    """Initialize components with config values."""
+) -> tuple[list[SignalListener], list[ResourceController]]:
+    """Initialize components with config values.
+    Listeners and controllers without an implementation for this OS are skipped."""
     if config.tapper_logging_config:
         logger.setup_logging(
             log_level_console=config.log_level_console,
@@ -124,10 +126,14 @@ def init(
     if os == constants.OS.linux:
         listener_wrapper.emul_keeper = None
     listeners = [
-        listener_wrapper.wrap(listener.get_for_os(os)) for listener in config.listeners
+        listener_wrapper.wrap(listener.get_for_os(os))
+        for listener in config.listeners
+        if listener.get_for_os(os) is not None
     ]
 
-    controllers = config.controllers
+    controllers = [
+        controller for controller in config.controllers if controller._supports(os)
+    ]
     if kbc := datastructs.get_first_in(KeyboardController, controllers):
         kbc._os = os
         kbc._emul_keeper = emul_keeper
@@ -143,6 +149,7 @@ def init(
     sleep_processor.check_interval = config.sleep_check_interval
     sleep_processor.kill_check_fn = flow_control.should_be_killed
     sleep_processor.pause_check_fn = flow_control.should_be_paused
+    flow_control.initialized = True
 
     send_processor.os = os
     send_processor.parser = default_send_parser(os)
@@ -151,7 +158,7 @@ def init(
     send_processor.sleep_fn = sleep_processor.sleep
 
     log.info("Tapper init complete")
-    return listeners
+    return listeners, controllers
 
 
 def set_default_controls_if_empty(icontrol: Group) -> None:
@@ -189,10 +196,12 @@ def verify_settings_exist(group: Group) -> None:
         raise AttributeError(e_text)
 
 
-def start(listeners: list[SignalListener]) -> None:
+def start(
+    listeners: list[SignalListener], controllers: list[ResourceController]
+) -> None:
     """Starts the application. Should be called after init"""
     log.info("Starting tapper")
-    for controller in config.controllers:
+    for controller in controllers:
         controller._start()
     for listener in listeners:
         listener.start()

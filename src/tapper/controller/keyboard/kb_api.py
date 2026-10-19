@@ -59,6 +59,9 @@ class KeyboardController(ResourceController):
     _commander: KeyboardCommander
     _emul_keeper: keeper.Emul
 
+    def _supports(self, os: str) -> bool:
+        return hasattr(self, "_tracker") or os in by_os
+
     def _init(self) -> None:
         if not hasattr(self, "_tracker") or not hasattr(self, "_commander"):
             self._tracker, self._commander = by_os[self._os]()

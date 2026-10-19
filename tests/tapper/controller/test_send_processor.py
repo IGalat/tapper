@@ -200,6 +200,16 @@ class TestSendCommandProcessor:
             up("z"),
         ]
 
+    def test_outside_of_action_works(self) -> None:
+        config_thread_local_storage.action_config = None
+        self.sender.send("ab")
+        assert self.all_signals == [
+            down("a"),
+            up("a"),
+            down("b"),
+            up("b"),
+        ]
+
     def test_wheel_and_cursor(self) -> None:
         self.sender.send("$(x230y340;wheel_up)")
         assert self.all_signals == [down("scroll_wheel_up")]

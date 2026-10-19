@@ -59,10 +59,10 @@ class SendCommandProcessor:
         :param speed: All sleep commands are divided by this number. Does not influence interval or press_duration.
         """
         config = config_thread_local_storage.action_config
-        interval = interval if interval is not None else config.send_interval
-        press_duration = (
-            press_duration if press_duration is not None else config.send_press_duration
-        )
+        if interval is None:
+            interval = config.send_interval if config else 0
+        if press_duration is None:
+            press_duration = config.send_press_duration if config else 0
 
         instructions: list[SendInstruction] = self.parser.parse(
             command, self.shift_down()

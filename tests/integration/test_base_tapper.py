@@ -1,5 +1,8 @@
+import threading
 import time
 from functools import partial
+
+import pytest
 
 import tapper
 from integration.conftest import Fixture
@@ -91,6 +94,29 @@ class TestSimple:
         conditions.append(2)
         f.send_real("q")
         assert f.emul_signals == click("012")
+
+
+class TestSleep:
+    def test_before_start_fails(self, f: Fixture) -> None:
+        with pytest.raises(RuntimeError, match="not initialized"):
+            tapper.sleep(0)
+
+    def test_outside_of_action_after_start(self, f: Fixture) -> None:
+        """E.g. in the main thread right after tapper.init(): no action config, nothing to kill."""
+        f.start()
+        outcome = []
+
+        def sleep_in_bare_thread() -> None:
+            try:
+                tapper.sleep(0)
+                outcome.append("ok")
+            except Exception as e:
+                outcome.append(e)
+
+        thread = threading.Thread(target=sleep_in_bare_thread)
+        thread.start()
+        thread.join()
+        assert outcome == ["ok"]
 
 
 class TestTreeOrder:

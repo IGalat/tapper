@@ -26,8 +26,8 @@ COMBO_DELIMITER = ";"
 
 default_shift = "left_shift"
 
-ki_shift_down = lambda: KeyInstruction(default_shift, constants.KeyDir.DOWN)
-ki_shift_up = lambda: KeyInstruction(default_shift, constants.KeyDir.UP)
+ki_shift_down = lambda shift=default_shift: KeyInstruction(shift, constants.KeyDir.DOWN)
+ki_shift_up = lambda shift=default_shift: KeyInstruction(shift, constants.KeyDir.UP)
 
 
 def parse_wrap(combo_wrap: str) -> re.Pattern[str]:
@@ -171,12 +171,13 @@ class SendParser:
 
     @cache
     def parse(self, command: str, shift_in: str | None = None) -> list[SendInstruction]:
-        """Parse send command into sequential instructions."""
-        global default_shift
+        """Parse send command into sequential instructions.
+
+        :param shift_in: the shift key that is held down when sending, if any.
+        """
         self.pattern = self.pattern or parse_wrap(COMBO_WRAP)
 
-        if shift_in:
-            default_shift = shift_in
+        shift = shift_in or default_shift
         shift_down = bool(shift_in)
         result = []
         combos = match_combos(command, self.pattern).copy()
@@ -187,7 +188,7 @@ class SendParser:
                 combo = combos[0]
                 if i == combo.start():
                     combos.remove(combo)
-                    cmds = self.parse_combo(to_content(combo), shift_down)
+                    cmds = self.parse_combo(to_content(combo), shift_down, shift)
                     result.extend(cmds)
 
                     i = combo.end()
@@ -202,33 +203,36 @@ class SendParser:
             if symbol in keyboard.chars_en_upper:
                 symbol = keyboard.chars_en_upper_to_lower[symbol]
                 if not shift_down:
-                    result.append(ki_shift_down())
+                    result.append(ki_shift_down(shift))
                     shift_down = True
                 result.append(KeyInstruction(symbol))
             else:
                 if shift_down:
-                    result.append(ki_shift_up())
+                    result.append(ki_shift_up(shift))
                     shift_down = False
                 result.append(KeyInstruction(symbol))
             i += 1
 
         if shift_down and not shift_in:
-            result.append(ki_shift_up())
+            result.append(ki_shift_up(shift))
         elif shift_in and not shift_down:
-            result.append(ki_shift_down())
+            result.append(ki_shift_down(shift))
         return result
 
-    def parse_combo(self, content: str, shift_down: bool) -> list[SendInstruction]:
+    def parse_combo(
+        self, content: str, shift_down: bool, shift: str = default_shift
+    ) -> list[SendInstruction]:
         """
         Parse a combo from content string
         :param content: string like "a+b"
         :param shift_down: if shift is down before combo
+        :param shift: which shift key that is
         :return: parsed instructions
         """
         result = self._parse_combo(content).copy()
         if shift_down and has_chars(result):
-            result.insert(0, ki_shift_up())
-            result.append(ki_shift_down())
+            result.insert(0, ki_shift_up(shift))
+            result.append(ki_shift_down(shift))
         return result
 
     @cache

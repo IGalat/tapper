@@ -68,7 +68,7 @@ def f(dummy: Dummy, is_debug: bool, make_group: Callable) -> Fixture:
     config.tray_icon = False
     tapper.root = make_group("root")
     tapper.control_group = make_group("control_group")
-    tapper._initialized = False
+    tapper.controller.flow_control.initialized = False
     tapper.controller.flow_control.config_thread_local_storage.action_config = (
         wrapper.ActionConfig(0, 0, tapper.controller.flow_control.kill_id)
     )
