@@ -44,7 +44,7 @@ tray = [
 # Image matching
 img = [
     "pillow>=9.4.0",
-    "mss>=7.0.1",
+    "mss>=10.2.0",  # mss.MSS top-level export
     "numpy>=1.24.1",
     "opencv-python>=4.7.0.68",
 ]

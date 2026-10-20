@@ -639,7 +639,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "evdev", marker = "sys_platform == 'linux'", specifier = ">=1.6.0" },
-    { name = "mss", marker = "extra == 'img'", specifier = ">=7.0.1" },
+    { name = "mss", marker = "extra == 'img'", specifier = ">=10.2.0" },
     { name = "numpy", marker = "extra == 'img'", specifier = ">=1.24.1" },
     { name = "opencv-python", marker = "extra == 'img'", specifier = ">=4.7.0.68" },
     { name = "pillow", marker = "extra == 'img'", specifier = ">=9.4.0" },
