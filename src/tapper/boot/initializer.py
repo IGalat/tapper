@@ -1,4 +1,5 @@
 from tapper import config
+from tapper import trigger_conditions
 from tapper.action.runner import ActionRunner
 from tapper.action.runner import ActionRunnerImpl
 from tapper.boot import tray_icon
@@ -22,6 +23,7 @@ from tapper.model.send import SendInstruction
 from tapper.model.send import SleepInstruction
 from tapper.model.send import WheelInstruction
 from tapper.model.tap_tree import Group
+from tapper.model.types_ import KwTriggerConditions
 from tapper.parser.common import CURSOR_MOVE
 from tapper.parser.common import MILLIS
 from tapper.parser.common import SECONDS
@@ -32,6 +34,7 @@ from tapper.signal.signal_processor import SignalProcessor
 from tapper.signal.wrapper import ListenerWrapper
 from tapper.state import keeper
 from tapper.util import datastructs
+from tapper.util.datastructs import get_first_in
 
 
 def default_trigger_parser(os: str | None = None) -> TriggerParser:
@@ -86,6 +89,18 @@ def default_send_parser(os: str | None = None) -> SendParser:
     return send_parser
 
 
+# initializer.py
+def default_trigger_conditions(
+    controllers: list[ResourceController],
+) -> KwTriggerConditions:
+    return {
+        **trigger_conditions.generic(),
+        **trigger_conditions.keyboard(get_first_in(KeyboardController, controllers)),
+        **trigger_conditions.mouse(get_first_in(MouseController, controllers)),
+        **trigger_conditions.window(get_first_in(WindowController, controllers)),
+    }
+
+
 def init(
     iroot: Group,
     icontrol: Group,
@@ -105,8 +120,13 @@ def init(
     global keeper_pressed
     os = config.os
 
+    controllers = [
+        controller for controller in config.controllers if controller._supports(os)
+    ]
     transformer = TreeTransformer(
-        send_processor.send, default_trigger_parser(os), config.kw_trigger_conditions
+        send_processor.send,
+        default_trigger_parser(os),
+        {**default_trigger_conditions(controllers), **config.kw_trigger_conditions},
     )
     verify_settings_exist(iroot)
     root = transformer.transform(iroot)
@@ -131,9 +151,6 @@ def init(
         if listener.get_for_os(os) is not None
     ]
 
-    controllers = [
-        controller for controller in config.controllers if controller._supports(os)
-    ]
     if kbc := datastructs.get_first_in(KeyboardController, controllers):
         kbc._os = os
         kbc._emul_keeper = emul_keeper

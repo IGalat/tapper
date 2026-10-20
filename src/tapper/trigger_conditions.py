@@ -1,5 +1,3 @@
-"""See config.tree_possible_kwargs for docs."""
-
 from typing import Any
 from typing import Callable
 

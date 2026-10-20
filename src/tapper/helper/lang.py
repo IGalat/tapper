@@ -6,8 +6,6 @@ from tapper.model import languages
 from tapper.model.languages import Lang
 from tapper.parser import send_parser
 
-_combo_pattern = send_parser.parse_wrap(config.send_combo_wrap)
-
 
 @cache
 def to_en(language: str | int | Lang, text: str) -> str:
@@ -23,7 +21,8 @@ def to_en(language: str | int | Lang, text: str) -> str:
             f"Language {language} you're trying to transliterate is not implemented."
         )
     result = []
-    combos = send_parser.match_combos(text, _combo_pattern)
+    pattern = send_parser.parse_wrap(config.send_combo_wrap)
+    combos = send_parser.match_combos(text, pattern)
     i = 0
     while i < len(text):
         if combos:

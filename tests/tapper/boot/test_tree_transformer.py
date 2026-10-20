@@ -30,7 +30,9 @@ class TestTreeTransformer:
     @pytest.fixture(scope="class")
     def transform(self) -> TransformFn:
         return TreeTransformer(
-            send, initializer.default_trigger_parser(), config.kw_trigger_conditions
+            send,
+            initializer.default_trigger_parser(),
+            initializer.default_trigger_conditions(config.controllers),
         ).transform
 
     @pytest.fixture

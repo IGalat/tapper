@@ -2,7 +2,6 @@ import logging
 import sys
 import time
 
-from tapper import trigger_conditions
 from tapper.controller.keyboard.kb_api import KeyboardController
 from tapper.controller.mouse.mouse_api import MouseController
 from tapper.controller.window.window_api import WindowController
@@ -11,7 +10,6 @@ from tapper.model import mouse
 from tapper.model.types_ import KwTriggerConditions
 from tapper.signal.keyboard.keyboard_listener import KeyboardSignalListener
 from tapper.signal.mouse.mouse_listener import MouseSignalListener
-from tapper.util.datastructs import get_first_in
 
 """
 ------------------------------------
@@ -84,14 +82,10 @@ controllers = [
     WindowController(),
 ]
 
-kw_trigger_conditions: KwTriggerConditions = {
-    **trigger_conditions.generic(),
-    **trigger_conditions.keyboard(get_first_in(KeyboardController, controllers)),
-    **trigger_conditions.mouse(get_first_in(MouseController, controllers)),
-    **trigger_conditions.window(get_first_in(WindowController, controllers)),
-}
+kw_trigger_conditions: KwTriggerConditions = {}
 """
-Keyword trigger conditions that can be used as part of Tap or Group.
+Your own keyword trigger conditions, usable as part of Tap or Group.
+Built-in ones (see tapper.trigger_conditions) are added on init for the controllers in use.
 
 When keyword is used, the value is used in the corresponding function every
 time signal is received and Tap or Group could trigger an action.
