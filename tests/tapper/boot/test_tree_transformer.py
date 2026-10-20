@@ -55,8 +55,8 @@ class TestTreeTransformer:
         group.add(tap)
         shadow_group = transform(group)
 
-        assert shadow_group.get_main_triggers(KeyDirBool.DOWN) == ["a"]
-        assert shadow_group.get_main_triggers(KeyDirBool.UP) == []
+        assert shadow_group.get_main_triggers(KeyDirBool.DOWN) == {"a"}
+        assert shadow_group.get_main_triggers(KeyDirBool.UP) == set()
         assert len(shadow_group.children) == 1
         t = shadow_group.children[0]
         assert isinstance(t, STap)
@@ -65,7 +65,7 @@ class TestTreeTransformer:
             assert t.suppress_trigger == self.res
             assert t.send_interval == self.si
             assert t.send_press_duration == self.spd
-            assert t.get_main_triggers(KeyDirBool.DOWN) == ["a"]
+            assert t.get_main_triggers(KeyDirBool.DOWN) == {"a"}
             assert t.original == tap
             assert t.action == send
 
@@ -76,12 +76,12 @@ class TestTreeTransformer:
         group.add(group1, Tap("f1", partial(send, "f1")), group2)
         sg = transform(group)
 
-        assert sg.get_main_triggers(KeyDirBool.DOWN) == ["1", "f1", "a", "b"]
+        assert sg.get_main_triggers(KeyDirBool.DOWN) == {"1", "f1", "a", "b"}
         assert len(sg.children) == 3
         g1, t2, g3 = sg.children
         assert len(g1.children) == 1
         assert len(g3.children) == 2
-        assert g3.get_main_triggers(KeyDirBool.DOWN) == ["a", "b"]
+        assert g3.get_main_triggers(KeyDirBool.DOWN) == {"a", "b"}
 
     def test_prop_override(self, transform: TransformFn, group: Group) -> None:
         tap1 = Tap("1", send)

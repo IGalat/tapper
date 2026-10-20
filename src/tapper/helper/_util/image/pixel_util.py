@@ -73,28 +73,17 @@ def pixel_info(
         callback_for_data((r, g, b), (x, y))
 
 
-def px_eq(im: ImagePixelMatrixT, color: PixelColorT) -> bool:
-    return (
-        (im[:, :, 0] == color[0])
-        & (im[:, :, 1] == color[1])
-        & (im[:, :, 2] == color[2])
-    )
-
-
 def get_first_match_coords(
     image: ImagePixelMatrixT, color: PixelColorT, variation: int
 ) -> XyCoordsT | None:
-    """Probably horribly inefficient"""
-    for i in range(image.shape[0]):
-        for j in range(image.shape[1]):
-            px = image[i, j]
-            if (
-                abs(int(px[0]) - color[0]) <= variation
-                and abs(int(px[1]) - color[1]) <= variation
-                and abs(int(px[2]) - color[2]) <= variation
-            ):
-                return j, i  # transposed. why?
-    return None
+    """First match in row-major order: top row first, left to right."""
+    # uint8 subtraction wraps around, so widen before taking the difference
+    close = np.abs(image.astype(np.int16) - color) <= variation
+    matching_px = np.argwhere(close.all(axis=2))
+    if matching_px.size == 0:
+        return None
+    y, x = matching_px[0]
+    return int(x), int(y)
 
 
 def find(
@@ -114,17 +103,8 @@ def find(
         elif len(bbox_or_coords) == 4:
             bbox = bbox_or_coords
     outer = base.get_screenshot_if_none_and_cut(outer_maybe, bbox)
-    if variation == 0:
-        matching_px = np.argwhere(px_eq(outer, color))
-        if matching_px.size <= 0:
-            return None
-        first_match = matching_px[0]
-        y = first_match[0]
-        x = first_match[1]
-        match = int(x), int(y)
-    else:
-        if (match := get_first_match_coords(outer, color, variation)) is None:
-            return None
+    if (match := get_first_match_coords(outer, color, variation)) is None:
+        return None
 
     if bbox is None or return_absolute_coords is False:
         return match

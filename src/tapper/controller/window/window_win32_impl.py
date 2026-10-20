@@ -1,5 +1,4 @@
 import ctypes.wintypes
-import logging
 import os
 import time
 from typing import Any
@@ -14,6 +13,7 @@ import win32process
 
 from tapper.controller.window.window_api import WindowCommander
 from tapper.controller.window.window_api import WindowTracker
+from tapper.feedback.logger import log
 from tapper.model.window import Window
 
 user32 = ctypes.windll.user32
@@ -199,7 +199,7 @@ class Win32WindowTrackerCommander(WindowTracker, WindowCommander):
                 handle,
             )
         except pywintypes.error as e:
-            logging.warn(e)
+            log.warning(e)
             result = self._win_explorer_to_active(handle)
         if result:
             win32gui.ShowWindow(handle, win32con.SW_RESTORE)  # un-minimize
@@ -223,7 +223,7 @@ class Win32WindowTrackerCommander(WindowTracker, WindowCommander):
             user32.SetForegroundWindow(handle)
             return True
         except Exception as e:
-            logging.error(e)
+            log.error(e)
             return False
 
     def to_next_of_same_group(self) -> bool:
@@ -387,6 +387,6 @@ class Win32WindowTrackerCommander(WindowTracker, WindowCommander):
         try:
             [cmd(open_win[0].handle) for cmd in commands_for_handle]
         except Exception as e:
-            logging.error(e)
+            log.error(e)
             return False
         return True

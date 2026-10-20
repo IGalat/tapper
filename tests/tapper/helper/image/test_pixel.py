@@ -99,6 +99,12 @@ class TestFind:
         with pytest.raises(ValueError):
             img.pixel_find((1000, -200, 0))
 
+    def test_variation_in_both_directions(self) -> None:
+        outer = img_test_util.from_matrix([[black, gray], [gray, white]])
+        assert img.pixel_find((250, 250, 250), outer=outer, variation=10) == (1, 1)
+        assert img.pixel_find((5, 5, 5), outer=outer, variation=10) == (0, 0)
+        assert img.pixel_find((120, 135, 128), outer=outer, variation=10) == (1, 0)
+
 
 class TestWaitFor:
     def test_simplest(self, mock_get_sct) -> None:

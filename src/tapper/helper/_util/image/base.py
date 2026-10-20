@@ -6,7 +6,6 @@ import mss
 import numpy as np
 import PIL.Image
 import PIL.ImageGrab
-from mss.base import MSSBase
 from numpy import ndarray
 
 from tapper.helper.model_types import BboxT
@@ -25,13 +24,7 @@ def find_fuzzy_cv2(target: ndarray, outer: ndarray) -> tuple[float, XyCoordsT]:
     return max_val, max_loc
 
 
-mss_instance: MSSBase
-
-
-def get_mss() -> MSSBase:
-    global mss_instance
-    mss_instance = mss.mss()
-    return mss_instance
+mss_instance = mss.MSS()
 
 
 @lru_cache(maxsize=5)
@@ -72,11 +65,11 @@ def get_screenshot_if_none_and_cut(
         return maybe_image
     if bbox is not None:
         try:
-            sct = get_mss().grab(bbox)
+            sct = mss_instance.grab(bbox)
         except Exception as e:
             raise e
     else:
-        sct = get_mss().grab(get_mss().monitors[0])
+        sct = mss_instance.grab(mss_instance.monitors[0])
     pil_rgb = PIL.Image.frombytes("RGB", sct.size, sct.bgra, "raw", "BGRX")
     return np.asarray(pil_rgb)
 
@@ -134,16 +127,7 @@ def win32_coords_start() -> XyCoordsT:
 def target_to_image(target: ImageT, bbox: BboxT | None) -> ImagePixelMatrixT:
     """Transform and verify target from API input to workable image-array."""
     target_image = to_pixel_matrix(target)
-    assert target_image is not None  # for mypy
-    if bbox is not None:
-        bbox_x = abs(bbox[2] - bbox[0])
-        bbox_y = abs(bbox[3] - bbox[1])
-        image_x, image_y = get_image_size(target_image)
-        if bbox_x < image_x or bbox_y < image_y:
-            raise ValueError(
-                f"Bbox should NOT be smaller than target, "
-                f"but got {bbox_x}x{bbox_y} vs target {image_x}x{image_y}"
-            )
+    check_bbox_bigger_or_eq(target_image, bbox)
     return target_image
 
 
@@ -152,15 +136,7 @@ def outer_to_image(
 ) -> ImagePixelMatrixT:
     """Transform and verify target from API input (or screenshot) to workable image-array."""
     outer_maybe = to_pixel_matrix(outer_or_path_maybe)
-    if outer_maybe is not None and bbox is not None:
-        bbox_x = abs(bbox[2] - bbox[0])
-        bbox_y = abs(bbox[3] - bbox[1])
-        image_x, image_y = get_image_size(outer_maybe)
-        if bbox_x > image_x or bbox_y > image_y:
-            raise ValueError(
-                f"Bbox should NOT be bigger than outer, "
-                f"but got {bbox_x}x{bbox_y} vs outer {image_x}x{image_y}"
-            )
+    check_bbox_smaller_or_eq(outer_maybe, bbox)
     return get_screenshot_if_none_and_cut(outer_maybe, bbox)
 
 

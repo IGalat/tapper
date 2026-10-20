@@ -12,8 +12,6 @@ from tapper.model.trigger import Trigger
 from tapper.model.types_ import Action
 from tapper.model.types_ import TriggerConditionFn
 from tapper.util.cache import lru_cache
-from tapper.util.datastructs import to_flat_list
-from tapper.util.datastructs import unique_list
 
 
 class STapGeneric(ABC):
@@ -28,7 +26,7 @@ class STapGeneric(ABC):
     trigger_conditions: list[TriggerConditionFn]
 
     @abstractmethod
-    def get_main_triggers(self, direction: constants.KeyDirBool) -> list[str]:
+    def get_main_triggers(self, direction: constants.KeyDirBool) -> set[str]:
         """All main keys. If group - all children's main keys."""
 
 
@@ -41,11 +39,11 @@ class STap(STapGeneric):
     executor: int
     suppress_trigger: constants.ListenerResult
 
-    def get_main_triggers(self, direction: constants.KeyDirBool) -> list[str]:
+    def get_main_triggers(self, direction: constants.KeyDirBool) -> set[str]:
         if self.trigger.main.direction == direction:
-            return self.trigger.main.symbols
+            return set(self.trigger.main.symbols)
         else:
-            return []
+            return set()
 
 
 @dataclass
@@ -55,11 +53,12 @@ class SGroup(STapGeneric):
     children: list[STapGeneric] = field(default_factory=list)
 
     @lru_cache
-    def get_main_triggers(self, direction: constants.KeyDirBool) -> list[str]:
-        nested_non_unique = [
-            child.get_main_triggers(direction) for child in self.children
-        ]
-        return unique_list(to_flat_list(nested_non_unique))
+    def get_main_triggers(self, direction: constants.KeyDirBool) -> set[str]:
+        return {
+            trigger
+            for child in self.children
+            for trigger in child.get_main_triggers(direction)
+        }
 
     def add(self, *children: STapGeneric) -> "SGroup":
         self.children.extend(children)
