@@ -107,32 +107,31 @@ def win_filter(
     return win
 
 
-def add_win_if_required(
-    result: list[Window],
-    exec_or_title: Optional[str] = None,
-    title: Optional[str] = None,
-    exec: Optional[str] = None,
-    strict: bool = False,
-    process_id: Optional[int] = None,
-    handle: Any = None,
-    limit: Optional[int] = None,
-    win_to_add: Optional[Window] = None,
-) -> None:
-    if limit and len(result) >= limit:
-        return
-    if not win_to_add:
-        return
-    if not hasattr(win_to_add, "exec") and not hasattr(win_to_add, "title"):
-        return
-    if win_filter(win_to_add, exec_or_title, title, exec, strict, process_id, handle):
-        result.append(win_to_add)
+OPEN_WINDOWS_TTL = 0.1
+"""Enumerating windows with their exec names takes milliseconds, and `open_win`
+conditions ask on every keystroke, so a recent enumeration is reused for this long."""
 
 
 class Win32WindowTrackerCommander(WindowTracker, WindowCommander):
     only_visible_windows: bool
+    _open_windows: list[Window]
+    _open_windows_at: float
 
     def __init__(self, only_visible_windows: bool = True) -> None:
         self.only_visible_windows = only_visible_windows
+        self._open_windows = []
+        self._open_windows_at = float("-inf")
+
+    def _all_open(self) -> list[Window]:
+        now = time.perf_counter()
+        if now - self._open_windows_at > OPEN_WINDOWS_TTL:
+            found: list[Optional[Window]] = []
+            win32gui.EnumWindows(
+                lambda hwnd, _: found.append(self.to_window(hwnd)), None
+            )
+            self._open_windows = [win for win in found if win]
+            self._open_windows_at = now
+        return self._open_windows
 
     def start(self) -> None:
         pass
@@ -151,20 +150,11 @@ class Win32WindowTrackerCommander(WindowTracker, WindowCommander):
         limit: Optional[int] = None,
     ) -> list[Window]:
         result: list[Window] = []
-        win32gui.EnumWindows(
-            lambda hwnd, _: add_win_if_required(
-                result,
-                exec_or_title,
-                title,
-                exec,
-                strict,
-                process_id,
-                handle,
-                limit,
-                self.to_window(hwnd),
-            ),
-            None,
-        )
+        for win in self._all_open():
+            if win_filter(win, exec_or_title, title, exec, strict, process_id, handle):
+                result.append(win)
+                if limit and len(result) >= limit:
+                    break
         return result
 
     def active(

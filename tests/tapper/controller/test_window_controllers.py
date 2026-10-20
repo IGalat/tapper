@@ -1,3 +1,4 @@
+import sys
 from functools import partial
 from typing import Any
 from typing import Callable
@@ -6,6 +7,42 @@ from typing import Optional
 import pytest
 
 from tapper.model.window import Window
+from testutil_model import FakeClock
+
+
+@pytest.mark.skipif(sys.platform != "win32", reason="imports pywin32")
+def test_get_open_reuses_enumeration_within_ttl(
+    monkeypatch: pytest.MonkeyPatch, fake_perf_counter: FakeClock
+) -> None:
+    from tapper.controller.window import window_win32_impl as impl
+
+    windows = [
+        Window("Notepad", "notepad.exe", 1, 10),
+        Window("Chrome", "chrome.exe", 2, 20),
+    ]
+    enumerations = 0
+
+    def enum_windows(callback: Callable[[Any, Any], Any], _: Any) -> None:
+        nonlocal enumerations
+        enumerations += 1
+        for win in windows:
+            callback(win.handle, None)
+
+    monkeypatch.setattr(impl.win32gui, "EnumWindows", enum_windows)
+    tracker = impl.Win32WindowTrackerCommander()
+    monkeypatch.setattr(
+        tracker, "to_window", lambda hwnd: next(w for w in windows if w.handle == hwnd)
+    )
+
+    fake_perf_counter.set(10)
+    assert tracker.get_open("notepad") == [windows[0]]
+    assert tracker.get_open(exec="chrome.exe", strict=True) == [windows[1]]
+    assert tracker.get_open(limit=1) == [windows[0]]
+    assert enumerations == 1
+
+    fake_perf_counter.advance(impl.OPEN_WINDOWS_TTL + 0.001)
+    assert tracker.get_open() == windows
+    assert enumerations == 2
 
 
 @pytest.mark.skip(
