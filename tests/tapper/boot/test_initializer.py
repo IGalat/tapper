@@ -35,13 +35,13 @@ def test_init_skips_components_not_implemented_for_os(
         [KeyboardController(), MouseController(), WindowController(), injected_kbc],
     )
 
-    listeners, controllers = initializer.init(
+    runtime = initializer.init(
         make_group("root"),
         make_group("control"),
         SendCommandProcessor.from_none(),
         SleepCommandProcessor.from_none(),
     )
 
-    assert len(listeners) == 1
-    assert type(listeners[0]) is dummy.Listener
-    assert controllers == [injected_kbc]
+    assert len(runtime.listeners) == 1
+    assert type(runtime.listeners[0]) is dummy.Listener
+    assert runtime.controllers == [injected_kbc]

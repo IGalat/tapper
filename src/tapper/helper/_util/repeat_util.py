@@ -4,7 +4,6 @@ from typing import Callable
 
 import tapper
 from tapper.action.wrapper import ActionConfig
-from tapper.boot import initializer
 from tapper.controller import flow_control
 from tapper.controller.flow_control import config_thread_local_storage
 from tapper.helper.model import Repeatable
@@ -82,7 +81,7 @@ def to_pressed_condition(symbol: str) -> Callable[[], bool]:
     else:
         raise ValueError(f"Repeat while pressed: '{symbol}' not recognised.")
     return lambda: (
-        device.pressed(symbol) or symbol in initializer.keeper_pressed.pressed_keys
+        device.pressed(symbol) or symbol in tapper._runtime.pressed.pressed_keys
     )
 
 

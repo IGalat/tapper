@@ -1,3 +1,5 @@
+from dataclasses import dataclass
+
 from tapper import config
 from tapper import trigger_conditions
 from tapper.action.runner import ActionRunner
@@ -23,6 +25,7 @@ from tapper.model.send import SendInstruction
 from tapper.model.send import SleepInstruction
 from tapper.model.send import WheelInstruction
 from tapper.model.tap_tree import Group
+from tapper.model.tap_tree_shadow import SGroup
 from tapper.model.types_ import KwTriggerConditions
 from tapper.parser.common import CURSOR_MOVE
 from tapper.parser.common import MILLIS
@@ -45,8 +48,18 @@ def default_action_runner() -> ActionRunner:
     return ActionRunnerImpl(config.action_runner_executors_threads)
 
 
-# crutch, use DI instead.
-keeper_pressed = None
+@dataclass
+class Runtime:
+    """Everything init() built, for one process. Lives at tapper._runtime."""
+
+    root: SGroup
+    control: SGroup
+    runner: ActionRunner
+    emul: keeper.Emul
+    pressed: keeper.Pressed
+    signal_processor: SignalProcessor
+    listeners: list[SignalListener]
+    controllers: list[ResourceController]
 
 
 def default_keeper_pressed(os: str | None = None) -> keeper.Pressed:
@@ -106,7 +119,7 @@ def init(
     icontrol: Group,
     send_processor: SendCommandProcessor,
     sleep_processor: SleepCommandProcessor,
-) -> tuple[list[SignalListener], list[ResourceController]]:
+) -> Runtime:
     """Initialize components with config values.
     Listeners and controllers without an implementation for this OS are skipped."""
     if config.tapper_logging_config:
@@ -117,7 +130,6 @@ def init(
         )
     log.info("Initializing tapper")
 
-    global keeper_pressed
     os = config.os
 
     controllers = [
@@ -137,7 +149,6 @@ def init(
     runner = default_action_runner()
     emul_keeper = keeper.Emul()
     state_keeper = default_keeper_pressed()
-    keeper_pressed = state_keeper
 
     signal_processor = SignalProcessor(root, control, state_keeper, runner)
     listener_wrapper = ListenerWrapper(
@@ -175,7 +186,16 @@ def init(
     send_processor.sleep_fn = sleep_processor.sleep
 
     log.info("Tapper init complete")
-    return listeners, controllers
+    return Runtime(
+        root=root,
+        control=control,
+        runner=runner,
+        emul=emul_keeper,
+        pressed=state_keeper,
+        signal_processor=signal_processor,
+        listeners=listeners,
+        controllers=controllers,
+    )
 
 
 def set_default_controls_if_empty(icontrol: Group) -> None:
@@ -213,14 +233,12 @@ def verify_settings_exist(group: Group) -> None:
         raise AttributeError(e_text)
 
 
-def start(
-    listeners: list[SignalListener], controllers: list[ResourceController]
-) -> None:
+def start(runtime: Runtime) -> None:
     """Starts the application. Should be called after init"""
     log.info("Starting tapper")
-    for controller in controllers:
+    for controller in runtime.controllers:
         controller._start()
-    for listener in listeners:
+    for listener in runtime.listeners:
         listener.start()
     if config.tray_icon and config.os != "darwin":  # No tray for MacOS
         tray_icon.create()

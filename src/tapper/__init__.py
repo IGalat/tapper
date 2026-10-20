@@ -2,11 +2,9 @@ import time as _time
 
 from tapper import config
 from tapper.boot import initializer as _initializer
+from tapper.controller import flow_control as _flow_control
 from tapper.controller.keyboard.kb_api import KeyboardController as _KeyboardController
 from tapper.controller.mouse.mouse_api import MouseController as _MouseController
-from tapper.controller.resource_controller import (
-    ResourceController as _ResourceController,
-)
 from tapper.controller.send_processor import (
     SendCommandProcessor as _SendCommandProcessor,
 )
@@ -16,15 +14,13 @@ from tapper.controller.sleep_processor import (
 from tapper.controller.window.window_api import WindowController as _WindowController
 from tapper.feedback import logger as _logger
 from tapper.model import tap_tree as _tap_tree
-from tapper.signal.base_listener import SignalListener as _SignalListener
 from tapper.util import datastructs as _datastructs
 
-_listeners: list[_SignalListener]
-_controllers: list[_ResourceController]
+_runtime: _initializer.Runtime
+"""Set by init()."""
 
 _send_processor = _SendCommandProcessor.from_none()
 _sleep_processor = _SleepCommandProcessor.from_none()
-_initialized = False
 _blocking = True
 
 Tap = _tap_tree.Tap
@@ -72,15 +68,11 @@ log = _logger.log
 """This logger will log into both console and logfile, by default."""
 
 
-def init() -> None:
+def init() -> _initializer.Runtime:
     """Initializes all underlying tools."""
-    global _listeners
-    global _controllers
-    global _initialized
-    _listeners, _controllers = _initializer.init(
-        root, control_group, _send_processor, _sleep_processor
-    )
-    _initialized = True
+    global _runtime
+    _runtime = _initializer.init(root, control_group, _send_processor, _sleep_processor)
+    return _runtime
 
 
 @_logger.LogExceptions()
@@ -89,9 +81,8 @@ def start() -> None:
     Initializes all underlying tools, and starts listeners.
     No changes by user in any elements of tapper are expected after this command.
     """
-    if not _initialized:
-        init()
-    _initializer.start(_listeners, _controllers)
+    runtime = _runtime if _flow_control.initialized else init()
+    _initializer.start(runtime)
 
     # Should be blocking for normal usage, flag is for testing.
     # If tray icon is on, it will be blocking anyway.
