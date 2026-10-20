@@ -1,9 +1,10 @@
-import atexit
 import os
 from typing import Any
 
 from tapper.feedback.logger import log
 from tapper.helper import controls
+
+_icon: Any = None
 
 
 def get_logo_path() -> str:
@@ -21,6 +22,7 @@ def make_menu() -> Any:
 
 def create() -> None:
     """Makes a visible tray icon."""
+    global _icon
     try:
         import PIL.Image
         import pystray
@@ -31,10 +33,10 @@ def create() -> None:
 
     logo = PIL.Image.open(get_logo_path())
 
-    stray = pystray.Icon("tapper", logo, menu=make_menu())
+    _icon = pystray.Icon("tapper", logo, menu=make_menu())
+    _icon.run_detached()
 
-    @atexit.register
-    def remove_stray() -> None:
-        stray.visible = False
 
-    stray.run_detached()
+def remove() -> None:
+    if _icon is not None:
+        _icon.stop()

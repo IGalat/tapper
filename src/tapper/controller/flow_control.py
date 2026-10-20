@@ -26,6 +26,9 @@ kill_id = uuid.uuid4()
 """When this is changed, all running actions will be killed
 with StopTapperActionException when they call tapper.sleep."""
 
+shutdown = threading.Event()
+"""Set to make tapper.start() stop everything and return."""
+
 
 def should_be_paused() -> bool:
     return paused

@@ -1,3 +1,4 @@
+import threading
 import time
 from dataclasses import dataclass
 from typing import Any
@@ -8,6 +9,9 @@ from unittest.mock import patch
 
 import pytest
 
+import tapper
+from tapper.controller import flow_control
+from tapper.controller.flow_control import StopTapperActionException
 from tapper.helper import repeat
 from tapper.helper._util import repeat_util
 
@@ -29,6 +33,13 @@ def mock_return_false(mock: Any) -> None:
 
 def raise_io_error() -> None:
     raise OSError()
+
+
+def wait_until(condition: Callable[[], bool]) -> None:
+    for _ in range(500):
+        if condition():
+            return
+        time.sleep(0.001)
 
 
 def wait_for_repeatable() -> None:
@@ -245,3 +256,40 @@ class TestRepeatToggle:
         wait_for_repeatable()
 
         assert counter.count == 3
+
+
+class TestKill:
+    def test_toggle_runs_after_a_kill(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        killed = Counter()
+        survivor = Counter()
+
+        def kill(*_: Any) -> None:
+            raise StopTapperActionException
+
+        monkeypatch.setattr(tapper, "sleep", kill)
+        repeat.toggle(killed.tick)()
+        wait_until(lambda: repeat_util.running_repeatable is None)
+        assert killed.count == 1
+
+        monkeypatch.setattr(tapper, "sleep", lambda *_: None)
+        repeat.toggle(survivor.tick, max_repeats=3)()
+        wait_until(lambda: survivor.count == 3)
+        assert survivor.count == 3
+
+
+class TestShutdown:
+    def test_repeat_ends_when_tapper_stops(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        shutdown = threading.Event()
+        monkeypatch.setattr(flow_control, "shutdown", shutdown)
+        monkeypatch.setattr(tapper, "sleep", lambda *_: time.sleep(0.001))
+        counter = Counter()
+
+        repeat.toggle(counter.tick)()
+        wait_for_repeatable()
+        shutdown.set()
+        wait_until(lambda: repeat_util.running_repeatable is None)
+
+        assert repeat_util.running_repeatable is None
+        assert counter.count >= 1

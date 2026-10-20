@@ -12,7 +12,7 @@ from tapper.signal.mouse.mouse_listener import MouseSignalListener
 
 class Win32MouseSignalListener(MouseSignalListener):
     def start(self) -> None:
-        Thread(target=self.event_loop_start).start()
+        Thread(target=self.event_loop_start, daemon=True).start()
 
     @LogExceptions()
     def event_loop_start(self) -> None:

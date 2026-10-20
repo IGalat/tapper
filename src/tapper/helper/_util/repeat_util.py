@@ -1,25 +1,27 @@
+import queue
+import threading
 import time
-from concurrent.futures import ThreadPoolExecutor
 from typing import Callable
 
 import tapper
 from tapper.action.wrapper import ActionConfig
 from tapper.controller import flow_control
+from tapper.controller.flow_control import StopTapperActionException
 from tapper.controller.flow_control import config_thread_local_storage
 from tapper.helper.model import Repeatable
 
 TIME_SPLIT = 0.1
 
-executor = ThreadPoolExecutor(max_workers=1)
-
-
 running_repeatable: Repeatable | None = None
+
+_to_run: queue.Queue[Repeatable] = queue.Queue()
 
 
 def is_end_run(repeatable: Repeatable) -> bool:
     try:
         return (
-            running_repeatable is None
+            flow_control.shutdown.is_set()
+            or running_repeatable is None
             or running_repeatable.uid != repeatable.uid
             or not bool(repeatable.condition())
         )
@@ -64,10 +66,22 @@ def _run_task(repeatable: Repeatable) -> None:
         running_repeatable = None
 
 
+def _worker() -> None:
+    global running_repeatable
+    while True:
+        try:
+            _run_task(_to_run.get())
+        except StopTapperActionException:
+            running_repeatable = None
+
+
+threading.Thread(target=_worker, name="tapper-repeat", daemon=True).start()
+
+
 def run_action(in_repeatable: Repeatable) -> None:
     global running_repeatable
     running_repeatable = in_repeatable
-    executor.submit(_run_task, in_repeatable)
+    _to_run.put(in_repeatable)
 
 
 def to_pressed_condition(symbol: str) -> Callable[[], bool]:

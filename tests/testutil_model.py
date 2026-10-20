@@ -291,6 +291,9 @@ class DummyActionRunner(ActionRunner):
     def run_control(self, fn: types_.Action) -> None:
         self.control_actions_ran.append(fn)
 
+    def shutdown(self, timeout: float) -> int:
+        return 0
+
 
 class Dummy:
     Listener = DummyListener

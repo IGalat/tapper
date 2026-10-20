@@ -104,6 +104,12 @@ class TestSleepKill:
 
 
 class TestSleepPause:
+    def test_killed_while_paused(self, sleep_fixture: SleepFixture) -> None:
+        sleep_fixture.processor.pause_check_fn.return_value = True
+        sleep_fixture.processor.kill_check_fn.side_effect = [False, False, True]
+        with pytest.raises(StopTapperActionException):
+            sleep_fixture.sleep(1)
+
     def test_time_slept_extends_with_pause(self, sleep_fixture: SleepFixture) -> None:
         sleep_fixture.processor.check_interval = 0.1
         sleep_fixture.processor.pause_check_fn.side_effect = lambda: bool(

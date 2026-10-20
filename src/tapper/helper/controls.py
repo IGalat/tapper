@@ -1,6 +1,3 @@
-import atexit
-import os
-import signal
 import subprocess
 import sys
 import uuid
@@ -18,17 +15,12 @@ def restart() -> None:
         )
     else:
         subprocess.Popen(popen_args, start_new_session=True, close_fds=True)
-    _terminate()
+    _flow_control.shutdown.set()
 
 
 def terminate() -> None:
     log.info("Terminating tapper...")
-    _terminate()
-
-
-def _terminate() -> None:
-    atexit._run_exitfuncs()  # run all @atexit functions
-    os.kill(os.getpid(), signal.SIGINT)
+    _flow_control.shutdown.set()
 
 
 def pause_actions_on() -> None:

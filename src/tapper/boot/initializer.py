@@ -240,3 +240,23 @@ def start(runtime: Runtime) -> None:
         listener.start()
     if config.tray_icon and config.os != "darwin":  # No tray for MacOS
         tray_icon.create()
+
+
+STOP_TIMEOUT = 2
+"""Seconds to wait for running actions on stop. An action that neither finishes nor
+calls tapper.sleep cannot be interrupted; after this it is reported and left behind."""
+
+
+def stop(runtime: Runtime) -> None:
+    """Counterpart of start. Running actions are killed where they call tapper.sleep."""
+    log.info("Stopping tapper")
+    for listener in runtime.listeners:
+        listener.stop()
+    controls.kill_running_actions()
+    if still_running := runtime.runner.shutdown(STOP_TIMEOUT):
+        log.warning(
+            f"{still_running} action(s) still running after {STOP_TIMEOUT}s, exiting anyway."
+        )
+    for controller in runtime.controllers:
+        controller._stop()
+    tray_icon.remove()

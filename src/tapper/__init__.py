@@ -1,5 +1,3 @@
-import time as _time
-
 from tapper import config
 from tapper.boot import initializer as _initializer
 from tapper.controller import flow_control as _flow_control
@@ -85,7 +83,10 @@ def start() -> None:
     _initializer.start(runtime)
 
     # Should be blocking for normal usage, flag is for testing.
-    # If tray icon is on, it will be blocking anyway.
     if _blocking:
-        while True:
-            _time.sleep(1000000)
+        try:
+            while not _flow_control.shutdown.wait(0.2):
+                pass
+        except KeyboardInterrupt:
+            log.info("Interrupted")
+        _initializer.stop(runtime)

@@ -32,7 +32,7 @@ class LinuxKeyboardSignalListener(KeyboardSignalListener):
         self.real_kbs = evdev_common.get_real_keyboards()
         self.virtual_kb = evdev_common.get_virtual_kb()
         for kb in self.real_kbs:
-            Thread(target=partial(self.keyboard_loop, kb)).start()
+            Thread(target=partial(self.keyboard_loop, kb), daemon=True).start()
 
     @LogExceptions()
     def stop(self) -> None:

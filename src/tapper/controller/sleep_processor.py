@@ -75,6 +75,7 @@ class SleepCommandProcessor:
     def pause_if_required(self) -> None:
         while self.pause_check_fn():
             self.actual_sleep_fn(self.check_interval)
+            self.kill_if_required()
 
     def kill_if_required(self) -> None:
         if self.kill_check_fn():

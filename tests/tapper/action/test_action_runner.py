@@ -19,6 +19,18 @@ def all_actions_done(runnables: list[list[Future[Any]]]) -> bool:
     return not runner.prune_done_runnables(runnables)
 
 
+class TestShutdown:
+    def test_waits_for_actions_that_finish_in_time(self) -> None:
+        runner_ = ActionRunnerImpl([1])
+        runner_.run(functools.partial(time.sleep, 0.05))
+        assert runner_.shutdown(timeout=1) == 0
+
+    def test_reports_actions_still_running(self) -> None:
+        runner_ = ActionRunnerImpl([1])
+        runner_.run(functools.partial(time.sleep, 0.2))
+        assert runner_.shutdown(timeout=0.01) == 1
+
+
 class TestActionRunnerImpl:
     @pytest.fixture(scope="class")
     def simple_runner(self) -> ActionRunner:

@@ -2,6 +2,7 @@ from abc import ABC
 from abc import abstractmethod
 from concurrent.futures import Future
 from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import wait
 from typing import Any
 from typing import Final
 
@@ -32,6 +33,13 @@ class ActionRunner(ABC):
         """Runs an action in a separate thread. Intended to be only used for control of tapper flow.
 
         There is no concurrency for this, and queueing is not allowed.
+        """
+
+    @abstractmethod
+    def shutdown(self, timeout: float) -> int:
+        """No more actions will be accepted. Waits up to timeout for running ones.
+
+        :return: how many actions are still running after that.
         """
 
 
@@ -78,3 +86,11 @@ class ActionRunnerImpl(ActionRunner):
     def run_control(self, fn: types_.Action) -> None:
         if not hasattr(self, "_control_runnable") or self._control_runnable.done():
             self._control_runnable = self.control_executor.submit(fn)
+
+    def shutdown(self, timeout: float) -> int:
+        for executor in [*self.executors, self.control_executor]:
+            executor.shutdown(wait=False, cancel_futures=True)
+        running = [f for runnables in self._runnables for f in runnables]
+        if hasattr(self, "_control_runnable"):
+            running.append(self._control_runnable)
+        return len(wait(running, timeout=timeout).not_done)
