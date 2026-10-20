@@ -68,6 +68,7 @@ def test_subscription(wrap_fixture: WrapFixture) -> None:
     state = pressed.get_state(time.perf_counter())
     assert not state
 
+    event.join()
     assert subscription_log == will_signal
 
 

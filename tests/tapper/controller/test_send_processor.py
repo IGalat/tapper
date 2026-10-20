@@ -87,6 +87,9 @@ class TestSendCommandProcessor:
         config_thread_local_storage.action_config = wrapper.ActionConfig(
             0, 0, flow_control.kill_id
         )
+        yield
+        event.join()
+        assert not self.real_signals, "emulated signals must not be published"
 
     def test_simplest(self) -> None:
         self.sender.send("a")

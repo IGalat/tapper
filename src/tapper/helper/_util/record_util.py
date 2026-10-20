@@ -81,6 +81,7 @@ def stop_recording(callbacks: list[Callable[[str], Any]], config: RecordConfig) 
 
     event.unsubscribe("keyboard", record_signal)
     event.unsubscribe("mouse", record_signal)
+    event.join()
 
     if recording_:
         rec = recording_

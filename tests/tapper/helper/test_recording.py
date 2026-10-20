@@ -141,6 +141,7 @@ class TestRecorderTransform:
 
 def push_key(signal: Signal, fake_clock: FakeClock) -> None:
     event.publish("keyboard", signal)
+    event.join()
     fake_clock.advance(1)
 
 
