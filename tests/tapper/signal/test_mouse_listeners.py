@@ -1,9 +1,9 @@
 import random
 import sys
-from functools import partial
 
 import pytest
 
+from tapper.boot import platforms
 from tapper.model import constants
 from tapper.model.constants import KeyDirBool
 from tapper.model.constants import ListenerResult
@@ -14,9 +14,8 @@ from tapper.signal.mouse.mouse_listener import MouseSignalListener
 
 @pytest.mark.skipif(sys.platform != constants.OS.win32, reason="")
 class TestWin32Listener:
-    get_listener: MouseSignalListener = partial(
-        MouseSignalListener.get_for_os, sys.platform
-    )
+    def get_listener(self) -> MouseSignalListener:
+        return platforms.for_os(sys.platform).listeners[constants.Aspect.mouse]()
 
     def assert_result(
         self,

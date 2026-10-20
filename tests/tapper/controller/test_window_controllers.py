@@ -29,7 +29,7 @@ def test_get_open_reuses_enumeration_within_ttl(
             callback(win.handle, None)
 
     monkeypatch.setattr(impl.win32gui, "EnumWindows", enum_windows)
-    tracker = impl.Win32WindowTrackerCommander()
+    tracker = impl.Win32WindowDriver()
     monkeypatch.setattr(
         tracker, "to_window", lambda hwnd: next(w for w in windows if w.handle == hwnd)
     )
@@ -63,9 +63,7 @@ class TestWin32WindowController:
 
     @pytest.fixture
     def win_command(self, command_fns: list[Callable[[Any], Any]]) -> Any:
-        from tapper.controller.window.window_win32_impl import (
-            Win32WindowTrackerCommander,
-        )
+        from tapper.controller.window.window_win32_impl import Win32WindowDriver
         from tapper.controller.window.window_win32_impl import win_filter
 
         def get_open(
@@ -82,7 +80,7 @@ class TestWin32WindowController:
             )
             return [filtered] if filtered else []
 
-        win_tc = Win32WindowTrackerCommander()
+        win_tc = Win32WindowDriver()
         win_tc.get_open = get_open
         return partial(win_tc.window_commands, command_fns)
 

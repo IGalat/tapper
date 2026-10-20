@@ -8,12 +8,18 @@ import pytest
 import tapper
 from tapper import config
 from tapper.action import wrapper
+from tapper.boot import platforms
+from tapper.boot.platforms import Platform
 from tapper.controller.keyboard.kb_api import KeyboardController
 from tapper.controller.mouse.mouse_api import MouseController
 from tapper.controller.send_processor import SendCommandProcessor
+from tapper.model import constants
+from tapper.model.constants import Aspect
 from tapper.model.constants import KeyDirBool
 from tapper.model.types_ import SendFn
 from tapper.model.types_ import Signal
+from tapper.signal.base_listener import SignalListener
+from tapper.signal.keyboard.keyboard_listener import KeyboardSignalListener
 from tapper.state import keeper
 from testutil_model import Dummy
 
@@ -42,6 +48,7 @@ def ends_with(outer: list[Any], sub: list[Any]) -> bool:
 
 
 class Fixture:
+    listener: SignalListener
     emul_signals: list[Signal]
     real_signals: list[Signal]
     pressed: list[str]
@@ -59,7 +66,9 @@ class Fixture:
 
 
 @pytest.fixture
-def f(dummy: Dummy, is_debug: bool, make_group: Callable) -> Fixture:
+def f(
+    dummy: Dummy, is_debug: bool, make_group: Callable, monkeypatch: pytest.MonkeyPatch
+) -> Fixture:
     """Emulation of the entire tapper setup."""
     debug_sleep_mult = 5 if is_debug else 1
 
@@ -73,10 +82,11 @@ def f(dummy: Dummy, is_debug: bool, make_group: Callable) -> Fixture:
         wrapper.ActionConfig(0, 0, tapper.controller.flow_control.kill_id)
     )
 
-    listener = dummy.Listener.get_for_os("")
-    config.listeners = [listener]
+    listener = dummy.Listener()
+    config.listeners = [KeyboardSignalListener]
 
     fixture = Fixture()
+    fixture.listener = listener
     fixture._acts = {}
     fixture.emul_signals = []
     fixture.real_signals = []
@@ -84,14 +94,23 @@ def f(dummy: Dummy, is_debug: bool, make_group: Callable) -> Fixture:
     fixture.toggled = []
     fixture.actions = []
 
-    kb_tc = dummy.KbTC(listener, fixture.emul_signals, fixture.pressed, fixture.toggled)
-    tapper.kb._tracker, tapper.kb._commander = kb_tc, kb_tc
-    mouse_tc = dummy.MouseTC(
+    kb_driver = dummy.KbDriver(
         listener, fixture.emul_signals, fixture.pressed, fixture.toggled
     )
-    tapper.mouse._tracker, tapper.mouse._commander = mouse_tc, mouse_tc
-    wtc = dummy.WinTC([])
-    tapper.window._tracker, tapper.window._commander = wtc, wtc
+    mouse_driver = dummy.MouseDriver(
+        listener, fixture.emul_signals, fixture.pressed, fixture.toggled
+    )
+    window_driver = dummy.WindowDriver([])
+    dummy_platform = Platform(
+        listeners={Aspect.keyboard: lambda: listener},
+        drivers={
+            Aspect.keyboard: lambda: kb_driver,
+            Aspect.mouse: lambda: mouse_driver,
+            Aspect.window: lambda: window_driver,
+        },
+    )
+    monkeypatch.setattr(config, "os", constants.OS.dummy)
+    monkeypatch.setitem(platforms.by_os, constants.OS.dummy, lambda: dummy_platform)
 
     def start() -> None:
         tapper.init()  # this will init sender
@@ -115,17 +134,19 @@ def f(dummy: Dummy, is_debug: bool, make_group: Callable) -> Fixture:
 
         emul_keeper = keeper.Emul()
 
-        kb_tc2 = dummy.KbTC(
+        kb_driver2 = dummy.KbDriver(
             listener, fixture.real_signals, fixture.pressed, fixture.toggled
         )
         kbc = KeyboardController()
-        kbc._tracker, kbc._commander, kbc._emul_keeper = kb_tc2, kb_tc2, emul_keeper
+        kbc._init(kb_driver2)
+        kbc._emul_keeper = emul_keeper
 
-        mouse_tc2 = dummy.MouseTC(
+        mouse_driver2 = dummy.MouseDriver(
             listener, fixture.real_signals, fixture.pressed, fixture.toggled
         )
         mc = MouseController()
-        mc._tracker, mc._commander, mc._emul_keeper = mouse_tc2, mouse_tc2, emul_keeper
+        mc._init(mouse_driver2)
+        mc._emul_keeper = emul_keeper
 
         real_sender.kb_controller = kbc
         real_sender.mouse_controller = mc

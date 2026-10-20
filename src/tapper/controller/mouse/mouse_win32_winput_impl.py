@@ -2,8 +2,7 @@ from typing import Optional
 
 from winput import winput
 
-from tapper.controller.mouse.mouse_api import MouseCommander
-from tapper.controller.mouse.mouse_api import MouseTracker
+from tapper.controller.mouse.mouse_api import MouseDriver
 from tapper.controller.mouse.mouse_api import calc_move
 from tapper.model import mouse
 from tapper.util import datastructs
@@ -40,7 +39,7 @@ def button_state(code: int) -> int:
     return user32.GetKeyState(code)
 
 
-class Win32MouseTrackerCommander(MouseTracker, MouseCommander):
+class Win32MouseDriver(MouseDriver):
     def start(self) -> None:
         winput.set_DPI_aware(per_monitor=True)
 

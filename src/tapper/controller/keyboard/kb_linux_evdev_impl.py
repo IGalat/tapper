@@ -4,8 +4,7 @@ import time
 import evdev
 from evdev import UInput
 
-from tapper.controller.keyboard.kb_api import KeyboardCommander
-from tapper.controller.keyboard.kb_api import KeyboardTracker
+from tapper.controller.keyboard.kb_api import KeyboardDriver
 from tapper.model import keyboard
 from tapper.model.constants import EvdevReverseKeyDir
 from tapper.model.constants import KeyDirBool
@@ -27,7 +26,7 @@ symbol_code_map = datastructs.symbols_to_codes(
 modifier_led_indices = {"caps": 1, "caps_lock": 1, "num_lock": 0, "scroll_lock": 2}
 
 
-class LinuxKeyboardTrackerCommander(KeyboardTracker, KeyboardCommander):
+class LinuxKeyboardDriver(KeyboardDriver):
     real_kbs: list[evdev.InputDevice]
     virtual_kb: UInput
 

@@ -1,5 +1,6 @@
 from abc import ABC
 from abc import abstractmethod
+from typing import ClassVar
 
 from tapper.model import constants
 from tapper.model import errors
@@ -11,6 +12,9 @@ class SignalListener(ABC):
 
     When an implementation receives the signal, it must call on_signal fn.
     """
+
+    name: ClassVar[constants.Aspect]
+    """Aspect, not concrete impl. Used as topic in event subscription and in boot.platforms."""
 
     @classmethod
     @abstractmethod
@@ -38,16 +42,3 @@ class SignalListener(ABC):
     @abstractmethod
     def stop(self) -> None:
         """And clean resources, this is terminal."""
-
-    @property
-    @abstractmethod
-    def name(self) -> str:
-        """Aspect, not concrete impl. Used as topic in event subscription."""
-
-    @staticmethod
-    @abstractmethod
-    def get_for_os(os: str) -> "SignalListener | None":
-        """
-        :param os: Result of sys.platform() call, or see model/constants.
-        :return: Per-OS implementation of a specific SignalListener.
-        """

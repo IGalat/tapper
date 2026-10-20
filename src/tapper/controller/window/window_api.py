@@ -1,7 +1,6 @@
 from abc import ABC
 from abc import abstractmethod
 from typing import Any
-from typing import Callable
 from typing import Optional
 
 from tapper.controller.resource_controller import ResourceController
@@ -9,7 +8,9 @@ from tapper.model import constants
 from tapper.model.window import Window
 
 
-class WindowTracker(ABC):
+class WindowDriver(ABC):
+    """OS implementation of one aspect: reads its state and commands it."""
+
     @abstractmethod
     def start(self) -> None:
         pass
@@ -41,16 +42,6 @@ class WindowTracker(ABC):
         process_id: Optional[int] = None,
         handle: Any = None,
     ) -> Optional[Window]:
-        pass
-
-
-class WindowCommander(ABC):
-    @abstractmethod
-    def start(self) -> None:
-        pass
-
-    @abstractmethod
-    def stop(self) -> None:
         pass
 
     @abstractmethod
@@ -122,27 +113,14 @@ class WindowCommander(ABC):
 class WindowController(ResourceController):
     """Allows checking window status and giving commands."""
 
-    _os: str
-    _only_visible_windows: bool
-    """Provided before init."""
-
-    _tracker: WindowTracker
-    _commander: WindowCommander
-
-    def _supports(self, os: str) -> bool:
-        return hasattr(self, "_tracker") or os in by_os
-
-    def _init(self) -> None:
-        if not hasattr(self, "_tracker") or not hasattr(self, "_commander"):
-            self._tracker, self._commander = by_os[self._os](self._only_visible_windows)
+    aspect = constants.Aspect.window
+    _driver: WindowDriver
 
     def _start(self) -> None:
-        self._commander.start()
-        self._tracker.start()
+        self._driver.start()
 
     def _stop(self) -> None:
-        self._tracker.stop()
-        self._commander.stop()
+        self._driver.stop()
 
     def get_open(
         self,
@@ -170,7 +148,7 @@ class WindowController(ResourceController):
 
         :param limit: Search will stop after getting this many results.
         """
-        return self._tracker.get_open(
+        return self._driver.get_open(
             exec_or_title, title, exec, strict, process_id, handle, limit
         )
 
@@ -229,7 +207,7 @@ class WindowController(ResourceController):
         # if is_fore("notepad"):
         #     do_my_thing()
         """
-        return self._tracker.active(
+        return self._driver.active(
             exec_or_title, title, exec, strict, process_id, handle
         )
 
@@ -257,7 +235,7 @@ class WindowController(ResourceController):
 
         :return: True if found and successfully set as foreground, else False.
         """
-        return self._commander.to_active(
+        return self._driver.to_active(
             window_or_exec_or_title, title, exec, strict, process_id, handle
         )
 
@@ -272,7 +250,7 @@ class WindowController(ResourceController):
 
         :return: True if found and switched, else False.
         """
-        return self._commander.to_next_of_same_group()
+        return self._driver.to_next_of_same_group()
 
     def close(
         self,
@@ -295,7 +273,7 @@ class WindowController(ResourceController):
             If None, will not kill.
         :return: True if found and successfully closed, else False.
         """
-        return self._commander.close(
+        return self._driver.close(
             window_or_exec_or_title,
             title,
             exec,
@@ -322,7 +300,7 @@ class WindowController(ResourceController):
 
         :return: True if found and successfully minimized, else False.
         """
-        return self._commander.minimize(
+        return self._driver.minimize(
             window_or_exec_or_title, title, exec, strict, process_id, handle
         )
 
@@ -343,7 +321,7 @@ class WindowController(ResourceController):
 
         :return: True if found and successfully minimized, else False.
         """
-        return self._commander.maximize(
+        return self._driver.maximize(
             window_or_exec_or_title, title, exec, strict, process_id, handle
         )
 
@@ -365,20 +343,6 @@ class WindowController(ResourceController):
 
         :return: True if found and successfully restore, else False.
         """
-        return self._commander.restore(
+        return self._driver.restore(
             window_or_exec_or_title, title, exec, strict, process_id, handle
         )
-
-
-def win32_impl(
-    only_visible_windows: bool = True,
-) -> tuple[WindowTracker, WindowCommander]:
-    from tapper.controller.window.window_win32_impl import Win32WindowTrackerCommander
-
-    r = Win32WindowTrackerCommander(only_visible_windows)
-    return r, r
-
-
-by_os: dict[str, Callable[[bool], tuple[WindowTracker, WindowCommander]]] = {
-    constants.OS.win32: win32_impl
-}

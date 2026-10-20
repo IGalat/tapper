@@ -11,8 +11,7 @@ import win32con
 import win32gui
 import win32process
 
-from tapper.controller.window.window_api import WindowCommander
-from tapper.controller.window.window_api import WindowTracker
+from tapper.controller.window.window_api import WindowDriver
 from tapper.feedback.logger import log
 from tapper.model.window import Window
 
@@ -112,7 +111,7 @@ OPEN_WINDOWS_TTL = 0.1
 conditions ask on every keystroke, so a recent enumeration is reused for this long."""
 
 
-class Win32WindowTrackerCommander(WindowTracker, WindowCommander):
+class Win32WindowDriver(WindowDriver):
     only_visible_windows: bool
     _open_windows: list[Window]
     _open_windows_at: float

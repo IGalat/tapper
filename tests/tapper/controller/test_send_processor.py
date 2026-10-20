@@ -65,13 +65,15 @@ class TestSendCommandProcessor:
             pressed,
         ).wrap(listener)
 
-        kb_tc = dummy.KbTC(listener, self.all_signals, None, toggled)
+        kb_driver = dummy.KbDriver(listener, self.all_signals, None, toggled)
         kbc = KeyboardController()
-        kbc._tracker, kbc._commander, kbc._emul_keeper = kb_tc, kb_tc, emul
+        kbc._init(kb_driver)
+        kbc._emul_keeper = emul
 
-        mouse_tc = dummy.MouseTC(listener, self.all_signals, None, toggled)
+        mouse_driver = dummy.MouseDriver(listener, self.all_signals, None, toggled)
         mc = MouseController()
-        mc._tracker, mc._commander, mc._emul_keeper = mouse_tc, mouse_tc, emul
+        mc._init(mouse_driver)
+        mc._emul_keeper = emul
         self.mc = mc
 
         self.sender = SendCommandProcessor(

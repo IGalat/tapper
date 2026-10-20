@@ -2,7 +2,9 @@ import sys
 import time
 
 from manual.util_mantest import killme_in
+from tapper.boot import platforms
 from tapper.controller.mouse.mouse_api import MouseController
+from tapper.model.constants import Aspect
 from tapper.state import keeper
 
 
@@ -10,8 +12,7 @@ from tapper.state import keeper
 def mouse_commander() -> None:
     mc = MouseController()
     mc._emul_keeper = keeper.Emul()
-    mc._os = sys.platform
-    mc._init()
+    mc._init(platforms.for_os(sys.platform).drivers[Aspect.mouse]())
     mc._start()
     time.sleep(0.5)
 

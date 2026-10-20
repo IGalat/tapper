@@ -2,14 +2,14 @@ import sys
 import time
 
 from manual.util_mantest import killme_in
+from tapper.boot import platforms
 from tapper.controller.window.window_api import WindowController
+from tapper.model.constants import Aspect
 
 
 def window_controller() -> None:
     wc = WindowController()
-    wc._only_visible_windows = True
-    wc._os = sys.platform
-    wc._init()
+    wc._init(platforms.for_os(sys.platform).drivers[Aspect.window]())
     wc._start()
 
     print("Open windows:")

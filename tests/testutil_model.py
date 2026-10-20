@@ -7,13 +7,10 @@ from typing import Callable
 from unittest.mock import MagicMock
 
 from tapper.action.runner import ActionRunner
-from tapper.controller.keyboard.kb_api import KeyboardCommander
-from tapper.controller.keyboard.kb_api import KeyboardTracker
-from tapper.controller.mouse.mouse_api import MouseCommander
-from tapper.controller.mouse.mouse_api import MouseTracker
+from tapper.controller.keyboard.kb_api import KeyboardDriver
+from tapper.controller.mouse.mouse_api import MouseDriver
 from tapper.controller.sleep_processor import SleepCommandProcessor
-from tapper.controller.window.window_api import WindowCommander
-from tapper.controller.window.window_api import WindowTracker
+from tapper.controller.window.window_api import WindowDriver
 from tapper.model import constants
 from tapper.model import languages
 from tapper.model import types_
@@ -21,8 +18,6 @@ from tapper.model.languages import Lang
 from tapper.model.types_ import Signal
 from tapper.model.window import Window
 from tapper.signal.base_listener import SignalListener
-
-dumL = None
 
 
 class DummyListener(SignalListener):
@@ -38,15 +33,8 @@ class DummyListener(SignalListener):
     def stop(self) -> None:
         pass
 
-    @staticmethod
-    def get_for_os(os: str) -> SignalListener:
-        global dumL
-        if not dumL:
-            dumL = DummyListener()
-        return dumL
 
-
-class DummyKbTrackerCommander(KeyboardTracker, KeyboardCommander):
+class DummyKeyboardDriver(KeyboardDriver):
     listener: SignalListener
     all_signals: list[Signal]
     pressed_symbols: list[str]
@@ -103,7 +91,7 @@ class DummyKbTrackerCommander(KeyboardTracker, KeyboardCommander):
         self.lang_ = languages.get(lang)
 
 
-class DummyMouseTrackerCommander(MouseTracker, MouseCommander):
+class DummyMouseDriver(MouseDriver):
     listener: SignalListener
     all_signals: list[Signal]
     pressed_symbols: list[str]
@@ -180,7 +168,7 @@ def str_match(filtered: str | None, iterated: str | None, strict: bool) -> bool:
         return filtered.casefold() in iterated.casefold()
 
 
-class DummyWindowTrackerCommander(WindowTracker, WindowCommander):
+class DummyWindowDriver(WindowDriver):
     open_windows: list[str]
     fore_window: str
 
@@ -306,9 +294,9 @@ class DummyActionRunner(ActionRunner):
 
 class Dummy:
     Listener = DummyListener
-    KbTC = DummyKbTrackerCommander
-    MouseTC = DummyMouseTrackerCommander
-    WinTC = DummyWindowTrackerCommander
+    KbDriver = DummyKeyboardDriver
+    MouseDriver = DummyMouseDriver
+    WindowDriver = DummyWindowDriver
     ActionRunner = DummyActionRunner
 
 

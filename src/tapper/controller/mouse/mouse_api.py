@@ -43,7 +43,9 @@ def calc_move(
     return x, y
 
 
-class MouseTracker(ABC):
+class MouseDriver(ABC):
+    """OS implementation of one aspect: reads its state and commands it."""
+
     @abstractmethod
     def start(self) -> None:
         pass
@@ -62,16 +64,6 @@ class MouseTracker(ABC):
 
     @abstractmethod
     def get_pos(self) -> tuple[int, int]:
-        pass
-
-
-class MouseCommander(ABC):
-    @abstractmethod
-    def start(self) -> None:
-        pass
-
-    @abstractmethod
-    def stop(self) -> None:
         pass
 
     @abstractmethod
@@ -90,28 +82,17 @@ class MouseCommander(ABC):
 
 
 class MouseController(ResourceController):
-    _os: str
-    """Provided before init."""
-    _tracker: MouseTracker
-    _commander: MouseCommander
+    aspect = constants.Aspect.mouse
+    _driver: MouseDriver
     _emul_keeper: keeper.Emul
     _state_keeper: keeper.Pressed
     _memorized_pos: tuple[int, int] | None = None
 
-    def _supports(self, os: str) -> bool:
-        return hasattr(self, "_tracker") or os in by_os
-
-    def _init(self) -> None:
-        if not hasattr(self, "_tracker") or not hasattr(self, "_commander"):
-            self._tracker, self._commander = by_os[self._os]()
-
     def _start(self) -> None:
-        self._commander.start()
-        self._tracker.start()
+        self._driver.start()
 
     def _stop(self) -> None:
-        self._tracker.stop()
-        self._commander.stop()
+        self._driver.stop()
 
     def pressed(self, symbol: str) -> bool:
         """Is key held down. Not applicable to wheel."""
@@ -119,11 +100,11 @@ class MouseController(ResourceController):
 
     def toggled(self, symbol: str) -> bool:
         """Is key toggled. Not applicable to wheel."""
-        return self._tracker.toggled(symbol)
+        return self._driver.toggled(symbol)
 
     def get_pos(self) -> tuple[int, int]:
         """Coordinates (x, y) of current mouse position."""
-        return self._tracker.get_pos()
+        return self._driver.get_pos()
 
     def is_near(self, x: int, y: int, precision: int = 50) -> bool:
         """Circle with "precision" radius."""
@@ -141,12 +122,12 @@ class MouseController(ResourceController):
     def press(self, symbol: str) -> None:
         """Presses down one key."""
         self._emul_keeper.will_emulate((symbol, constants.KeyDirBool.DOWN))
-        self._commander.press(symbol)
+        self._driver.press(symbol)
 
     def release(self, symbol: str) -> None:
         """Releases (presses up) one key. Not applicable to wheel."""
         self._emul_keeper.will_emulate((symbol, constants.KeyDirBool.UP))
-        self._commander.release(symbol)
+        self._driver.release(symbol)
 
     def move(
         self,
@@ -166,7 +147,7 @@ class MouseController(ResourceController):
             x, y = x_or_xy
         else:
             x = x_or_xy
-        self._commander.move(x, y, relative)
+        self._driver.move(x, y, relative)
 
     def memorize_pos(self) -> None:
         """Remember current cursor position. Only used for to_memorized_pos."""
@@ -204,17 +185,3 @@ class MouseController(ResourceController):
         self.press("right_mouse_button")
         time.sleep(0)
         self.release("right_mouse_button")
-
-
-def win32_winput() -> tuple[MouseTracker, MouseCommander]:
-    from tapper.controller.mouse.mouse_win32_winput_impl import (
-        Win32MouseTrackerCommander,
-    )
-
-    r = Win32MouseTrackerCommander()
-    return r, r
-
-
-by_os: dict[str, Callable[[], tuple[MouseTracker, MouseCommander]]] = {
-    constants.OS.win32: win32_winput,
-}

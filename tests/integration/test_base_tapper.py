@@ -12,6 +12,8 @@ from integration.conftest import sleep_signal
 from tapper import Group
 from tapper import Tap
 from tapper import config
+from tapper.model.types_ import Signal
+from tapper.util import event
 
 
 class TestSimple:
@@ -117,6 +119,36 @@ class TestSleep:
         thread.start()
         thread.join()
         assert outcome == ["ok"]
+
+
+class TestEmulatedEcho:
+    """The OS reports tapper's own keystrokes back through the hook; those must be bounced."""
+
+    def test_echo_does_not_trigger_taps(self, f: Fixture) -> None:
+        config.action_runner_executors_threads = [5]
+        tapper.root.add({"a": "b", "b": "c"})
+        f.start()
+
+        f.send_real("a")
+        assert f.emul_signals == click("b")
+
+    def test_echo_is_not_published(self, f: Fixture) -> None:
+        published: list[Signal] = []
+        event.subscribe(f.listener.name, published.append)
+        tapper.root.add({"a": "b"})
+        f.start()
+
+        f.send_real("a")
+        event.join()
+        event.unsubscribe(f.listener.name, published.append)
+        assert published == click("a")
+
+    def test_echo_updates_pressed_state(self, f: Fixture) -> None:
+        tapper.root.add({"a": "$(b down)"})
+        f.start()
+
+        f.send_real("a")
+        assert "b" in tapper._runtime.pressed.pressed_keys
 
 
 class TestTreeOrder:

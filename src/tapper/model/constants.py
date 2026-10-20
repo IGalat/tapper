@@ -41,6 +41,15 @@ class OS(str, Enum):
     linux = "linux"
 
 
+class Aspect(str, Enum):
+    """A device or OS facility that tapper listens to and commands.
+    Keys of boot.platforms tables, and topics in event subscription."""
+
+    keyboard = "keyboard"
+    mouse = "mouse"
+    window = "window"
+
+
 class ListenerResult(Flag):
     PROPAGATE = False
     """Signal will be received by other apps."""

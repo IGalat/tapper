@@ -4,6 +4,7 @@ from tapper import config
 from tapper import trigger_conditions
 from tapper.action.runner import ActionRunner
 from tapper.action.runner import ActionRunnerImpl
+from tapper.boot import platforms
 from tapper.boot import tray_icon
 from tapper.boot.tree_transformer import TreeTransformer
 from tapper.controller import flow_control
@@ -131,10 +132,14 @@ def init(
     log.info("Initializing tapper")
 
     os = config.os
+    platform = platforms.for_os(os)
 
-    controllers = [
-        controller for controller in config.controllers if controller._supports(os)
-    ]
+    controllers = []
+    for controller in config.controllers:
+        if make_driver := platform.drivers.get(controller.aspect):
+            controller._init(make_driver())
+            controllers.append(controller)
+
     transformer = TreeTransformer(
         send_processor.send,
         default_trigger_parser(os),
@@ -156,23 +161,16 @@ def init(
     )
     if os == constants.OS.linux:
         listener_wrapper.emul_keeper = None
-    listeners = [
-        listener_wrapper.wrap(listener.get_for_os(os))
-        for listener in config.listeners
-        if listener.get_for_os(os) is not None
-    ]
+    listeners = []
+    for listener_type in config.listeners:
+        if make_listener := platform.listeners.get(listener_type.name):
+            listeners.append(listener_wrapper.wrap(make_listener()))
 
     if kbc := datastructs.get_first_in(KeyboardController, controllers):
-        kbc._os = os
         kbc._emul_keeper = emul_keeper
     if mc := datastructs.get_first_in(MouseController, controllers):
-        mc._os = os
         mc._emul_keeper = emul_keeper
         mc._state_keeper = state_keeper
-    if wc := datastructs.get_first_in(WindowController, controllers):
-        wc._os = os
-        wc._only_visible_windows = config.only_visible_windows
-    [c._init() for c in controllers]
 
     sleep_processor.check_interval = config.sleep_check_interval
     sleep_processor.kill_check_fn = flow_control.should_be_killed

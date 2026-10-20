@@ -2,12 +2,13 @@ import sys
 import time
 
 from manual.util_mantest import killme_in
-from tapper.controller.keyboard import kb_api
+from tapper.boot import platforms
+from tapper.model.constants import Aspect
 
 
 def kb_commander() -> None:
     time.sleep(0.5)
-    _, kbc = kb_api.by_os[sys.platform]()
+    kbc = platforms.for_os(sys.platform).drivers[Aspect.keyboard]()
 
     def click(symbol: str) -> bool:
         time.sleep(0.1)
@@ -39,10 +40,10 @@ def kb_commander() -> None:
 
 def language_monitor() -> None:
     time.sleep(0.5)
-    kbl, kbc = kb_api.by_os[sys.platform]()
+    kbc = platforms.for_os(sys.platform).drivers[Aspect.keyboard]()
     for _ in range(10):
         time.sleep(1)
-        print(kbl.lang())
+        print(kbc.lang())
 
     kbc.set_lang("en")
 

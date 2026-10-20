@@ -11,6 +11,7 @@ from tapper import mouse
 from tapper.boot import initializer
 from tapper.helper.model import RecordConfig
 from tapper.model import keyboard
+from tapper.model.constants import Aspect
 from tapper.model.constants import KeyDir
 from tapper.model.constants import KeyDirBool
 from tapper.model.send import CursorMoveInstruction
@@ -72,15 +73,15 @@ def start_recording() -> None:
     recording_ = []
 
     tapper.sleep(0)  # or it sometimes records DOWN of trigger
-    event.subscribe("keyboard", record_signal)
-    event.subscribe("mouse", record_signal)
+    event.subscribe(Aspect.keyboard, record_signal)
+    event.subscribe(Aspect.mouse, record_signal)
 
 
 def stop_recording(callbacks: list[Callable[[str], Any]], config: RecordConfig) -> None:
     global recording_
 
-    event.unsubscribe("keyboard", record_signal)
-    event.unsubscribe("mouse", record_signal)
+    event.unsubscribe(Aspect.keyboard, record_signal)
+    event.unsubscribe(Aspect.mouse, record_signal)
     event.join()
 
     if recording_:

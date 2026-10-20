@@ -1,6 +1,8 @@
 import sys
 
 from manual.util_mantest import killme_in
+from tapper.boot import platforms
+from tapper.model.constants import Aspect
 from tapper.model.constants import KeyDirBool
 from tapper.model.constants import ListenerResult
 from tapper.model.types_ import Signal
@@ -15,7 +17,9 @@ def on_signal(signal: Signal) -> ListenerResult:
 
 
 def kb_listener() -> None:
-    listener: KeyboardSignalListener = KeyboardSignalListener.get_for_os(sys.platform)
+    listener: KeyboardSignalListener = platforms.for_os(sys.platform).listeners[
+        Aspect.keyboard
+    ]()
     listener.on_signal = on_signal
     listener.start()
 

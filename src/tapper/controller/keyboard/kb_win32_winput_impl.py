@@ -4,8 +4,7 @@ import win32con
 import win32gui
 from winput import winput
 
-from tapper.controller.keyboard.kb_api import KeyboardCommander
-from tapper.controller.keyboard.kb_api import KeyboardTracker
+from tapper.controller.keyboard.kb_api import KeyboardDriver
 from tapper.model import keyboard
 from tapper.model import languages
 from tapper.model.languages import Lang
@@ -38,7 +37,7 @@ def key_state(code: int) -> int:
     return user32.GetKeyState(code)
 
 
-class Win32KeyboardTrackerCommander(KeyboardTracker, KeyboardCommander):
+class Win32KeyboardDriver(KeyboardDriver):
     def start(self) -> None:
         pass
 
