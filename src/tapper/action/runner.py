@@ -1,3 +1,4 @@
+import threading
 from abc import ABC
 from abc import abstractmethod
 from concurrent.futures import Future
@@ -63,6 +64,8 @@ class ActionRunnerImpl(ActionRunner):
     _control_runnable: Future[Any]
     """Currently running or done task for control executor."""
 
+    _lock: threading.Lock
+
     def __init__(self, executors_threads: list[int]) -> None:
         """
         :param executors_threads: see ActionRunner doc for general explanation.
@@ -75,22 +78,26 @@ class ActionRunnerImpl(ActionRunner):
         self._runnables = [[] for _ in executors_threads]
 
         self.control_executor = ThreadPoolExecutor(max_workers=1)
+        self._lock = threading.Lock()
 
     def run(self, fn: types_.Action, executor_ordinal: int = 0) -> None:
         exc = executor_ordinal
-        self._runnables[exc] = prune_done_runnables(self._runnables[exc])
-        if len(self._runnables[exc]) < self.ex_threads[exc]:
-            runnable = self.executors[exc].submit(fn)
-            self._runnables[exc].append(runnable)
+        with self._lock:
+            self._runnables[exc] = prune_done_runnables(self._runnables[exc])
+            if len(self._runnables[exc]) < self.ex_threads[exc]:
+                runnable = self.executors[exc].submit(fn)
+                self._runnables[exc].append(runnable)
 
     def run_control(self, fn: types_.Action) -> None:
-        if not hasattr(self, "_control_runnable") or self._control_runnable.done():
-            self._control_runnable = self.control_executor.submit(fn)
+        with self._lock:
+            if not hasattr(self, "_control_runnable") or self._control_runnable.done():
+                self._control_runnable = self.control_executor.submit(fn)
 
     def shutdown(self, timeout: float) -> int:
         for executor in [*self.executors, self.control_executor]:
             executor.shutdown(wait=False, cancel_futures=True)
-        running = [f for runnables in self._runnables for f in runnables]
-        if hasattr(self, "_control_runnable"):
-            running.append(self._control_runnable)
+        with self._lock:
+            running = [f for runnables in self._runnables for f in runnables]
+            if hasattr(self, "_control_runnable"):
+                running.append(self._control_runnable)
         return len(wait(running, timeout=timeout).not_done)
