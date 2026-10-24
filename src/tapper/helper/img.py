@@ -39,7 +39,8 @@ def find(
     Search a region of the screen for an image.
 
     :param target: what to find. Path to an image, or image object(numpy array).
-    :param bbox: bounding box of where to search in the outer.
+    :param bbox: bounding box of where to search in the outer. If None and target is a path
+        with "-(BBOX_{x1}_{y1}_{x2}_{y2})" in its name (see :func:snip), that bbox is used.
     :param outer: Optional image in which to find, path or numpy array. If not specified, will search on screen.
     :param precision: A number between 0 and 1 to indicate the allowed deviation from the searched image.
         0.95 is a difference visible to the eye, and random images can sometimes match up to 0.8.
@@ -221,7 +222,7 @@ def get_snip(
     :param bbox: Bounding box of the screenshot or image. If None, the whole screen or image is snipped.
     :param prefix: Optional name, may be a path of image to save, without extension. If not specified,
     will not be saved to disk.
-    :param bbox_to_name: If true, will append to the name "-BBOX({x1}_{y1}_{x2}_{y2})", with corner coordinates.
+    :param bbox_to_name: If true, will append to the name "-(BBOX_{x1}_{y1}_{x2}_{y2})", with corner coordinates.
     :param override_existing: Will override existing file if prefix exists, otherwise will save as prefix(2).png
     :return: Resulting image RGB, transformed to numpy array.
 

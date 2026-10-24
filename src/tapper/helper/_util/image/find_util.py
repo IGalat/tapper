@@ -23,6 +23,7 @@ def api_find_raw(
     bbox: BboxT | None,
     outer_maybe: ImageT | None = None,
 ) -> tuple[float, XyCoordsT]:
+    bbox = base.bbox_or_from_name(target, bbox)
     target_image = base.target_to_image(target, bbox)
     x_start, y_start = base.get_start_coords(outer_maybe, bbox)
     outer = base.outer_to_image(outer_maybe, bbox)
@@ -50,6 +51,7 @@ def api_find(
 ) -> XyCoordsT | None:
     if target is None:
         raise ValueError("image_find nees something to search for.")
+    bbox = base.bbox_or_from_name(target, bbox)
     target_image = base.target_to_image(target, bbox)
     outer = base.outer_to_image(outer_or_path_maybe, bbox)
     found = find(target_image, outer, precision)
@@ -90,6 +92,7 @@ def wait_for(
     interval: float,
     precision: float,
 ) -> XyCoordsT | None:
+    bbox = base.bbox_or_from_name(target, bbox)
     target_image = base.target_to_image(target, bbox)
     finish_time = time.perf_counter() + timeout
     while time.perf_counter() < finish_time:
@@ -107,6 +110,7 @@ def wait_for_disappear(
     interval: float,
     precision: float,
 ) -> bool:
+    bbox = base.bbox_or_from_name(target, bbox)
     target_image = base.target_to_image(target, bbox)
     finish_time = time.perf_counter() + timeout
     while time.perf_counter() < finish_time:

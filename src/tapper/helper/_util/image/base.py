@@ -1,4 +1,5 @@
 import os
+import re
 import sys
 from functools import lru_cache
 from pathlib import Path
@@ -150,6 +151,18 @@ def win32_coords_start() -> XyCoordsT:
     return x, y
 
 
+BBOX_IN_NAME = re.compile(r"\(BBOX_(-?\d+)_(-?\d+)_(-?\d+)_(-?\d+)\)")
+
+
+def bbox_or_from_name(target: ImageT, bbox: BboxT | None) -> BboxT | None:
+    if bbox is not None or isinstance(target, ndarray):
+        return bbox
+    if match := BBOX_IN_NAME.search(Path(os.fsdecode(target)).name):
+        x1, y1, x2, y2 = map(int, match.groups())
+        return x1, y1, x2, y2
+    return None
+
+
 def target_to_image(target: ImageT, bbox: BboxT | None) -> ImagePixelMatrixT:
     """Transform and verify target from API input to workable image-array."""
     target_image = to_pixel_matrix(target)
@@ -180,7 +193,7 @@ def targets_normalize(
     result = []
     for item in targets:
         image, bbox = item if isinstance(item, tuple) else (item, shared_bbox)
-        result.append((to_pixel_matrix(image), bbox, image))
+        result.append((to_pixel_matrix(image), bbox_or_from_name(image, bbox), image))
     return result
 
 

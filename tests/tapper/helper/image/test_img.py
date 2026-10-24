@@ -1,5 +1,7 @@
 import time
+from collections.abc import Callable
 from collections.abc import Iterator
+from pathlib import Path
 from typing import Any
 from unittest.mock import MagicMock
 from unittest.mock import patch
@@ -7,8 +9,10 @@ from unittest.mock import patch
 import img_test_util
 import numpy
 import pytest
+from PIL import Image
 
 from tapper.helper import img
+from tapper.helper._util.image import base
 
 red = 255, 0, 0
 green = 0, 255, 0
@@ -171,6 +175,39 @@ class TestFindOneOf:
         assert isinstance(result, numpy.ndarray)
         assert numpy.array_equal(result, btn_yellow)
         assert xy == pytest.approx(btn_yellow_xy, abs=10)
+
+
+@pytest.fixture
+def save_png(tmp_path: Path) -> Callable[[str, list[list[tuple[int, int, int]]]], str]:
+    def save(name: str, matrix: list[list[tuple[int, int, int]]]) -> str:
+        path = str(tmp_path / name)
+        Image.fromarray(img_test_util.from_matrix(matrix)).save(path)
+        return path
+
+    return save
+
+
+class TestBboxFromName:
+    def test_find_uses_bbox_from_name(self, save_png) -> None:
+        white_px = save_png("white-(BBOX_2_2_3_5).png", [[white]])
+        assert img.find(white_px, outer=absolutes) == (2, 4)
+
+    def test_explicit_bbox_overrides_name(self, save_png) -> None:
+        white_px = save_png("white-(BBOX_2_2_3_5).png", [[white]])
+        assert img.find(white_px, (1, 0, 2, 5), absolutes) == (1, 4)
+
+    def test_find_one_of_uses_bbox_from_name(self, save_png) -> None:
+        white_in_top_rows = save_png("white-(BBOX_0_0_3_3).png", [[white]])
+        green_px = img_test_util.from_matrix([[green]])
+        result, _ = img.find_one_of([white_in_top_rows, green_px], outer=absolutes)
+        assert result is green_px
+
+    def test_negative_coords(self) -> None:
+        bbox = base.bbox_or_from_name("no-(BBOX_-100_213_-56_412).png", None)
+        assert bbox == (-100, 213, -56, 412)
+
+    def test_name_without_bbox(self) -> None:
+        assert base.bbox_or_from_name("snip.png", None) is None
 
 
 class TestWaitFor:

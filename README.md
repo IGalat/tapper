@@ -512,7 +512,7 @@ If you expect one of the images to appear, use `wait_for_one_of`:
 
 ```python
 yes_btn = "yes.png", (-100, 213, -56, 412)
-no_btn = "no(BBOX_-100_213_-56_412).png"
+no_btn = "no-(BBOX_-100_213_-56_412).png"
 close_btn = "close.png"
 
 btn = img.wait_for_one_of([yes_btn, no_btn, close_btn])
