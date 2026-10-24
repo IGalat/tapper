@@ -30,7 +30,7 @@ class WheelInstruction:
 
 @dataclass(frozen=True)
 class CursorMoveInstruction:
-    """Move mouse cursor. Absolute unless relative."""
+    """Move mouse cursor."""
 
     xy: tuple[int, int]
     relative: bool = field(default=False)

@@ -83,8 +83,8 @@ def setup_logging(
 
     logging.config.dictConfig(config)
     queue_handler = logging.getHandlerByName("queue_handler")
-    queue_handler = cast(QueueHandler, queue_handler)  # just for typing
     if queue_handler is not None:
+        queue_handler = cast(QueueHandler, queue_handler)  # just for typing
         queue_handler.listener.start()
         atexit.register(queue_handler.listener.stop)
 

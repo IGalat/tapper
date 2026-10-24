@@ -9,6 +9,8 @@ from tapper.controller import flow_control
 from tapper.controller.flow_control import StopTapperActionException
 from tapper.controller.flow_control import config_thread_local_storage
 from tapper.helper.model import Repeatable
+from tapper.model import keyboard as keyboard_model
+from tapper.model import mouse as mouse_model
 
 TIME_SPLIT = 0.1
 
@@ -86,11 +88,11 @@ def run_action(in_repeatable: Repeatable) -> None:
 
 def to_pressed_condition(symbol: str) -> Callable[[], bool]:
     if symbol in [
-        *tapper.model.mouse.regular_buttons,
-        *tapper.model.mouse.button_aliases.keys(),
+        *mouse_model.regular_buttons,
+        *mouse_model.button_aliases.keys(),
     ]:
         device = tapper.mouse
-    elif symbol in tapper.model.keyboard.get_keys(tapper.config.os).keys():
+    elif symbol in keyboard_model.get_keys(tapper.config.os).keys():
         device = tapper.kb
     else:
         raise ValueError(f"Repeat while pressed: '{symbol}' not recognised.")

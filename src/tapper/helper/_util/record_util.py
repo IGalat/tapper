@@ -148,9 +148,12 @@ def reduce_mouse_moves(records: list[SignalRecord], min_movement: int) -> None:
     if not records:
         return
     pos = records[0].mouse_pos
+    if not isinstance(pos, tuple):  # only for tests; would be assert for type otherwise
+        return
     for i in range(len(records) - 1):
         r = records[i + 1]
-        if r.mouse_pos and mouse_api.is_near(
+        assert isinstance(r.mouse_pos, tuple)
+        if mouse_api.is_near(
             r.mouse_pos[0],
             r.mouse_pos[1],
             pos[0],

@@ -369,7 +369,7 @@ def pixel_get_with_best_match_color(
     outer: ImageT | None = None,
     max_variation: int = 255,
 ) -> None:
-    return _pixel_util.pixel_get_with_best_match_color  # todo
+    return  # _pixel_util.pixel_get_with_best_match_color  # todo
 
 
 def pixel_get_with_best_match_color_near(
@@ -379,4 +379,4 @@ def pixel_get_with_best_match_color_near(
     outer: ImageT | None = None,
     max_variation: int = 255,
 ) -> None:
-    return _pixel_util.pixel_get_with_best_match_color_near  # todo
+    return  # _pixel_util.pixel_get_with_best_match_color_near  # todo

@@ -26,20 +26,12 @@ def calc_move(
     relative: bool,
 ) -> tuple[int, int]:
     if not relative:
-        if x is None:
-            x = get_pos()[0]
-        elif y is None:
-            y = get_pos()[1]
+        x = x if x is not None else get_pos()[0]
+        y = y if y is not None else get_pos()[1]
     else:  # calculate here and absolute move
         current_x, current_y = get_pos()
-        if x is None:
-            x = current_x
-        else:
-            x += current_x
-        if y is None:
-            y = current_y
-        else:
-            y += current_y
+        x = current_x if x is None else x + current_x
+        y = current_y if y is None else y + current_y
     return x, y
 
 

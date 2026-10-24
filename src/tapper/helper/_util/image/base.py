@@ -22,7 +22,8 @@ def find_fuzzy_cv2(target: ndarray, outer: ndarray) -> tuple[float, XyCoordsT]:
 
     comparison = cv2.matchTemplate(outer, target, cv2.TM_CCORR_NORMED)
     _, max_val, _, max_loc = cv2.minMaxLoc(comparison)
-    return max_val, max_loc
+    x, y = max_loc
+    return max_val, (int(x), int(y))
 
 
 mss_instance = mss.MSS()

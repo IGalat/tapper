@@ -26,6 +26,7 @@ coords_to_bbox_1_pixel = lambda coords: (
 def hex_or_rgb_to_rgb(color: PixelColorT | PixelHexColorT) -> PixelColorT:
     if isinstance(color, str):
         result = ImageColor.getcolor(color, "RGB")
+        assert isinstance(result, tuple)
         r, g, b = result[0], result[1], result[2]  # type checkers
     else:
         r, g, b = color
