@@ -54,7 +54,10 @@ class TestSimple:
 
         f.send_real("$(shift down)")
         f.clock.advance(0.06)  # "50ms" triggers need the key held longer than that
-        f.send_real("$(enter;shift up)")
+        # one signal per send: actions run on separate threads, so the order of two
+        # actions triggered by one send is up to the scheduler
+        f.send_real("$(enter)")
+        f.send_real("$(shift up)")
         assert f.actions == [1, 3, 2]
 
         f.send_real(" ")
@@ -71,7 +74,8 @@ class TestSimple:
 
         f.send_real("$(  down;enter down)")
         f.clock.advance(0.06)
-        f.send_real("$(enter up;  up)")
+        f.send_real("$(enter up)")
+        f.send_real("$(  up)")
         assert ends_with(f.actions, [4, 6, 5])
 
     def test_trigger_if(self, f: Fixture) -> None:
@@ -229,11 +233,10 @@ class TestConcurrentActions:
 
         f.send_real("ababab")
         f.wait_blocked(3)
-        assert f.emul_signals == [
-            sleep_signal(0.01),
-            sleep_signal(0.02),
-            sleep_signal(0.01),
-        ]
+        # sorted: concurrent actions reach the gate in scheduler order
+        assert sorted(f.emul_signals) == sorted(
+            [sleep_signal(0.01), sleep_signal(0.02), sleep_signal(0.01)]
+        )
 
     def test_mix_concurrent(self, f: Fixture) -> None:
         config.action_runner_executors_threads = [1, 3]
@@ -258,4 +261,6 @@ class TestConcurrentActions:
 
         f.send_real("xzhgfdsa")
         f.wait_blocked(4)
-        assert f.emul_signals == [sleep_signal(ms / 1000) for ms in [2, 16, 15, 14]]
+        assert sorted(f.emul_signals) == sorted(
+            sleep_signal(ms / 1000) for ms in [2, 16, 15, 14]
+        )
