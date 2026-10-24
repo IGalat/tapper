@@ -58,8 +58,8 @@ class TreeTransformer:
     def transform(self, group: Group) -> SGroup:
         result = SGroup()
         result.original = group
-        result.send_interval = group.send_interval or 0
-        result.send_press_duration = group.send_press_duration or 0
+        result.send_interval = find_property("send_interval", group)
+        result.send_press_duration = find_property("send_press_duration", group)
         result.trigger_conditions = transform_trigger_conditions(
             self.possible_trigger_conditions, group.trigger_conditions
         )

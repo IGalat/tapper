@@ -62,6 +62,7 @@ class Tap(TapGeneric):
         self.send_interval = send_interval
         self.send_press_duration = send_press_duration
         self.trigger_conditions = trigger_conditions
+        self._parent = None
 
     def conditions(self, **trigger_conditions: Any) -> "Tap":
         """Add new trigger conditions. Can also be done in constructor."""

@@ -49,6 +49,8 @@ class TestTreeTransformer:
         group = Group()
         group.executor = 33
         group.suppress_trigger = ListenerResult.PROPAGATE
+        group.send_interval = 0
+        group.send_press_duration = 0
         group.name = "blah"
         transform(group)
 

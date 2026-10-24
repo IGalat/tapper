@@ -4,20 +4,14 @@ from functools import cache
 
 @dataclass(frozen=True)
 class Lang:
-    # locale id = 1024 * sub_language id  +  primary language id. en_US -> sub lang _ prim lang
+    # locale id = 1024 * sub_language id + primary language id. en_US -> sub lang _ prim lang
+    # sub_lang_id = locale_id % 1024
+    # primary_lang_id =  self.locale_id // 1024
     locale_id: int
     description: str
     letter_code: str
     charset: str  # must be same len as english chars_en in model.keyboard to work
-    aliases: tuple[str] | None = None
-
-    @property
-    def get_sub_lang_id(self) -> int:
-        return self.locale_id % 1024
-
-    @property
-    def get_primary_lang_id(self) -> int:
-        return self.locale_id // 1024
+    aliases: tuple[str, ...] | None = None
 
 
 """

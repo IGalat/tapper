@@ -146,24 +146,14 @@ def reduce_time(records: list[SignalRecord], non_compress_action_delay: float) -
 
 def reduce_mouse_moves(records: list[SignalRecord], min_movement: int) -> None:
     """Removes small movement, setting record.mouse_pos to None."""
-    if not records:
-        return
-    pos = records[0].mouse_pos
-    if not isinstance(pos, tuple):  # only for tests; would be assert for type otherwise
-        return
-    for i in range(len(records) - 1):
-        r = records[i + 1]
-        assert isinstance(r.mouse_pos, tuple)
-        if mouse_api.is_near(
-            r.mouse_pos[0],
-            r.mouse_pos[1],
-            pos[0],
-            pos[1],
-            min_movement,
-        ):
+    kept: tuple[int, int] | None = None
+    for r in records:
+        if r.mouse_pos is None:
+            continue
+        if kept is not None and mouse_api.is_near(*r.mouse_pos, *kept, min_movement):
             r.mouse_pos = None
         else:
-            pos = r.mouse_pos
+            kept = r.mouse_pos
 
 
 def to_instructions(records: list[SignalRecord]) -> list[SendInstruction]:

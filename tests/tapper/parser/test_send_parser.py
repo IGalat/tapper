@@ -200,6 +200,10 @@ class TestCombosWithoutProps:
             KI("c"),
         ]
 
+    def test_wheel_cannot_open_chain(self, parse: ParseFn) -> None:
+        with pytest.raises(SendParseError):
+            parse("$(scroll_up+a)")
+
     def test_mouse_move(self, parse: ParseFn) -> None:
         assert parse("$(x340y980)") == [CursorMoveInstruction((340, 980))]
 
