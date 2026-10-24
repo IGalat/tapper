@@ -9,6 +9,7 @@ import tapper
 from tapper import config
 from tapper.boot import platforms
 from tapper.boot.platforms import Platform
+from tapper.controller import flow_control
 from tapper.controller.flow_control import ActionConfig
 from tapper.controller.keyboard.kb_api import KeyboardController
 from tapper.controller.mouse.mouse_api import MouseController
@@ -24,14 +25,14 @@ from tapper.state import keeper
 from testutil_model import Dummy
 
 
-def click(symbols: str) -> Signal | list[Signal]:
+def click(symbols: str) -> list[Signal]:
     result = []
     for s in symbols:
         result.extend([(s, KeyDirBool.DOWN), (s, KeyDirBool.UP)])
     return result
 
 
-def down(symbols: str) -> Signal | list[Signal]:
+def down(symbols: str) -> list[Signal]:
     return [(s, KeyDirBool.DOWN) for s in symbols]
 
 
@@ -77,9 +78,9 @@ def f(
     config.tray_icon = False
     tapper.root = make_group("root")
     tapper.control_group = make_group("control_group")
-    tapper.controller.flow_control.initialized = False
-    tapper.controller.flow_control.config_thread_local_storage.action_config = (
-        ActionConfig(0, 0, tapper.controller.flow_control.kill_id)
+    flow_control.initialized = False
+    flow_control.config_thread_local_storage.action_config = ActionConfig(
+        0, 0, flow_control.kill_id
     )
 
     listener = dummy.Listener()

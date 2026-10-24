@@ -3,6 +3,8 @@ import random
 import shutil
 from pathlib import Path
 from string import ascii_uppercase
+from typing import Any
+from typing import Iterator
 from unittest.mock import MagicMock
 from unittest.mock import call
 from unittest.mock import patch
@@ -17,7 +19,7 @@ absolutes = img_test_util.absolutes()
 
 
 @pytest.fixture
-def mock_get_sct() -> MagicMock:
+def mock_get_sct() -> Iterator[MagicMock]:
     with patch(
         "tapper.helper._util.image.base.get_screenshot_if_none_and_cut"
     ) as mock_sct:
@@ -25,7 +27,7 @@ def mock_get_sct() -> MagicMock:
 
 
 @pytest.fixture
-def temp_dir(tmpdir_factory) -> Path:
+def temp_dir(tmpdir_factory: Any) -> Iterator[Path]:
     temp_name = "".join(random.choice(ascii_uppercase) for i in range(12))
     my_tmpdir = tmpdir_factory.mktemp(temp_name)
     yield my_tmpdir
@@ -33,13 +35,13 @@ def temp_dir(tmpdir_factory) -> Path:
 
 
 @pytest.fixture
-def mock_save_to_disk() -> MagicMock:
+def mock_save_to_disk() -> Iterator[MagicMock]:
     with patch("tapper.helper._util.image.base.save_to_disk") as mock_save:
         yield mock_save
 
 
 @pytest.fixture
-def mock_mouse_pos() -> MagicMock:
+def mock_mouse_pos() -> Iterator[MagicMock]:
     with patch("tapper.mouse.get_pos") as mock_mouse_get_pos:
         yield mock_mouse_get_pos
 

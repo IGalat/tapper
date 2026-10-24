@@ -1,4 +1,5 @@
 import time
+from typing import Iterator
 
 import pytest
 
@@ -45,7 +46,7 @@ class TestSendCommandProcessor:
     toggled: list[str]
 
     @pytest.fixture(autouse=True)
-    def setup(self, dummy: Dummy, monkeypatch: pytest.MonkeyPatch) -> None:
+    def setup(self, dummy: Dummy, monkeypatch: pytest.MonkeyPatch) -> Iterator[None]:
         self.all_signals = []
         self.real_signals = []
 
@@ -87,9 +88,8 @@ class TestSendCommandProcessor:
 
         event.subscribe(listener.name, lambda signal: self.real_signals.append(signal))
 
-        config_thread_local_storage.action_config = ActionConfig(
-            0, 0, flow_control.kill_id
-        )
+        self.action_config = ActionConfig(0, 0, flow_control.kill_id)
+        config_thread_local_storage.action_config = self.action_config
         yield
         event.join()
         assert not self.real_signals, "emulated signals must not be published"
@@ -137,7 +137,7 @@ class TestSendCommandProcessor:
         ]
 
     def test_interval_config(self) -> None:
-        config_thread_local_storage.action_config.send_interval = 0.5
+        self.action_config.send_interval = 0.5
         self.sender.send("hello")
         result = []
         for letter in "hello":
@@ -146,7 +146,7 @@ class TestSendCommandProcessor:
         assert self.all_signals == result
 
     def test_interval_variable_overrides_config(self) -> None:
-        config_thread_local_storage.action_config.send_interval = 0.1
+        self.action_config.send_interval = 0.1
         self.sender.send("hi")
         self.sender.send("qq", interval=10)
         assert self.all_signals == [
@@ -183,7 +183,7 @@ class TestSendCommandProcessor:
         ]
 
     def test_press_duration_config(self) -> None:
-        config_thread_local_storage.action_config.send_press_duration = 0.1
+        self.action_config.send_press_duration = 0.1
         self.sender.send("sp")
         assert self.all_signals == [
             down("s"),
@@ -195,7 +195,7 @@ class TestSendCommandProcessor:
         ]
 
     def test_press_duration_variable_overrides_config(self) -> None:
-        config_thread_local_storage.action_config.send_press_duration = 0.3
+        self.action_config.send_press_duration = 0.3
         self.sender.send("mz", press_duration=1)
         assert self.all_signals == [
             down("m"),

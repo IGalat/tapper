@@ -1,5 +1,7 @@
 import time
 from typing import Any
+from typing import Iterator
+from unittest.mock import MagicMock
 from unittest.mock import patch
 
 import img_test_util
@@ -24,7 +26,7 @@ btn_pink_xy = 310, 305
 
 
 @pytest.fixture
-def mock_get_sct() -> None:
+def mock_get_sct() -> Iterator[MagicMock]:
     with patch(
         "tapper.helper._util.image.base.get_screenshot_if_none_and_cut"
     ) as mock_sct:

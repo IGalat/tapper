@@ -1,5 +1,6 @@
 import sys
 from typing import Callable
+from typing import Iterator
 from unittest.mock import MagicMock
 from unittest.mock import patch
 
@@ -56,13 +57,13 @@ def sleep_fixture() -> SleepFixture:
 
 
 @pytest.fixture
-def mock_sleep(sleep_fixture: SleepFixture) -> None:
+def mock_sleep(sleep_fixture: SleepFixture) -> Iterator[None]:
     with patch("tapper.sleep", new=sleep_fixture.sleep):
         yield
 
 
 @pytest.fixture
-def fake_perf_counter():
+def fake_perf_counter() -> Iterator[FakeClock]:
     fake = FakeClock()
     with patch("time.perf_counter", new=fake):
         yield fake

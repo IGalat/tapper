@@ -1,4 +1,5 @@
 import time
+from typing import Iterator
 from unittest.mock import MagicMock
 from unittest.mock import patch
 
@@ -19,7 +20,7 @@ absolutes = img_test_util.absolutes()
 
 
 @pytest.fixture
-def mock_get_sct() -> MagicMock:
+def mock_get_sct() -> Iterator[MagicMock]:
     with patch(
         "tapper.helper._util.image.base.get_screenshot_if_none_and_cut"
     ) as mock_sct:
@@ -27,7 +28,7 @@ def mock_get_sct() -> MagicMock:
 
 
 @pytest.fixture
-def mock_mouse_pos() -> MagicMock:
+def mock_mouse_pos() -> Iterator[MagicMock]:
     with patch("tapper.mouse.get_pos") as mock_mouse_get_pos:
         yield mock_mouse_get_pos
 

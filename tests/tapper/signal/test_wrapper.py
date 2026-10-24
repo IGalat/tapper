@@ -12,7 +12,7 @@ from tapper.util import event
 
 
 def noop(no: Signal) -> constants.ListenerResult:
-    pass
+    return constants.ListenerResult.PROPAGATE
 
 
 WrapFixture = tuple[ListenerWrapper, SignalListener, keeper.Emul, keeper.Pressed]

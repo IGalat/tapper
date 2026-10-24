@@ -34,7 +34,7 @@ def mouse_commander() -> None:
     mc.move(y=400, relative=True)
     mc.press("lmb")
     time.sleep(0.1)
-    mc.move(y=-400, x=5, relative=True)
+    mc.move(x_or_xy=5, y=-400, relative=True)
     print("Now some lines below are selected too.")
     time.sleep(2)
 
@@ -53,7 +53,7 @@ def mouse_commander() -> None:
     time.sleep(2)
 
     screen_size = (1920, 1080)
-    mc.move(x=screen_size[0] // 2, y=screen_size[1] // 2)
+    mc.move(x_or_xy=screen_size[0] // 2, y=screen_size[1] // 2)
     print(
         "Now mouse cursor should be in the middle of your screen (make sure screen_size matches)."
     )

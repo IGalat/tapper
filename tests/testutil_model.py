@@ -25,7 +25,7 @@ class DummyListener(SignalListener):
 
     @classmethod
     def get_possible_signal_symbols(cls) -> list[str]:
-        pass
+        return []
 
     def start(self) -> None:
         pass
@@ -81,7 +81,7 @@ class DummyKeyboardDriver(KeyboardDriver):
     def toggled(self, symbol: str) -> bool:
         return symbol in self.toggled_symbols
 
-    def lang(self, lang: str | int | Lang | None = None) -> None:
+    def lang(self, lang: str | int | Lang | None = None) -> Lang | None:
         if lang is None:
             return self.lang_
         else:
@@ -235,7 +235,7 @@ class DummyWindowDriver(WindowDriver):
         handle: Any = None,
         force_after: float | None = None,
     ) -> bool:
-        pass
+        return False
 
     def minimize(
         self,
@@ -246,7 +246,7 @@ class DummyWindowDriver(WindowDriver):
         process_id: int | None = None,
         handle: Any = None,
     ) -> bool:
-        pass
+        return False
 
     def maximize(
         self,
@@ -270,10 +270,10 @@ class DummyWindowDriver(WindowDriver):
         process_id: int | None = None,
         handle: Any = None,
     ) -> bool:
-        pass
+        return False
 
     def to_next_of_same_group(self) -> bool:
-        pass
+        return False
 
 
 class DummyActionRunner(ActionRunner):
@@ -307,7 +307,7 @@ class Dummy:
 class SleepFixture:
     sleep: Callable[[Any], None]
     processor: SleepCommandProcessor
-    mock_actual_sleep: MagicMock | Callable[[Any], None]
+    mock_actual_sleep: MagicMock
 
     def get_time_slept(self) -> float:
         return round(

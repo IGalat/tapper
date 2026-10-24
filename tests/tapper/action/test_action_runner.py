@@ -15,8 +15,7 @@ from tapper.util import datastructs
 
 
 def all_actions_done(runnables: list[list[Future[Any]]]) -> bool:
-    runnables = datastructs.to_flat_list(runnables)
-    return not runner.prune_done_runnables(runnables)
+    return not runner.prune_done_runnables(datastructs.to_flat_list(runnables))
 
 
 class TestShutdown:
