@@ -368,8 +368,22 @@ def pixel_get_with_best_match_color(
     bbox_or_coords: BboxT | XyCoordsT | None = None,
     outer: ImageT | None = None,
     max_variation: int = 255,
-) -> None:
-    return  # _pixel_util.pixel_get_with_best_match_color  # todo
+) -> tuple[XyCoordsT, PixelColorT] | None:
+    """
+    The pixel whose color is closest to the given one, and its actual color.
+    Immediate function, wrap in lambda if setting as action of Tap.
+
+    :param color: see `pixel_find` param.
+    :param bbox_or_coords: see `pixel_find` param.
+    :param outer: see `pixel_find` param.
+    :param max_variation: the most any color component may be off for the pixel to count, 0-255.
+        With the default every color counts, so there is always a result on a non-empty area.
+    :return: Absolute coordinates of the closest pixel and its color, or None if nothing is close enough.
+        Among equally close pixels the first one, top row first and left to right.
+    """
+    return _pixel_util.pixel_get_with_best_match_color(
+        color, bbox_or_coords, outer, max_variation
+    )
 
 
 def pixel_get_with_best_match_color_near(
@@ -378,5 +392,12 @@ def pixel_get_with_best_match_color_near(
     max_distance: int = 50,
     outer: ImageT | None = None,
     max_variation: int = 255,
-) -> None:
-    return  # _pixel_util.pixel_get_with_best_match_color_near  # todo
+) -> tuple[XyCoordsT, PixelColorT] | None:
+    """
+    Same as `pixel_get_with_best_match_color`, but only among pixels within max_distance
+    of xy_position: a circle, like the `cursor_near` trigger condition.
+    Immediate function, wrap in lambda if setting as action of Tap.
+    """
+    return _pixel_util.pixel_get_with_best_match_color_near(
+        color, xy_position, max_distance, outer, max_variation
+    )

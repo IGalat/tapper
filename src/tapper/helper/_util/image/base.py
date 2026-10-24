@@ -83,6 +83,23 @@ def get_screenshot_if_none_and_cut(
     return np.asarray(pil_rgb)
 
 
+def clamp_bbox(bbox: BboxT, image: ImagePixelMatrixT | None) -> BboxT:
+    """The part of bbox that lies within the image, or within the screen if there is none."""
+    if image is not None:
+        left, top = 0, 0
+        right, bottom = get_image_size(image)
+    else:
+        screen = get_mss().monitors[0]
+        left, top = screen["left"], screen["top"]
+        right, bottom = left + screen["width"], top + screen["height"]
+    return (
+        max(bbox[0], left),
+        max(bbox[1], top),
+        min(bbox[2], right),
+        min(bbox[3], bottom),
+    )
+
+
 def check_bbox_smaller_or_eq(
     image: ImagePixelMatrixT | None, bbox: BboxT | None
 ) -> None:

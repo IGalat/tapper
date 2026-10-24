@@ -6,7 +6,7 @@ type PixelColorT = tuple[int, int, int]
 """RGB color of a pixel, 0-255 values."""
 
 type PixelHexColorT = str
-"""Hexadecimal color, like '#FFFFFF' """
+"""Hexadecimal color: '#RRGGBB', case-insensitive."""
 
 type PixelStrFormatT = str
 """ Format for pixel's data, f-string that gets filled with data:

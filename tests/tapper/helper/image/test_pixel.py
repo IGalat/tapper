@@ -104,11 +104,76 @@ class TestFind:
         with pytest.raises(ValueError):
             img.pixel_find((1000, -200, 0))
 
+    def test_hex_color_must_be_rrggbb(self) -> None:
+        assert img.pixel_find("#00ff00", outer=absolutes) == (1, 0)
+        assert img.pixel_find("#00FF00", outer=absolutes) == (1, 0)
+        for not_a_color in ["00ff00", "#0f0", "#00ff00ff", "green", "#00ff0g"]:
+            with pytest.raises(ValueError, match="RRGGBB"):
+                img.pixel_find(not_a_color, outer=absolutes)
+
     def test_variation_in_both_directions(self) -> None:
         outer = img_test_util.from_matrix([[black, gray], [gray, white]])
         assert img.pixel_find((250, 250, 250), outer=outer, variation=10) == (1, 1)
         assert img.pixel_find((5, 5, 5), outer=outer, variation=10) == (0, 0)
         assert img.pixel_find((120, 135, 128), outer=outer, variation=10) == (1, 0)
+
+
+class TestBestMatch:
+    def test_closest_pixel_and_its_color(self) -> None:
+        outer = img_test_util.from_matrix([[black, gray], [gray, white]])
+        assert img.pixel_get_with_best_match_color((250, 250, 250), outer=outer) == (
+            (1, 1),
+            white,
+        )
+
+    def test_too_far_off(self) -> None:
+        outer = img_test_util.from_matrix([[black, gray], [gray, white]])
+        assert (
+            img.pixel_get_with_best_match_color(
+                (250, 250, 250), outer=outer, max_variation=4
+            )
+            is None
+        )
+
+    def test_ties_go_to_the_first_in_reading_order(self) -> None:
+        outer = img_test_util.from_matrix([[gray, gray], [gray, gray]])
+        assert img.pixel_get_with_best_match_color(black, outer=outer) == ((0, 0), gray)
+
+    def test_within_bbox(self) -> None:
+        outer = img_test_util.from_matrix([[white, black, black], [black, black, gray]])
+        found = img.pixel_get_with_best_match_color(white, (1, 0, 3, 2), outer=outer)
+        assert found == ((2, 1), gray)
+
+
+class TestBestMatchNear:
+    outer = img_test_util.from_matrix(
+        [
+            [white, black, black, black, black],
+            [black, black, black, black, black],
+            [black, black, black, black, black],
+            [black, black, black, white, black],
+            [black, black, black, black, white],
+        ]
+    )
+
+    def test_only_the_circle_counts(self) -> None:
+        """(3, 3) is within 2 of the center, the corners are not: the square around would reach them."""
+        found = img.pixel_get_with_best_match_color_near(
+            white, (2, 2), max_distance=2, outer=self.outer
+        )
+        assert found == ((3, 3), white)
+
+    def test_nothing_close_enough(self) -> None:
+        found = img.pixel_get_with_best_match_color_near(
+            white, (2, 2), max_distance=1, outer=self.outer, max_variation=10
+        )
+        assert found is None
+
+    def test_near_the_edge(self) -> None:
+        found = img.pixel_get_with_best_match_color_near(
+            white, (0, 0), max_distance=2, outer=self.outer
+        )
+        assert found == ((0, 0), white)
 
 
 class TestWaitFor:
