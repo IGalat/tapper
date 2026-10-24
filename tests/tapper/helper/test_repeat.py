@@ -1,10 +1,10 @@
 import threading
-import time
 from collections.abc import Callable
 from collections.abc import Generator
+from collections.abc import Iterator
 from dataclasses import dataclass
+from types import SimpleNamespace
 from typing import Any
-from unittest.mock import call
 from unittest.mock import patch
 
 import pytest
@@ -14,6 +14,8 @@ from tapper.controller import flow_control
 from tapper.controller.flow_control import StopTapperActionError
 from tapper.helper import repeat
 from tapper.helper._util import repeat_util
+from testutil_model import Stepper
+from testutil_model import join_repeat_worker
 
 
 @dataclass
@@ -35,226 +37,232 @@ def raise_io_error() -> None:
     raise OSError()
 
 
-def wait_until(condition: Callable[[], bool]) -> None:
-    for _ in range(500):
-        if condition():
-            return
-        time.sleep(0.001)
-
-
-def wait_for_repeatable() -> None:
-    """Less flaky compared to just time.sleep"""
-    for _ in range(25):
-        if repeat_util.running_repeatable is not None:
-            break
-        time.sleep(0.001)
-    time.sleep(0.001)
+@pytest.fixture(autouse=True)
+def runtime(monkeypatch: pytest.MonkeyPatch) -> None:
+    """What a repeat reads from the initialized tapper: root send settings and key state."""
+    stub = SimpleNamespace(
+        root=SimpleNamespace(send_interval=0, send_press_duration=0),
+        pressed=SimpleNamespace(pressed_keys={}),
+    )
+    monkeypatch.setattr(tapper, "_runtime", stub, raising=False)
 
 
 @pytest.fixture(autouse=True)
 def assert_clean_state_after_test() -> Generator:
     yield
-    time.sleep(0)
+    join_repeat_worker()
     assert repeat_util.running_repeatable is None
 
 
-@pytest.mark.skip("fails, flaky waits. need new robust test mechanism")
 class TestRepeatWhileFn:
-    def test_simplest(self) -> None:
+    def test_simplest(self, stepper: Stepper) -> None:
         counter = Counter()
         repeat.while_fn(lambda: counter.count < 1, counter.tick, interval=0)()
-        wait_for_repeatable()
-
+        join_repeat_worker()  # the condition is false right after the action, so no sleep
         assert counter.count == 1
 
-    def test_several_times(self) -> None:
+    def test_several_times(self, stepper: Stepper) -> None:
         counter = Counter()
         repeat.while_fn(lambda: counter.count < 5, counter.tick, interval=0)()
-        wait_for_repeatable()
-
+        stepper.wait_action()
+        stepper.step(3)
+        stepper.release()
+        join_repeat_worker()
         assert counter.count == 5
 
-    def test_zero_times(self) -> None:
+    def test_zero_times(self, stepper: Stepper) -> None:
         counter = Counter()
         repeat.while_fn(lambda: False, counter.tick, interval=0)()
-        wait_for_repeatable()
-
+        join_repeat_worker()
         assert counter.count == 0
 
-    def test_max_repeats(self) -> None:
+    def test_max_repeats(self, stepper: Stepper) -> None:
         counter = Counter()
         repeat.while_fn(lambda: True, counter.tick, interval=0, max_repeats=5)()
-        wait_for_repeatable()
-
+        stepper.wait_action()
+        stepper.step(4)
+        stepper.release()
+        join_repeat_worker()
         assert counter.count == 5
 
-    def test_condition_false_from_start(self) -> None:
-        counter = Counter()
-        repeat.while_fn(lambda: False, counter.tick, interval=0)()
-        wait_for_repeatable()
-
-        assert counter.count == 0
-
-    @pytest.mark.skip("new mock_sleep is not a mock itself")
-    def test_sleep_time(self, mock_sleep: Any) -> None:
+    def test_sleeps_the_interval(self, stepper: Stepper) -> None:
         counter = Counter()
         repeat.while_fn(lambda: True, counter.tick, interval=0.035, max_repeats=2)()
-        wait_for_repeatable()
+        stepper.wait_action()
+        stepper.step()
+        stepper.release()
+        join_repeat_worker()
         assert counter.count == 2
-        assert mock_sleep.call_count == 2
-        assert mock_sleep.call_args == call(0.035)
+        assert stepper.slept == [0.035, 0.035]
 
-    def test_second_repeat_overrides_first(self) -> None:
+    def test_second_repeat_overrides_first(self, stepper: Stepper) -> None:
         counter1 = Counter()
         counter2 = Counter()
         repeat.while_fn(lambda: True, counter1.tick, interval=0.05)()
-        wait_for_repeatable()
+        stepper.wait_action()
+
         repeat.while_fn(lambda: counter2.count < 5, counter2.tick, interval=0)()
-        time.sleep(
-            0.05
-        )  # if less time, wait for 1st will be longer since switch is not instant.
+        stepper.release()  # the first loop ends at its next check
+        stepper.wait_action()
+        stepper.step(3)
+        stepper.release()
+        join_repeat_worker()
+        assert (counter1.count, counter2.count) == (1, 5)
 
-        assert counter1.count == 1
-        assert counter2.count == 5
-
-    def test_second_repeat_overrides_without_repeats(self) -> None:
+    def test_second_repeat_overrides_without_repeats(self, stepper: Stepper) -> None:
         counter = Counter()
         repeat.while_fn(lambda: True, counter.tick, interval=0.05)()
-        wait_for_repeatable()
-        assert counter.count == 1
+        stepper.wait_action()
+
         repeat.while_fn(lambda: False, counter.tick, interval=0)()
-        time.sleep(0.05)  # enough for 1st to repeat
+        stepper.release()
+        join_repeat_worker()
         assert counter.count == 1
 
 
 class TestRepeatWhilePressed:
     @pytest.fixture
-    def mock_pressed(self) -> Any:
+    def mock_pressed(self) -> Iterator[Any]:
         with patch("tapper.kb.pressed") as mock_pressed:
             mock_pressed.return_value = True
             yield mock_pressed
 
-    # todo fix: there's an exception in is_end_run because state_keeper isn't there.
-    def test_simplest(self, mock_pressed: Any, mock_sleep: Any) -> None:
+    def test_stops_when_released_by_action(
+        self, mock_pressed: Any, stepper: Stepper
+    ) -> None:
         counter = Counter()
         counter.action_at_5 = lambda: mock_return_false(mock_pressed)
         repeat.while_pressed("q", counter.tick)()
-        wait_for_repeatable()
-        mock_pressed.return_value = False
+        stepper.wait_action()
+        stepper.step(3)
+        stepper.release()  # the 5th action releases the key, so the loop ends
+        join_repeat_worker()
         assert counter.count == 5
 
-    @pytest.mark.skip("new mock_sleep is not a mock itself")
-    def test_press_and_release(self, mock_pressed: Any, mock_sleep: Any) -> None:
+    def test_stops_when_released(self, mock_pressed: Any, stepper: Stepper) -> None:
         counter = Counter()
-        counter.action_at_5 = lambda: mock_return_false(mock_pressed)
         repeat.while_pressed("q", counter.tick)()
-        wait_for_repeatable()
-
+        stepper.wait_action()
+        stepper.step(1)
         mock_pressed.return_value = False
-        wait_for_repeatable()
-
-        mock_pressed.return_value = True
-        wait_for_repeatable()
-
-        assert counter.count == 5
-        assert mock_sleep.call_count == 4
+        stepper.release()
+        join_repeat_worker()
+        assert counter.count == 2
+        assert repeat_util.running_repeatable is None
 
     def test_nonexistent_symbol(self) -> None:
         with pytest.raises(ValueError):
             repeat.while_pressed("some_key", lambda: False)
 
-    def test_max_repeats(self, mock_pressed: Any, mock_sleep: Any) -> None:
+    def test_max_repeats(self, mock_pressed: Any, stepper: Stepper) -> None:
         counter = Counter()
-        counter.action_at_5 = lambda: mock_return_false(mock_pressed)
         repeat.while_pressed("q", counter.tick, max_repeats=3)()
-        wait_for_repeatable()
-        mock_pressed.return_value = False
+        stepper.wait_action()
+        stepper.step(2)
+        stepper.release()
+        join_repeat_worker()
         assert counter.count == 3
 
 
 class TestRepeatToggle:
-    def test_simplest(self, mock_sleep: Any) -> None:
+    def test_simplest(self, stepper: Stepper) -> None:
         counter = Counter()
         toggle = repeat.toggle(counter.tick)
 
         toggle()
-        wait_for_repeatable()
+        stepper.wait_action()
         toggle()
-        assert counter.count > 0
+        stepper.release()
+        join_repeat_worker()
+        assert counter.count == 1
 
-    def test_toggle_twice(self, mock_sleep: Any) -> None:
+    def test_toggle_twice(self, stepper: Stepper) -> None:
         counter = Counter()
         toggle = repeat.toggle(counter.tick)
 
         toggle()
-        wait_for_repeatable()
+        stepper.wait_action()
         toggle()
-        wait_for_repeatable()
-        count_1 = counter.count
-        assert counter.count > 0
-
-        wait_for_repeatable()
-        assert counter.count == count_1
+        stepper.release()
+        join_repeat_worker()
+        assert counter.count == 1
 
         toggle()
-        wait_for_repeatable()
+        stepper.wait_action()
+        stepper.step(1)
         toggle()
-        assert counter.count > count_1
+        stepper.release()
+        join_repeat_worker()
+        assert counter.count == 3
 
-    def test_two_toggles(self, mock_sleep: Any) -> None:
+    def test_two_toggles(self, stepper: Stepper) -> None:
         counter1 = Counter()
         counter2 = Counter()
         toggle1 = repeat.toggle(counter1.tick)
         toggle2 = repeat.toggle(counter2.tick)
 
         toggle1()
-        wait_for_repeatable()
-        toggle2()
-        wait_for_repeatable()
-        count_1 = counter1.count
-        wait_for_repeatable()
-        assert counter1.count == count_1
+        stepper.wait_action()
+        toggle2()  # takes over: the first loop ends at its next check
+        stepper.release()
+        stepper.wait_action()
+        assert (counter1.count, counter2.count) == (1, 1)
 
         toggle1()
-        wait_for_repeatable()
-        count_2 = counter2.count
-        wait_for_repeatable()
-        assert counter2.count == count_2
-        toggle1()
+        stepper.release()
+        stepper.wait_action()
+        assert (counter1.count, counter2.count) == (2, 1)
 
-    def test_max_repeats(self, mock_sleep: Any) -> None:
+        toggle1()
+        stepper.release()
+        join_repeat_worker()
+
+    def test_max_repeats(self, stepper: Stepper) -> None:
         counter = Counter()
         toggle = repeat.toggle(counter.tick, max_repeats=2)
 
         toggle()
-        wait_for_repeatable()
+        stepper.wait_action()
+        stepper.step(1)
+        stepper.release()
+        join_repeat_worker()
         assert counter.count == 2
 
         toggle()
-        wait_for_repeatable()
+        stepper.wait_action()
+        stepper.step(1)
+        stepper.release()
+        join_repeat_worker()
         assert counter.count == 4
 
-    def test_toggle_again_after_exception(self, mock_sleep: Any) -> None:
+    def test_toggle_again_after_exception(self, stepper: Stepper) -> None:
         counter = Counter()
         counter.action_at_5 = raise_io_error
         toggle = repeat.toggle(counter.tick)
 
         toggle()
-        wait_for_repeatable()
+        stepper.wait_action()
+        stepper.step(3)
+        stepper.release()  # the 5th action raises, which ends the loop
+        join_repeat_worker()
         assert counter.count == 5
 
         toggle()
-        wait_for_repeatable()
+        stepper.wait_action()
         toggle()
-        assert counter.count > 5
+        stepper.release()
+        join_repeat_worker()
+        assert counter.count == 6
 
-    def test_condition(self, mock_sleep: Any) -> None:
+    def test_condition(self, stepper: Stepper) -> None:
         counter = Counter()
         toggle = repeat.toggle(counter.tick, condition=lambda: counter.count < 3)
 
         toggle()
-        wait_for_repeatable()
-
+        stepper.wait_action()
+        stepper.step(1)
+        stepper.release()  # the 3rd action makes the condition false
+        join_repeat_worker()
         assert counter.count == 3
 
 
@@ -268,28 +276,28 @@ class TestKill:
 
         monkeypatch.setattr(tapper, "sleep", kill)
         repeat.toggle(killed.tick)()
-        wait_until(lambda: repeat_util.running_repeatable is None)
+        join_repeat_worker()
         assert killed.count == 1
 
         monkeypatch.setattr(tapper, "sleep", lambda *_: None)
         repeat.toggle(survivor.tick, max_repeats=3)()
-        wait_until(lambda: survivor.count == 3)
+        join_repeat_worker()
         assert survivor.count == 3
 
 
 class TestShutdown:
     def test_repeat_ends_when_tapper_stops(
-        self, monkeypatch: pytest.MonkeyPatch
+        self, monkeypatch: pytest.MonkeyPatch, stepper: Stepper
     ) -> None:
         shutdown = threading.Event()
         monkeypatch.setattr(flow_control, "shutdown", shutdown)
-        monkeypatch.setattr(tapper, "sleep", lambda *_: time.sleep(0.001))
         counter = Counter()
 
         repeat.toggle(counter.tick)()
-        wait_for_repeatable()
+        stepper.wait_action()
         shutdown.set()
-        wait_until(lambda: repeat_util.running_repeatable is None)
+        stepper.release()
+        join_repeat_worker()
 
         assert repeat_util.running_repeatable is None
-        assert counter.count >= 1
+        assert counter.count == 1

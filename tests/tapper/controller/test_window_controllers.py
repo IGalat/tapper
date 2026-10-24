@@ -2,7 +2,6 @@ import sys
 from collections.abc import Callable
 from functools import partial
 from typing import Any
-from typing import ClassVar
 
 import pytest
 
@@ -45,24 +44,16 @@ def test_get_open_reuses_enumeration_within_ttl(
     assert enumerations == 2
 
 
-@pytest.mark.skip(
-    reason="tox does not recognise win32con, some bug in pywin32? only manual for now"
-)
+@pytest.mark.skipif(sys.platform != "win32", reason="imports pywin32")
 class TestWin32WindowController:
     test_window = Window("title", "exec", 123, 456)
-    handles_commanded: ClassVar[list[Any]] = []
 
     @pytest.fixture
-    def command_fns(self) -> list[Callable[[Any], Any]]:
-        self.handles_commanded.clear()
-
-        def command(handle: Any) -> None:
-            self.handles_commanded.append(handle)
-
-        return [command]
+    def commanded(self) -> list[Any]:
+        return []
 
     @pytest.fixture
-    def win_command(self, command_fns: list[Callable[[Any], Any]]) -> Any:
+    def win_command(self, commanded: list[Any], monkeypatch: pytest.MonkeyPatch) -> Any:
         from tapper.controller.window.window_win32_impl import Win32WindowDriver
         from tapper.controller.window.window_win32_impl import win_filter
 
@@ -80,9 +71,9 @@ class TestWin32WindowController:
             )
             return [filtered] if filtered else []
 
-        win_tc = Win32WindowDriver()
-        win_tc.get_open = get_open
-        return partial(win_tc.window_commands, command_fns)
+        driver = Win32WindowDriver()
+        monkeypatch.setattr(driver, "get_open", get_open)
+        return partial(driver.window_commands, [commanded.append])
 
     def test_win_filter_none(self) -> None:
         from tapper.controller.window.window_win32_impl import win_filter
@@ -145,52 +136,51 @@ class TestWin32WindowController:
         assert win_filter(win, process_id=123) == win
         assert win_filter(win, process_id=12) is None
 
-    def test_win_cmd_handle(self, win_command: Any) -> None:
+    def test_win_cmd_handle(self, win_command: Any, commanded: list[Any]) -> None:
         assert win_command(handle=987)
-        assert self.handles_commanded[0] == 987
-        self.handles_commanded.clear()
+        assert commanded == [987]
 
+        commanded.clear()
         assert win_command(handle=456)
-        assert self.handles_commanded[0] == self.test_window.handle
+        assert commanded == [self.test_window.handle]
 
-    def test_win_cmd_pid(self, win_command: Any) -> None:
+    def test_win_cmd_pid(self, win_command: Any, commanded: list[Any]) -> None:
         assert not win_command(process_id=987)
-        assert not self.handles_commanded
+        assert not commanded
         assert win_command(process_id=123)
-        assert self.handles_commanded[0] == self.test_window.handle
+        assert commanded == [self.test_window.handle]
 
-    def test_win_cmd_win(self, win_command: Any) -> None:
+    def test_win_cmd_win(self, win_command: Any, commanded: list[Any]) -> None:
         assert not win_command("some")
-        assert not self.handles_commanded
+        assert not commanded
         assert win_command(self.test_window)
-        assert self.handles_commanded[0] == self.test_window.handle
+        assert commanded == [self.test_window.handle]
 
-    def test_win_cmd_exec_or_title(self, win_command: Any) -> None:
+    def test_win_cmd_exec_or_title(
+        self, win_command: Any, commanded: list[Any]
+    ) -> None:
         assert not win_command("some")
-        assert not self.handles_commanded
         assert not win_command("tle", strict=True)
-        assert not self.handles_commanded
+        assert not commanded
         assert win_command("tle")
-        assert self.handles_commanded[0] == self.test_window.handle
-        self.handles_commanded.clear()
+        assert commanded == [self.test_window.handle]
 
+        commanded.clear()
         assert not win_command("xec", strict=True)
-        assert not self.handles_commanded
+        assert not commanded
         assert win_command("xec")
-        assert self.handles_commanded[0] == self.test_window.handle
+        assert commanded == [self.test_window.handle]
 
-    def test_win_cmd_title(self, win_command: Any) -> None:
+    def test_win_cmd_title(self, win_command: Any, commanded: list[Any]) -> None:
         assert not win_command(title="some")
-        assert not self.handles_commanded
         assert not win_command(title="tle", strict=True)
-        assert not self.handles_commanded
+        assert not commanded
         assert win_command(title="tle")
-        assert self.handles_commanded[0] == self.test_window.handle
+        assert commanded == [self.test_window.handle]
 
-    def test_win_cmd_exec(self, win_command: Any) -> None:
+    def test_win_cmd_exec(self, win_command: Any, commanded: list[Any]) -> None:
         assert not win_command(exec="some")
-        assert not self.handles_commanded
         assert not win_command(exec="xec", strict=True)
-        assert not self.handles_commanded
+        assert not commanded
         assert win_command(exec="xec")
-        assert self.handles_commanded[0] == self.test_window.handle
+        assert commanded == [self.test_window.handle]

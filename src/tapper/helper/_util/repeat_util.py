@@ -1,3 +1,4 @@
+import contextlib
 import queue
 import threading
 import time
@@ -8,6 +9,7 @@ from tapper.controller import flow_control
 from tapper.controller.flow_control import ActionConfig
 from tapper.controller.flow_control import StopTapperActionError
 from tapper.controller.flow_control import config_thread_local_storage
+from tapper.feedback.logger import log
 from tapper.helper.model import Repeatable
 from tapper.model import keyboard as keyboard_model
 from tapper.model import mouse as mouse_model
@@ -32,8 +34,6 @@ def is_end_run(repeatable: Repeatable) -> bool:
 
 
 def _run_task(repeatable: Repeatable) -> None:
-    global running_repeatable
-    running_repeatable = repeatable
     config_thread_local_storage.action_config = ActionConfig(
         send_interval=tapper._runtime.root.send_interval,
         send_press_duration=tapper._runtime.root.send_press_duration,
@@ -41,15 +41,12 @@ def _run_task(repeatable: Repeatable) -> None:
     )
     for _ in range(repeatable.max_repeats or 99999999999999):
         if is_end_run(repeatable):
-            running_repeatable = None
             return
         try:
             repeatable.action()
         except Exception:  # noqa: BLE001  # user action: any failure ends the repeat
-            running_repeatable = None
             return
         if is_end_run(repeatable):
-            running_repeatable = None
             return
         # if long wait, break into chunks to check if to end runnable
         if repeatable.interval <= TIME_SPLIT:
@@ -61,20 +58,27 @@ def _run_task(repeatable: Repeatable) -> None:
                 tapper.sleep(min(TIME_SPLIT, repeatable.interval - elapsed))
                 elapsed = time.perf_counter() - started_at
                 if is_end_run(repeatable):
-                    running_repeatable = None
                     return
-    else:
-        # looped until max repeats
+
+
+def _finish(repeatable: Repeatable) -> None:
+    """A newer repeat may already own the slot; only clear it if this one still does."""
+    global running_repeatable
+    if running_repeatable is repeatable:
         running_repeatable = None
 
 
 def _worker() -> None:
-    global running_repeatable
     while True:
+        task = _to_run.get()
         try:
-            _run_task(_to_run.get())
-        except StopTapperActionError:
-            running_repeatable = None
+            with contextlib.suppress(StopTapperActionError):
+                _run_task(task)
+        except Exception:  # noqa: BLE001  # the worker must outlive a broken repeat
+            log.warning("Repeat failed", exc_info=True)
+        finally:
+            _finish(task)
+            _to_run.task_done()
 
 
 threading.Thread(target=_worker, name="tapper-repeat", daemon=True).start()

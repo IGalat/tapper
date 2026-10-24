@@ -1,5 +1,8 @@
+import threading
 import time
 from collections.abc import Callable
+from collections.abc import Iterator
+from concurrent.futures import wait
 from functools import partial
 from typing import Any
 
@@ -23,6 +26,7 @@ from tapper.signal.base_listener import SignalListener
 from tapper.signal.keyboard.keyboard_listener import KeyboardSignalListener
 from tapper.state import keeper
 from testutil_model import Dummy
+from testutil_model import FakeClock
 
 
 def click(symbols: str) -> list[Signal]:
@@ -48,8 +52,22 @@ def ends_with(outer: list[Any], sub: list[Any]) -> bool:
     return len(outer) >= len(sub) and outer[-len(sub) :] == sub
 
 
+def wait_actions() -> None:
+    """Every action triggered so far has finished."""
+    runner = tapper._runtime.runner
+    futures = [future for futures in runner._runnables for future in futures]
+    if hasattr(runner, "_control_runnable"):
+        futures.append(runner._control_runnable)
+    assert not wait(futures, timeout=5).not_done, "actions still running"
+
+
 class Fixture:
     listener: SignalListener
+    clock: FakeClock
+    """time.perf_counter for the duration of the test; sleeps in real input advance it."""
+    gate: threading.Event
+    """Clear it to make every sleep inside an emulated send block until it is set again."""
+    _arrived: threading.Semaphore
     emul_signals: list[Signal]
     real_signals: list[Signal]
     pressed: list[str]
@@ -65,14 +83,17 @@ class Fixture:
             self._acts[n] = partial(self.actions.append, n)
         return self._acts[n]
 
+    def wait_blocked(self, actions: int) -> None:
+        """That many actions have reached a sleep and are parked at the closed gate."""
+        for _ in range(actions):
+            assert self._arrived.acquire(timeout=5), "fewer actions reached the gate"
+
 
 @pytest.fixture
 def f(
-    dummy: Dummy, is_debug: bool, make_group: Callable, monkeypatch: pytest.MonkeyPatch
-) -> Fixture:
+    dummy: Dummy, make_group: Callable, monkeypatch: pytest.MonkeyPatch
+) -> Iterator[Fixture]:
     """Emulation of the entire tapper setup."""
-    debug_sleep_mult = 5 if is_debug else 1
-
     # restore default before each
     config.action_runner_executors_threads = [1]
     config.tray_icon = False
@@ -88,6 +109,11 @@ def f(
 
     fixture = Fixture()
     fixture.listener = listener
+    fixture.clock = FakeClock()
+    monkeypatch.setattr(time, "perf_counter", fixture.clock)
+    fixture.gate = threading.Event()
+    fixture.gate.set()
+    fixture._arrived = threading.Semaphore(0)
     fixture._acts = {}
     fixture.emul_signals = []
     fixture.real_signals = []
@@ -116,22 +142,31 @@ def f(
     def start() -> None:
         tapper.init()  # this will init sender
 
-        def sleep_logged(time_s: float, signals: list[Signal]) -> None:
-            signals.append(sleep_signal(time_s))
-            time.sleep(time_s)
+        def emul_sleep(time_s: float) -> None:
+            fixture.emul_signals.append(sleep_signal(time_s))
+            fixture._arrived.release()
+            fixture.gate.wait()
 
-        def send_and_sleep(send: SendFn, command: str) -> None:
+        def real_sleep(time_s: float) -> None:
+            """Time passes: the clock moves and actions triggered so far get to finish."""
+            fixture.real_signals.append(sleep_signal(time_s))
+            fixture.clock.advance(time_s)
+            if fixture.gate.is_set():
+                wait_actions()
+
+        def send_real(send: SendFn, command: str) -> None:
             send(command)
-            time.sleep(0.01 * debug_sleep_mult)  # so actions can run their course
+            if fixture.gate.is_set():
+                wait_actions()
 
         sender = tapper._send_processor
-        sender.sleep_fn = partial(sleep_logged, signals=fixture.emul_signals)
+        sender.sleep_fn = emul_sleep
 
         real_sender = SendCommandProcessor()
         real_sender.os = sender.os
         real_sender.parser = sender.parser
-        real_sender.sleep_fn = partial(sleep_logged, signals=fixture.real_signals)
-        fixture.send_real = partial(send_and_sleep, real_sender.send)
+        real_sender.sleep_fn = real_sleep
+        fixture.send_real = partial(send_real, real_sender.send)
 
         emul_keeper = keeper.Emul()
 
@@ -157,4 +192,5 @@ def f(
 
     fixture.start = start
 
-    return fixture
+    yield fixture
+    fixture.gate.set()

@@ -6,12 +6,16 @@ from unittest.mock import patch
 
 import pytest
 
+import tapper
 import tapper.config
 from tapper.controller.sleep_processor import SleepCommandProcessor
+from tapper.helper._util import repeat_util
 from tapper.model.tap_tree import Group
 from testutil_model import Dummy
 from testutil_model import FakeClock
 from testutil_model import SleepFixture
+from testutil_model import Stepper
+from testutil_model import join_repeat_worker
 
 
 @pytest.fixture
@@ -67,3 +71,14 @@ def fake_perf_counter() -> Iterator[FakeClock]:
     fake = FakeClock()
     with patch("time.perf_counter", new=fake):
         yield fake
+
+
+@pytest.fixture
+def stepper(monkeypatch: pytest.MonkeyPatch) -> Iterator[Stepper]:
+    """Drive a repeat one action at a time. Tears down whatever a failed test left running."""
+    stepper_ = Stepper()
+    monkeypatch.setattr(tapper, "sleep", stepper_.sleep)
+    yield stepper_
+    repeat_util.running_repeatable = None
+    stepper_.release()
+    join_repeat_worker()

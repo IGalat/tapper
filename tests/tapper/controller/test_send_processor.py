@@ -86,12 +86,13 @@ class TestSendCommandProcessor:
         self.sender = sender
         monkeypatch.setattr(flow_control, "initialized", True)
 
-        event.subscribe(listener.name, lambda signal: self.real_signals.append(signal))
+        event.subscribe(listener.name, self.real_signals.append)
 
         self.action_config = ActionConfig(0, 0, flow_control.kill_id)
         config_thread_local_storage.action_config = self.action_config
         yield
         event.join()
+        event.unsubscribe(listener.name, self.real_signals.append)
         assert not self.real_signals, "emulated signals must not be published"
 
     def test_simplest(self) -> None:

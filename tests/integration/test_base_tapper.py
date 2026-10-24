@@ -1,5 +1,4 @@
 import threading
-import time
 from functools import partial
 
 import pytest
@@ -54,7 +53,7 @@ class TestSimple:
         f.start()
 
         f.send_real("$(shift down)")
-        time.sleep(0.05)
+        f.clock.advance(0.06)  # "50ms" triggers need the key held longer than that
         f.send_real("$(enter;shift up)")
         assert f.actions == [1, 3, 2]
 
@@ -66,12 +65,12 @@ class TestSimple:
         assert ends_with(f.actions, [4, 4])
         assert 5 not in f.actions
 
-        time.sleep(0.05)
+        f.clock.advance(0.06)
         f.send_real("$(  up)")
         assert ends_with(f.actions, [5])
 
         f.send_real("$(  down;enter down)")
-        time.sleep(0.05)
+        f.clock.advance(0.06)
         f.send_real("$(enter up;  up)")
         assert ends_with(f.actions, [4, 6, 5])
 
@@ -184,7 +183,7 @@ class TestTreeOrder:
         f.send_real("$(ctrl+left_alt 50ms+1)")
         assert ends_with(f.emul_signals, click("controll" + "w/ctrl"))
 
-        time.sleep(1)
+        f.clock.advance(1)
         f.send_real("$(shift+1 50ms+ctrl)")
         assert ends_with(f.emul_signals, click("excl" + "controll"))
 
@@ -201,19 +200,26 @@ class TestTreeOrder:
 
 
 class TestConcurrentActions:
+    """With the gate closed, every triggered action parks in its sleep, so what reached
+    the gate is exactly what the runner accepted."""
+
     def test_simplest(self, f: Fixture) -> None:
         tapper.root.add({"a": "$(1ms)", "b": "$(2ms)"})
         f.start()
+        f.gate.clear()
 
         f.send_real("ab")
+        f.wait_blocked(1)
         assert f.emul_signals == [sleep_signal(0.001)]
 
     def test_actual_concurrent_simplest(self, f: Fixture) -> None:
         config.action_runner_executors_threads = [3]
         tapper.root.add({"a": "$(10ms)", "b": "$(20ms)"})
         f.start()
+        f.gate.clear()
 
         f.send_real("ababab")
+        f.wait_blocked(3)
         assert f.emul_signals == [
             sleep_signal(0.01),
             sleep_signal(0.02),
@@ -239,6 +245,8 @@ class TestConcurrentActions:
             ),
         )
         f.start()
+        f.gate.clear()
 
         f.send_real("xzhgfdsa")
+        f.wait_blocked(4)
         assert f.emul_signals == [sleep_signal(ms / 1000) for ms in [2, 16, 15, 14]]

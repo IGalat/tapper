@@ -1,9 +1,5 @@
-import random
-import shutil
 from collections.abc import Iterator
 from pathlib import Path
-from string import ascii_uppercase
-from typing import Any
 from unittest.mock import MagicMock
 from unittest.mock import call
 from unittest.mock import patch
@@ -26,14 +22,6 @@ def mock_get_sct() -> Iterator[MagicMock]:
 
 
 @pytest.fixture
-def temp_dir(tmpdir_factory: Any) -> Iterator[Path]:
-    temp_name = "".join(random.choice(ascii_uppercase) for i in range(12))
-    my_tmpdir = tmpdir_factory.mktemp(temp_name)
-    yield my_tmpdir
-    shutil.rmtree(str(my_tmpdir))
-
-
-@pytest.fixture
 def mock_save_to_disk() -> Iterator[MagicMock]:
     with patch("tapper.helper._util.image.base.save_to_disk") as mock_save:
         yield mock_save
@@ -51,11 +39,11 @@ class TestSnip:
         snipped = img.get_snip(None)
         assert numpy.array_equal(snipped, absolutes)
 
-    def test_saved_image_same_as_on_disk(self, temp_dir, mock_get_sct) -> None:
+    def test_saved_image_same_as_on_disk(self, tmp_path: Path, mock_get_sct) -> None:
         mock_get_sct.return_value = absolutes
 
         def get_name(name: str) -> str:
-            return str(Path(temp_dir / name))
+            return str(tmp_path / name)
 
         img.get_snip(bbox=None, prefix=get_name("qwe"))
         on_disk = img.from_path(get_name("qwe.png"), cache=False)
@@ -67,11 +55,13 @@ class TestSnip:
         assert mock_save_to_disk.call_count == 1
         assert mock_save_to_disk.call_args == call(absolutes, "qwe-BBOX(0,0,20,20).png")
 
-    def test_no_override_creates_different_file(self, temp_dir, mock_get_sct) -> None:
+    def test_no_override_creates_different_file(
+        self, tmp_path: Path, mock_get_sct
+    ) -> None:
         mock_get_sct.return_value = absolutes
 
         def get_name(name: str) -> str:
-            return str(Path(temp_dir / name))
+            return str(tmp_path / name)
 
         img.get_snip(bbox=None, prefix=get_name("qwe"))
         on_disk_0 = img.from_path(get_name("qwe.png"), cache=False)
@@ -80,9 +70,9 @@ class TestSnip:
         assert numpy.array_equal(on_disk_0, on_disk_1)
         assert not Path(get_name("qwe(2).png")).exists()
 
-    def test_override(self, temp_dir, mock_get_sct) -> None:
+    def test_override(self, tmp_path: Path, mock_get_sct) -> None:
         def get_name(name: str) -> str:
-            return str(Path(temp_dir / name))
+            return str(tmp_path / name)
 
         mock_get_sct.return_value = absolutes
         img.get_snip(bbox=None, prefix=get_name("qwe"))
@@ -92,7 +82,7 @@ class TestSnip:
         img.get_snip(bbox=None, prefix=get_name("qwe"), override_existing=True)
         on_disk_1 = img.from_path(get_name("qwe.png"), cache=False)
         assert not Path(get_name("qwe(1).png")).exists()
-        assert len(list(Path(temp_dir).iterdir())) == 1
+        assert len(list(tmp_path.iterdir())) == 1
         assert numpy.array_equal(on_disk_0, absolutes)
         assert numpy.array_equal(on_disk_1, img_test_util.btn_yellow())
 

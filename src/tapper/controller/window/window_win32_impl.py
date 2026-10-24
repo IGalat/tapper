@@ -68,7 +68,7 @@ def get_process_exec(pid: int | None) -> str | None:
         kernel32.CloseHandle(h_process)
 
 
-def str_match(filtered: str, iterated: str | None, strict: bool) -> bool:
+def str_match(filtered: str | None, iterated: str | None, strict: bool) -> bool:
     if not filtered or not iterated:
         return False
     if strict:

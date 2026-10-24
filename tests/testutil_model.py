@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import threading
 from collections import defaultdict
 from collections.abc import Callable
 from dataclasses import dataclass
@@ -11,6 +12,7 @@ from tapper.controller.keyboard.kb_api import KeyboardDriver
 from tapper.controller.mouse.mouse_api import MouseDriver
 from tapper.controller.sleep_processor import SleepCommandProcessor
 from tapper.controller.window.window_api import WindowDriver
+from tapper.helper._util import repeat_util
 from tapper.model import constants
 from tapper.model import languages
 from tapper.model import types_
@@ -330,3 +332,37 @@ class FakeClock:
 
     def set(self, v):
         self._t = v
+
+
+def join_repeat_worker() -> None:
+    """Returns once the repeat worker has finished every task handed to it."""
+    repeat_util._to_run.join()
+
+
+class Stepper:
+    """Stands in for tapper.sleep, so a loop that sleeps between actions runs exactly as
+    many actions as the test lets it: after each action it reports in and blocks until stepped."""
+
+    def __init__(self) -> None:
+        self.reported = threading.Semaphore(0)
+        self.go = threading.Semaphore(0)
+        self.slept: list[float] = []
+
+    def sleep(self, length: float = 0, *_: Any) -> None:
+        self.slept.append(length)
+        self.reported.release()
+        self.go.acquire()
+
+    def wait_action(self) -> None:
+        """The loop has run its action and is parked in sleep."""
+        assert self.reported.acquire(timeout=5), "the action never ran"
+
+    def step(self, times: int = 1) -> None:
+        """Let the loop run that many more actions."""
+        for _ in range(times):
+            self.go.release()
+            self.wait_action()
+
+    def release(self) -> None:
+        """Let the loop leave its sleep, for a loop that is about to end."""
+        self.go.release()

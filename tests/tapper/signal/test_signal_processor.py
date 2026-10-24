@@ -64,8 +64,8 @@ class TestSignalProcessor:
     processor: SignalProcessor
 
     @pytest.fixture(autouse=True)
-    def setup(self, dummy: Dummy) -> None:
-        wrapper.wrapped_action = lambda stap: stap.action
+    def setup(self, dummy: Dummy, monkeypatch: pytest.MonkeyPatch) -> None:
+        monkeypatch.setattr(wrapper, "wrapped_action", lambda stap: stap.action)
 
         self.root = SGroup()
         self.root.trigger_conditions = {}
