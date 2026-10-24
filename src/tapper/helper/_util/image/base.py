@@ -1,6 +1,7 @@
-import os.path
+import os
 import sys
 from functools import lru_cache
+from pathlib import Path
 from typing import overload
 
 import mss
@@ -32,7 +33,7 @@ mss_instance = mss.MSS()
 @lru_cache(maxsize=5)
 def from_path(pathlike: ImagePathT) -> ImagePixelMatrixT:
     if isinstance(pathlike, str):
-        pathlike = os.path.abspath(pathlike)
+        pathlike = Path(pathlike).absolute()
     pil_img = PIL.Image.open(pathlike).convert("RGB")
     return np.asarray(pil_img)
 
@@ -53,7 +54,7 @@ def to_pixel_matrix(image: ImageT | None) -> ImagePixelMatrixT | None:
     elif isinstance(image, ndarray):
         return image
     elif isinstance(image, (str, bytes, os.PathLike)):
-        return from_path(os.path.abspath(image))
+        return from_path(Path(os.fsdecode(image)).absolute())
     else:
         raise TypeError(f"Unexpected type, {type(image)} of {image}")
 

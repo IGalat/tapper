@@ -1,4 +1,4 @@
-import os
+from pathlib import Path
 from typing import Any
 
 from tapper.feedback.logger import log
@@ -8,7 +8,7 @@ _icon: Any = None
 
 
 def get_logo_path() -> str:
-    return os.path.dirname(os.path.realpath(__file__)) + "/../resources/tapper_logo.jpg"
+    return str(Path(__file__).resolve().parent.parent / "resources" / "tapper_logo.jpg")
 
 
 def make_menu() -> Any:

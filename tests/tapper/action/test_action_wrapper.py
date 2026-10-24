@@ -3,7 +3,7 @@ import logging
 import pytest
 
 from tapper.action.wrapper import wrapped_action
-from tapper.controller.flow_control import StopTapperActionException
+from tapper.controller.flow_control import StopTapperActionError
 from tapper.model.constants import ListenerResult
 from tapper.model.tap_tree_shadow import STap
 from tapper.model.trigger import MainKey
@@ -18,7 +18,7 @@ def make_stap(action) -> STap:
 
 
 def killed() -> None:
-    raise StopTapperActionException
+    raise StopTapperActionError
 
 
 def broken() -> None:

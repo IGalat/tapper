@@ -1,9 +1,9 @@
 import time
+from collections.abc import Callable
 from dataclasses import dataclass
-from typing import Callable
 
 from tapper.controller import flow_control
-from tapper.controller.flow_control import StopTapperActionException
+from tapper.controller.flow_control import StopTapperActionError
 from tapper.parser import common
 
 
@@ -68,4 +68,4 @@ class SleepCommandProcessor:
 
     def kill_if_required(self) -> None:
         if self.kill_check_fn():
-            raise StopTapperActionException
+            raise StopTapperActionError

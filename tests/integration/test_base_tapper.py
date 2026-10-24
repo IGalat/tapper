@@ -77,7 +77,9 @@ class TestSimple:
 
     def test_trigger_if(self, f: Fixture) -> None:
         conditions = []
-        is_in_conditions = lambda x: x in conditions
+
+        def is_in_conditions(x: int) -> bool:
+            return x in conditions
 
         tapper.root.add(
             {"q": "0"},

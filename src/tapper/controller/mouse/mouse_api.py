@@ -1,8 +1,7 @@
 import time
 from abc import ABC
 from abc import abstractmethod
-from typing import Callable
-from typing import Optional
+from collections.abc import Callable
 
 from tapper.controller.resource_controller import ResourceController
 from tapper.model import constants
@@ -21,8 +20,8 @@ def is_near(current_x: int, current_y: int, x: int, y: int, precision: int) -> b
 
 def calc_move(
     get_pos: Callable[[], tuple[int, int]],
-    x: Optional[int],
-    y: Optional[int],
+    x: int | None,
+    y: int | None,
     relative: bool,
 ) -> tuple[int, int]:
     if not relative:
@@ -68,7 +67,7 @@ class MouseDriver(ABC):
 
     @abstractmethod
     def move(
-        self, x: Optional[int] = None, y: Optional[int] = None, relative: bool = False
+        self, x: int | None = None, y: int | None = None, relative: bool = False
     ) -> None:
         pass
 

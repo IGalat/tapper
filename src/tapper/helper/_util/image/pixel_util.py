@@ -1,6 +1,6 @@
 import time
+from collections.abc import Callable
 from typing import Any
-from typing import Callable
 
 import numpy as np
 from PIL import ImageColor
@@ -15,12 +15,9 @@ from tapper.helper.model_types import PixelHexColorT
 from tapper.helper.model_types import PixelStrFormatT
 from tapper.helper.model_types import XyCoordsT
 
-coords_to_bbox_1_pixel = lambda coords: (
-    coords[0],
-    coords[1],
-    coords[0] + 1,
-    coords[1] + 1,
-)
+
+def coords_to_bbox_1_pixel(coords: XyCoordsT) -> BboxT:
+    return coords[0], coords[1], coords[0] + 1, coords[1] + 1
 
 
 def hex_or_rgb_to_rgb(color: PixelColorT | PixelHexColorT) -> PixelColorT:

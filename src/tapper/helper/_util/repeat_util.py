@@ -1,12 +1,12 @@
 import queue
 import threading
 import time
-from typing import Callable
+from collections.abc import Callable
 
 import tapper
 from tapper.controller import flow_control
 from tapper.controller.flow_control import ActionConfig
-from tapper.controller.flow_control import StopTapperActionException
+from tapper.controller.flow_control import StopTapperActionError
 from tapper.controller.flow_control import config_thread_local_storage
 from tapper.helper.model import Repeatable
 from tapper.model import keyboard as keyboard_model
@@ -27,7 +27,7 @@ def is_end_run(repeatable: Repeatable) -> bool:
             or running_repeatable.uid != repeatable.uid
             or not bool(repeatable.condition())
         )
-    except Exception:
+    except Exception:  # noqa: BLE001  # user condition: any failure ends the repeat
         return True
 
 
@@ -39,13 +39,13 @@ def _run_task(repeatable: Repeatable) -> None:
         send_press_duration=tapper._runtime.root.send_press_duration,
         kill_id=flow_control.kill_id,
     )
-    for i in range(repeatable.max_repeats or 99999999999999):
+    for _ in range(repeatable.max_repeats or 99999999999999):
         if is_end_run(repeatable):
             running_repeatable = None
             return
         try:
             repeatable.action()
-        except Exception:
+        except Exception:  # noqa: BLE001  # user action: any failure ends the repeat
             running_repeatable = None
             return
         if is_end_run(repeatable):
@@ -73,7 +73,7 @@ def _worker() -> None:
     while True:
         try:
             _run_task(_to_run.get())
-        except StopTapperActionException:
+        except StopTapperActionError:
             running_repeatable = None
 
 
@@ -92,7 +92,7 @@ def to_pressed_condition(symbol: str) -> Callable[[], bool]:
         *mouse_model.button_aliases.keys(),
     ]:
         device = tapper.mouse
-    elif symbol in keyboard_model.get_keys(tapper.config.os).keys():
+    elif symbol in keyboard_model.get_keys(tapper.config.os):
         device = tapper.kb
     else:
         raise ValueError(f"Repeat while pressed: '{symbol}' not recognised.")

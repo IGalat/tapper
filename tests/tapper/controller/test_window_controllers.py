@@ -1,8 +1,8 @@
 import sys
+from collections.abc import Callable
 from functools import partial
 from typing import Any
-from typing import Callable
-from typing import Optional
+from typing import ClassVar
 
 import pytest
 
@@ -50,7 +50,7 @@ def test_get_open_reuses_enumeration_within_ttl(
 )
 class TestWin32WindowController:
     test_window = Window("title", "exec", 123, 456)
-    handles_commanded: list[Any] = []
+    handles_commanded: ClassVar[list[Any]] = []
 
     @pytest.fixture
     def command_fns(self) -> list[Callable[[Any], Any]]:
@@ -67,13 +67,13 @@ class TestWin32WindowController:
         from tapper.controller.window.window_win32_impl import win_filter
 
         def get_open(
-            exec_or_title: Optional[str] = None,
-            title: Optional[str] = None,
-            exec: Optional[str] = None,
+            exec_or_title: str | None = None,
+            title: str | None = None,
+            exec: str | None = None,
             strict: bool = False,
-            process_id: Optional[int] = None,
+            process_id: int | None = None,
             handle: Any = None,
-            limit: Optional[int] = None,
+            limit: int | None = None,
         ) -> list[Window]:
             filtered = win_filter(
                 self.test_window, exec_or_title, title, exec, strict, process_id, handle

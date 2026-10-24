@@ -1,8 +1,8 @@
 import re
+from collections.abc import Callable
+from collections.abc import Iterator
 from dataclasses import dataclass
 from typing import Any
-from typing import Callable
-from typing import Iterator
 
 from tapper.model import constants
 from tapper.model import keyboard
@@ -28,8 +28,8 @@ class _TriggerProp:
 
 
 _COMMON_PROPS = {
-    "Time in seconds": _TriggerProp(common.SECONDS.regex, "time", common.SECONDS.fn),
-    "Time in millis": _TriggerProp(common.MILLIS.regex, "time", common.MILLIS.fn),
+    "Time in seconds": _TriggerProp(common.Seconds.regex, "time", common.Seconds.fn),
+    "Time in millis": _TriggerProp(common.Millis.regex, "time", common.Millis.fn),
 }
 _MAIN_PROPS = {
     **_COMMON_PROPS,
@@ -113,7 +113,7 @@ class TriggerParser:
         try:
             keys = list(self._parse_keys(trigger_text))
         except ValueError as e:
-            raise TriggerParseError(f"Trigger: '{trigger_text}', error: {e}")
+            raise TriggerParseError(f"Trigger: '{trigger_text}', error: {e}") from e
         keys = _lower_and_add_shift_if_required(keys)
         main = MainKey(keys[-1].symbols, **_resolve_props(keys[-1].props, _MAIN_PROPS))
         auxiliary = [
@@ -138,5 +138,5 @@ class TriggerParser:
         try:
             symbols = self.registered_symbols[symbol]
         except KeyError:
-            raise TriggerParseError(f"Symbol not registered: '{symbol}'")
+            raise TriggerParseError(f"Symbol not registered: '{symbol}'") from None
         return symbols

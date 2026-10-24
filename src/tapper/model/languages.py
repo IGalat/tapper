@@ -299,7 +299,7 @@ def get(lang_in: str | int | Lang) -> Lang:
             raise KeyError(
                 f"Language not found: {lang_in}. "
                 f"Support for it may be not implemented, or typo. See tapper.model.languages"
-            )
+            ) from None
     elif isinstance(lang_in, int):
         return languages_by_locale[lang_in]
     else:

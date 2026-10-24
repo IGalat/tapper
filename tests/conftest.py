@@ -1,6 +1,6 @@
 import sys
-from typing import Callable
-from typing import Iterator
+from collections.abc import Callable
+from collections.abc import Iterator
 from unittest.mock import MagicMock
 from unittest.mock import patch
 

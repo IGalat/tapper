@@ -1,9 +1,8 @@
 import ctypes.wintypes
 import os
 import time
+from collections.abc import Callable
 from typing import Any
-from typing import Callable
-from typing import Optional
 
 import pywintypes
 import win32api
@@ -21,30 +20,30 @@ kernel32 = ctypes.windll.kernel32  # type: ignore  # only typed and imported on 
 
 # https://learn.microsoft.com/en-us/windows/win32/menurc/wm-syscommand
 
-processFlag = getattr(
+PROCESS_QUERY_FLAG = getattr(
     win32con,
     "PROCESS_QUERY_LIMITED_INFORMATION",
     win32con.WM_SYSCOMMAND,
 )
 
-minimize_command = lambda hwnd: win32gui.PostMessage(
-    hwnd, win32con.WM_SYSCOMMAND, win32con.SC_MINIMIZE, 0
-)
 
-restore_command = lambda hwnd: win32gui.PostMessage(
-    hwnd, win32con.WM_SYSCOMMAND, win32con.SC_RESTORE, 0
-)
-
-maximize_command = lambda hwnd: win32gui.PostMessage(
-    hwnd, win32con.WM_SYSCOMMAND, win32con.SC_MAXIMIZE, 0
-)
-
-destroy_command = lambda hwnd: win32gui.PostMessage(
-    hwnd, win32con.WM_SYSCOMMAND, win32con.SC_CLOSE, 0
-)
+def minimize_command(hwnd: int) -> None:
+    win32gui.PostMessage(hwnd, win32con.WM_SYSCOMMAND, win32con.SC_MINIMIZE, 0)
 
 
-def get_pid(hwnd: Any) -> Optional[int]:
+def restore_command(hwnd: int) -> None:
+    win32gui.PostMessage(hwnd, win32con.WM_SYSCOMMAND, win32con.SC_RESTORE, 0)
+
+
+def maximize_command(hwnd: int) -> None:
+    win32gui.PostMessage(hwnd, win32con.WM_SYSCOMMAND, win32con.SC_MAXIMIZE, 0)
+
+
+def destroy_command(hwnd: int) -> None:
+    win32gui.PostMessage(hwnd, win32con.WM_SYSCOMMAND, win32con.SC_CLOSE, 0)
+
+
+def get_pid(hwnd: Any) -> int | None:
     process_id = None
     if hwnd:
         ulong = ctypes.wintypes.DWORD()
@@ -54,8 +53,8 @@ def get_pid(hwnd: Any) -> Optional[int]:
     return process_id
 
 
-def get_process_exec(pid: Optional[int]) -> Optional[str]:
-    h_process = kernel32.OpenProcess(processFlag, 0, pid)
+def get_process_exec(pid: int | None) -> str | None:
+    h_process = kernel32.OpenProcess(PROCESS_QUERY_FLAG, 0, pid)
     if not h_process:
         return None
     try:
@@ -79,14 +78,14 @@ def str_match(filtered: str, iterated: str | None, strict: bool) -> bool:
 
 
 def win_filter(
-    win: Optional[Window],
-    exec_or_title: Optional[str] = None,
-    title: Optional[str] = None,
-    exec: Optional[str] = None,
+    win: Window | None,
+    exec_or_title: str | None = None,
+    title: str | None = None,
+    exec: str | None = None,
     strict: bool = False,
-    process_id: Optional[int] = None,
+    process_id: int | None = None,
     handle: Any = None,
-) -> Optional[Window]:
+) -> Window | None:
     if not win:
         return None
     if handle and win.handle != handle:
@@ -124,7 +123,7 @@ class Win32WindowDriver(WindowDriver):
     def _all_open(self) -> list[Window]:
         now = time.perf_counter()
         if now - self._open_windows_at > OPEN_WINDOWS_TTL:
-            found: list[Optional[Window]] = []
+            found: list[Window | None] = []
             win32gui.EnumWindows(
                 lambda hwnd, _: found.append(self.to_window(hwnd)), None
             )
@@ -140,13 +139,13 @@ class Win32WindowDriver(WindowDriver):
 
     def get_open(
         self,
-        exec_or_title: Optional[str] = None,
-        title: Optional[str] = None,
-        exec: Optional[str] = None,
+        exec_or_title: str | None = None,
+        title: str | None = None,
+        exec: str | None = None,
         strict: bool = False,
-        process_id: Optional[int] = None,
+        process_id: int | None = None,
         handle: Any = None,
-        limit: Optional[int] = None,
+        limit: int | None = None,
     ) -> list[Window]:
         result: list[Window] = []
         for win in self._all_open():
@@ -158,23 +157,23 @@ class Win32WindowDriver(WindowDriver):
 
     def active(
         self,
-        exec_or_title: Optional[str] = None,
-        title: Optional[str] = None,
-        exec: Optional[str] = None,
+        exec_or_title: str | None = None,
+        title: str | None = None,
+        exec: str | None = None,
         strict: bool = False,
-        process_id: Optional[int] = None,
+        process_id: int | None = None,
         handle: Any = None,
-    ) -> Optional[Window]:
+    ) -> Window | None:
         fore = self.to_window(win32gui.GetForegroundWindow())
         return win_filter(fore, exec_or_title, title, exec, strict, process_id, handle)
 
     def to_active(
         self,
-        window_or_exec_or_title: Optional[Window | str] = None,
-        title: Optional[str] = None,
-        exec: Optional[str] = None,
+        window_or_exec_or_title: Window | str | None = None,
+        title: str | None = None,
+        exec: str | None = None,
         strict: bool = False,
-        process_id: Optional[int] = None,
+        process_id: int | None = None,
         handle: Any = None,
     ) -> bool:
         try:
@@ -211,7 +210,7 @@ class Win32WindowDriver(WindowDriver):
             user32.SetActiveWindow(handle)
             user32.SetForegroundWindow(handle)
             return True
-        except Exception as e:
+        except (pywintypes.error, OSError) as e:
             log.error(e)
             return False
 
@@ -230,13 +229,13 @@ class Win32WindowDriver(WindowDriver):
 
     def close(
         self,
-        window_or_exec_or_title: Optional[Window | str] = None,
-        title: Optional[str] = None,
-        exec: Optional[str] = None,
+        window_or_exec_or_title: Window | str | None = None,
+        title: str | None = None,
+        exec: str | None = None,
         strict: bool = False,
-        process_id: Optional[int] = None,
+        process_id: int | None = None,
         handle: Any = None,
-        force_after: Optional[float] = None,
+        force_after: float | None = None,
     ) -> bool:
         if (
             window_or_exec_or_title is None
@@ -271,11 +270,11 @@ class Win32WindowDriver(WindowDriver):
 
     def minimize(
         self,
-        window_or_exec_or_title: Optional[Window | str] = None,
-        title: Optional[str] = None,
-        exec: Optional[str] = None,
+        window_or_exec_or_title: Window | str | None = None,
+        title: str | None = None,
+        exec: str | None = None,
         strict: bool = False,
-        process_id: Optional[int] = None,
+        process_id: int | None = None,
         handle: Any = None,
     ) -> bool:
         return self.window_commands(
@@ -290,11 +289,11 @@ class Win32WindowDriver(WindowDriver):
 
     def maximize(
         self,
-        window_or_exec_or_title: Optional[Window | str] = None,
-        title: Optional[str] = None,
-        exec: Optional[str] = None,
+        window_or_exec_or_title: Window | str | None = None,
+        title: str | None = None,
+        exec: str | None = None,
         strict: bool = False,
-        process_id: Optional[int] = None,
+        process_id: int | None = None,
         handle: Any = None,
     ) -> bool:
         return self.window_commands(
@@ -309,11 +308,11 @@ class Win32WindowDriver(WindowDriver):
 
     def restore(
         self,
-        window_or_exec_or_title: Optional[Window | str] = None,
-        title: Optional[str] = None,
-        exec: Optional[str] = None,
+        window_or_exec_or_title: Window | str | None = None,
+        title: str | None = None,
+        exec: str | None = None,
         strict: bool = False,
-        process_id: Optional[int] = None,
+        process_id: int | None = None,
         handle: Any = None,
     ) -> bool:
         return self.window_commands(
@@ -326,7 +325,7 @@ class Win32WindowDriver(WindowDriver):
             handle,
         )
 
-    def to_window(self, hwnd: Any) -> Optional[Window]:
+    def to_window(self, hwnd: Any) -> Window | None:
         if self.only_visible_windows and not win32gui.IsWindowVisible(hwnd):
             return None
         text = win32gui.GetWindowText(hwnd)
@@ -342,11 +341,11 @@ class Win32WindowDriver(WindowDriver):
     def window_commands(
         self,
         commands_for_handle: list[Callable[[Any], Any]],
-        window_or_exec_or_title: Optional[Window | str] = None,
-        title: Optional[str] = None,
-        exec: Optional[str] = None,
+        window_or_exec_or_title: Window | str | None = None,
+        title: str | None = None,
+        exec: str | None = None,
         strict: bool = False,
-        process_id: Optional[int] = None,
+        process_id: int | None = None,
         handle: Any = None,
     ) -> bool:
         """Looks up the window handle and applies commands to it."""
@@ -375,7 +374,7 @@ class Win32WindowDriver(WindowDriver):
             return False
         try:
             [cmd(open_win[0].handle) for cmd in commands_for_handle]
-        except Exception as e:
+        except pywintypes.error as e:
             log.error(e)
             return False
         return True

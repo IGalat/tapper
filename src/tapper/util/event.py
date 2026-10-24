@@ -15,20 +15,19 @@ subscriber never delays the publisher (which may be an OS input hook).
 
 import queue
 import threading
+from collections.abc import Callable
 from typing import Any
-from typing import Callable
 from typing import ClassVar
-from typing import Optional
 from typing import Protocol
 
 from tapper.feedback.logger import log
 
-SubscribedFunction = Callable[[Any], Optional[bool]]
+SubscribedFunction = Callable[[Any], bool | None]
 """
 If return value is False, the function is unsubscribed.
 """
 
-_subscribers: dict[str, list[SubscribedFunction]] = dict()
+_subscribers: dict[str, list[SubscribedFunction]] = {}
 _published: queue.Queue[tuple[str, Any]] = queue.Queue()
 
 
@@ -79,7 +78,7 @@ def _deliver() -> None:
             try:
                 if subscribed_function(message) is False:
                     unsubscribe(topic, subscribed_function)
-            except Exception:
+            except Exception:  # noqa: BLE001  # user subscriber: the worker must outlive it
                 log.warning(
                     f"Subscriber {subscribed_function} failed on '{topic}'",
                     exc_info=True,

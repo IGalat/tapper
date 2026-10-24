@@ -78,9 +78,8 @@ def test_suppress(wrap_fixture: WrapFixture) -> None:
     def on_ctrl_alt_0(signal: Signal) -> constants.ListenerResult:
         nonlocal pressed
         state = pressed.get_state(time.perf_counter())
-        if signal == down("0"):
-            if "left_control" in state and "left_alt" in state:
-                return constants.ListenerResult.SUPPRESS
+        if signal == down("0") and "left_control" in state and "left_alt" in state:
+            return constants.ListenerResult.SUPPRESS
         return constants.ListenerResult.PROPAGATE
 
     wrapper.on_signal = on_ctrl_alt_0

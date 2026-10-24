@@ -45,4 +45,4 @@ def code_symbol_maps(draw: st.DrawFn) -> dict[int, str]:
     """To simulate platform-specific mapping of codes to symbols."""
     codes = draw(st.lists(st.integers(), unique=True))
     symbols = draw(st.lists(words, unique=True))
-    return dict(zip(codes, symbols))
+    return dict(zip(codes, symbols, strict=False))

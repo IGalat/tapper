@@ -4,7 +4,6 @@ from abc import ABC
 from abc import abstractmethod
 from dataclasses import dataclass
 from dataclasses import field
-from typing import Optional
 
 from tapper.model import constants
 from tapper.model.tap_tree import TapGeneric
@@ -19,7 +18,7 @@ class STapGeneric(ABC):
     All fields and methods in case of group refer to children's.
     """
 
-    original: Optional[TapGeneric]
+    original: TapGeneric | None
     """Item based on which this shadow is created."""
     send_interval: float
     send_press_duration: float

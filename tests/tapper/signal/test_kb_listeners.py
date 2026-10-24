@@ -22,8 +22,8 @@ class TestWin32Listener:
 
         from tapper.signal.keyboard import win32_kb_listener
 
-        press = list(win32_kb_listener.EVENT_PRESS)[0]
-        release = list(win32_kb_listener.EVENT_RELEASE)[0]
+        press = next(iter(win32_kb_listener.EVENT_PRESS))
+        release = next(iter(win32_kb_listener.EVENT_RELEASE))
         listener: win32_kb_listener.Win32KeyboardSignalListener = self.get_listener()
 
         last_signal: Signal | None = None

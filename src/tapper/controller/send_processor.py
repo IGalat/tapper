@@ -1,4 +1,4 @@
-from typing import Callable
+from collections.abc import Callable
 from typing import assert_never
 
 from tapper.controller import flow_control

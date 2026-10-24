@@ -1,7 +1,6 @@
 from abc import ABC
 from abc import abstractmethod
 from typing import Any
-from typing import Optional
 
 from tapper.controller.resource_controller import ResourceController
 from tapper.model import constants
@@ -22,36 +21,36 @@ class WindowDriver(ABC):
     @abstractmethod
     def get_open(
         self,
-        exec_or_title: Optional[str] = None,
-        title: Optional[str] = None,
-        exec: Optional[str] = None,
+        exec_or_title: str | None = None,
+        title: str | None = None,
+        exec: str | None = None,
         strict: bool = False,
-        process_id: Optional[int] = None,
+        process_id: int | None = None,
         handle: Any = None,
-        limit: Optional[int] = None,
+        limit: int | None = None,
     ) -> list[Window]:
         pass
 
     @abstractmethod
     def active(
         self,
-        exec_or_title: Optional[str] = None,
-        title: Optional[str] = None,
-        exec: Optional[str] = None,
+        exec_or_title: str | None = None,
+        title: str | None = None,
+        exec: str | None = None,
         strict: bool = False,
-        process_id: Optional[int] = None,
+        process_id: int | None = None,
         handle: Any = None,
-    ) -> Optional[Window]:
+    ) -> Window | None:
         pass
 
     @abstractmethod
     def to_active(
         self,
-        window_or_exec_or_title: Optional[Window | str] = None,
-        title: Optional[str] = None,
-        exec: Optional[str] = None,
+        window_or_exec_or_title: Window | str | None = None,
+        title: str | None = None,
+        exec: str | None = None,
         strict: bool = False,
-        process_id: Optional[int] = None,
+        process_id: int | None = None,
         handle: Any = None,
     ) -> bool:
         pass
@@ -63,24 +62,24 @@ class WindowDriver(ABC):
     @abstractmethod
     def close(
         self,
-        window_or_exec_or_title: Optional[Window | str] = None,
-        title: Optional[str] = None,
-        exec: Optional[str] = None,
+        window_or_exec_or_title: Window | str | None = None,
+        title: str | None = None,
+        exec: str | None = None,
         strict: bool = False,
-        process_id: Optional[int] = None,
+        process_id: int | None = None,
         handle: Any = None,
-        force_after: Optional[float] = None,
+        force_after: float | None = None,
     ) -> bool:
         pass
 
     @abstractmethod
     def minimize(
         self,
-        window_or_exec_or_title: Optional[Window | str] = None,
-        title: Optional[str] = None,
-        exec: Optional[str] = None,
+        window_or_exec_or_title: Window | str | None = None,
+        title: str | None = None,
+        exec: str | None = None,
         strict: bool = False,
-        process_id: Optional[int] = None,
+        process_id: int | None = None,
         handle: Any = None,
     ) -> bool:
         pass
@@ -88,11 +87,11 @@ class WindowDriver(ABC):
     @abstractmethod
     def maximize(
         self,
-        window_or_exec_or_title: Optional[Window | str] = None,
-        title: Optional[str] = None,
-        exec: Optional[str] = None,
+        window_or_exec_or_title: Window | str | None = None,
+        title: str | None = None,
+        exec: str | None = None,
         strict: bool = False,
-        process_id: Optional[int] = None,
+        process_id: int | None = None,
         handle: Any = None,
     ) -> bool:
         pass
@@ -100,11 +99,11 @@ class WindowDriver(ABC):
     @abstractmethod
     def restore(
         self,
-        window_or_exec_or_title: Optional[Window | str] = None,
-        title: Optional[str] = None,
-        exec: Optional[str] = None,
+        window_or_exec_or_title: Window | str | None = None,
+        title: str | None = None,
+        exec: str | None = None,
         strict: bool = False,
-        process_id: Optional[int] = None,
+        process_id: int | None = None,
         handle: Any = None,
     ) -> bool:
         pass
@@ -124,13 +123,13 @@ class WindowController(ResourceController):
 
     def get_open(
         self,
-        exec_or_title: Optional[str] = None,
-        title: Optional[str] = None,
-        exec: Optional[str] = None,
+        exec_or_title: str | None = None,
+        title: str | None = None,
+        exec: str | None = None,
         strict: bool = False,
-        process_id: Optional[int] = None,
+        process_id: int | None = None,
         handle: Any = None,
-        limit: Optional[int] = None,
+        limit: int | None = None,
     ) -> list[Window]:
         """
         Fetches open windows that have name or exec. Ignores ones without.
@@ -154,13 +153,13 @@ class WindowController(ResourceController):
 
     def is_open(
         self,
-        exec_or_title: Optional[str] = None,
-        title: Optional[str] = None,
-        exec: Optional[str] = None,
+        exec_or_title: str | None = None,
+        title: str | None = None,
+        exec: str | None = None,
         strict: bool = False,
-        process_id: Optional[int] = None,
+        process_id: int | None = None,
         handle: Any = None,
-    ) -> Optional[Window]:
+    ) -> Window | None:
         """
         First open window with params specified.
         If no windows match params, None is returned.
@@ -189,13 +188,13 @@ class WindowController(ResourceController):
 
     def active(
         self,
-        exec_or_title: Optional[str] = None,
-        title: Optional[str] = None,
-        exec: Optional[str] = None,
+        exec_or_title: str | None = None,
+        title: str | None = None,
+        exec: str | None = None,
         strict: bool = False,
-        process_id: Optional[int] = None,
+        process_id: int | None = None,
         handle: Any = None,
-    ) -> Optional[Window]:
+    ) -> Window | None:
         """
         Foreground window, if params match.
         If the foreground window doesn't match params, None is returned.
@@ -213,11 +212,11 @@ class WindowController(ResourceController):
 
     def to_active(
         self,
-        window_or_exec_or_title: Optional[Window | str] = None,
-        title: Optional[str] = None,
-        exec: Optional[str] = None,
+        window_or_exec_or_title: Window | str | None = None,
+        title: str | None = None,
+        exec: str | None = None,
         strict: bool = False,
-        process_id: Optional[int] = None,
+        process_id: int | None = None,
         handle: Any = None,
     ) -> bool:
         """
@@ -254,13 +253,13 @@ class WindowController(ResourceController):
 
     def close(
         self,
-        window_or_exec_or_title: Optional[Window | str] = None,
-        title: Optional[str] = None,
-        exec: Optional[str] = None,
+        window_or_exec_or_title: Window | str | None = None,
+        title: str | None = None,
+        exec: str | None = None,
         strict: bool = False,
-        process_id: Optional[int] = None,
+        process_id: int | None = None,
         handle: Any = None,
-        force_after: Optional[float] = None,
+        force_after: float | None = None,
     ) -> bool:
         """
         Close(destroy) a window, if found.
@@ -285,11 +284,11 @@ class WindowController(ResourceController):
 
     def minimize(
         self,
-        window_or_exec_or_title: Optional[Window | str] = None,
-        title: Optional[str] = None,
-        exec: Optional[str] = None,
+        window_or_exec_or_title: Window | str | None = None,
+        title: str | None = None,
+        exec: str | None = None,
         strict: bool = False,
-        process_id: Optional[int] = None,
+        process_id: int | None = None,
         handle: Any = None,
     ) -> bool:
         """
@@ -306,11 +305,11 @@ class WindowController(ResourceController):
 
     def maximize(
         self,
-        window_or_exec_or_title: Optional[Window | str] = None,
-        title: Optional[str] = None,
-        exec: Optional[str] = None,
+        window_or_exec_or_title: Window | str | None = None,
+        title: str | None = None,
+        exec: str | None = None,
         strict: bool = False,
-        process_id: Optional[int] = None,
+        process_id: int | None = None,
         handle: Any = None,
     ) -> bool:
         """
@@ -327,11 +326,11 @@ class WindowController(ResourceController):
 
     def restore(
         self,
-        window_or_exec_or_title: Optional[Window | str] = None,
-        title: Optional[str] = None,
-        exec: Optional[str] = None,
+        window_or_exec_or_title: Window | str | None = None,
+        title: str | None = None,
+        exec: str | None = None,
         strict: bool = False,
-        process_id: Optional[int] = None,
+        process_id: int | None = None,
         handle: Any = None,
     ) -> bool:
         """

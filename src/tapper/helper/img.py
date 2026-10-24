@@ -1,6 +1,6 @@
+from collections.abc import Callable
 from functools import partial
 from typing import Any
-from typing import Callable
 
 try:
     from tapper.helper._util.image import base as _base_util

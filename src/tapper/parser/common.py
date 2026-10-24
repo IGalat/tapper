@@ -1,6 +1,6 @@
 import re
+from collections.abc import Callable
 from typing import Any
-from typing import Callable
 
 
 class ParsedProp:
@@ -8,7 +8,7 @@ class ParsedProp:
     fn: Callable[[str], Any]
 
 
-class SECONDS(ParsedProp):
+class Seconds(ParsedProp):
     @staticmethod
     def parse_seconds(s: str) -> float:
         result = float(s[:-1])
@@ -20,7 +20,7 @@ class SECONDS(ParsedProp):
     fn = parse_seconds
 
 
-class MILLIS(ParsedProp):
+class Millis(ParsedProp):
     @staticmethod
     def parse_millis(ms: str) -> float:
         result = float(ms[:-2]) / 1000
@@ -32,7 +32,7 @@ class MILLIS(ParsedProp):
     fn = parse_millis
 
 
-class CURSOR_MOVE(ParsedProp):
+class CursorMove(ParsedProp):
     @staticmethod
     def parse_xy(coord_str: str) -> tuple[tuple[int, int], bool]:
         y_pos = coord_str.find("y")
@@ -46,10 +46,10 @@ class CURSOR_MOVE(ParsedProp):
 
 def parse_sleep_time(prop: str) -> float | None:
     """If doesn't match sleep pattern, will return None."""
-    if SECONDS.regex.fullmatch(prop):
-        return SECONDS.fn(prop)
-    if MILLIS.regex.fullmatch(prop):
-        return MILLIS.fn(prop)
+    if Seconds.regex.fullmatch(prop):
+        return Seconds.fn(prop)
+    if Millis.regex.fullmatch(prop):
+        return Millis.fn(prop)
     return None
 
 

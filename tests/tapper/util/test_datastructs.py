@@ -24,7 +24,7 @@ def tuple_for_sym_to_codes(
 ) -> tuple[dict[int, str], SymbolsWithAliases]:
     _codes = draw(st.lists(st.integers(), unique=True))
     _symbols = draw(st.lists(strategies.words, unique=True))
-    code_symbol_map = dict(zip(_codes, _symbols))
+    code_symbol_map = dict(zip(_codes, _symbols, strict=False))
     symbols = {v: [v] for v in code_symbol_map.values()}
     if symbols:
         references = list(symbols.keys())

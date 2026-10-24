@@ -27,7 +27,7 @@ modifier_led_indices = {"caps": 1, "caps_lock": 1, "num_lock": 0, "scroll_lock":
 
 
 class LinuxKeyboardDriver(KeyboardDriver):
-    real_kbs: list[evdev.InputDevice]
+    real_kbs: list[evdev.InputDevice[str]]
     virtual_kb: UInput
 
     def start(self) -> None:

@@ -1,5 +1,6 @@
+from collections.abc import Callable
 from functools import partial
-from typing import Callable
+from typing import Any
 
 import pytest
 
@@ -18,7 +19,9 @@ def send_fn(text: str) -> None:
     return
 
 
-send_action = lambda: send_fn
+def send_action() -> Any:
+    return send_fn
+
 
 TransformFn = Callable[[Group], SGroup]
 
@@ -84,7 +87,7 @@ class TestTreeTransformer:
 
         assert sg.get_main_triggers(KeyDirBool.DOWN) == {"1", "f1", "a", "b"}
         assert len(sg.children) == 3
-        g1, t2, g3 = sg.children
+        g1, _t2, g3 = sg.children
         assert isinstance(g1, SGroup)
         assert isinstance(g3, SGroup)
         assert len(g1.children) == 1

@@ -15,13 +15,13 @@ class TapGeneric(ABC):
     by its children, unless overridden down the line.
     """
 
-    executor: Optional[int]
+    executor: int | None
     """Which executor to run the action in. see `ActionRunner`."""
-    suppress_trigger: Optional[ListenerResult]
+    suppress_trigger: ListenerResult | None
     """Whether to suppress main key when an action is triggered."""
-    send_interval: Optional[float]
+    send_interval: float | None
     """Time before keypress for `send` command, in seconds. Will be overridden if specified on `send` itself."""
-    send_press_duration: Optional[float]
+    send_press_duration: float | None
     """
     Time between key press and release, in seconds. Will be overridden if specified on `send` itself.
     Only applies to click, not up/down. `e down;e up` will not have this time inbetween, `e` will.
@@ -47,10 +47,10 @@ class Tap(TapGeneric):
         self,
         trigger: TriggerStr,
         action: Action | str,
-        executor: Optional[int] = None,
-        suppress_trigger: Optional[bool] = None,
-        send_interval: Optional[float] = None,
-        send_press_duration: Optional[float] = None,
+        executor: int | None = None,
+        suppress_trigger: bool | None = None,
+        send_interval: float | None = None,
+        send_press_duration: float | None = None,
         **trigger_conditions: Any,
     ) -> None:
         self.trigger = trigger
@@ -103,11 +103,11 @@ class Group(TapGeneric):
 
     def __init__(
         self,
-        name: Optional[str] = None,
-        executor: Optional[int] = None,
-        suppress_trigger: Optional[bool] = None,
-        send_interval: Optional[float] = None,
-        send_press_duration: Optional[float] = None,
+        name: str | None = None,
+        executor: int | None = None,
+        suppress_trigger: bool | None = None,
+        send_interval: float | None = None,
+        send_press_duration: float | None = None,
         **trigger_conditions: Any,
     ) -> None:
         self.name = name

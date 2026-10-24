@@ -1,6 +1,6 @@
-import os
+from collections.abc import Callable
+from pathlib import Path
 from typing import Any
-from typing import Callable
 
 import tapper
 from tapper.helper._util.image import base
@@ -78,12 +78,12 @@ def finish_snip(
         )
         ending = bbox_str + ".png"
         full_name = ""
-        if override_existing or not os.path.exists(prefix + ending):
+        if override_existing or not Path(prefix + ending).exists():
             full_name = prefix + ending
         else:
             for i in range(1, 100):
                 potential_name = prefix + f"({i})" + ending
-                if not os.path.exists(potential_name):
+                if not Path(potential_name).exists():
                     full_name = potential_name
                     break
         base.save_to_disk(sct, full_name)

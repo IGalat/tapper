@@ -7,14 +7,13 @@ from evdev.eventio import EventIO
 
 
 @cache
-def get_real_keyboards() -> list[evdev.InputDevice]:
+def get_real_keyboards() -> list[evdev.InputDevice[str]]:
     devices = [evdev.InputDevice(path) for path in evdev.list_devices()]
     result = []
     for d in devices:
         cap = d.capabilities()
-        if ecodes.EV_KEY in cap:
-            if ecodes.KEY_Q in cap[ecodes.EV_KEY]:
-                result.append(d)
+        if ecodes.EV_KEY in cap and ecodes.KEY_Q in cap[ecodes.EV_KEY]:
+            result.append(d)
     if not result:
         raise PermissionError(
             "No keyboards detected."
@@ -25,11 +24,13 @@ def get_real_keyboards() -> list[evdev.InputDevice]:
     return result
 
 
-def make_virtual_device_from(real_kbs: list[evdev.InputDevice], name: str) -> UInput:
+def make_virtual_device_from(
+    real_kbs: list[evdev.InputDevice[str]], name: str
+) -> UInput:
     try:
         return UInput.from_device(*real_kbs, name="Tapper Virtual " + name)
-    except evdev.UInputError:
-        raise PermissionError("Cannot make virtual device. Try running as root.")
+    except evdev.UInputError as e:
+        raise PermissionError("Cannot make virtual device. Try running as root.") from e
 
 
 def uinput_action(device: EventIO, etype: int, code: int, evdev_direction: int) -> None:

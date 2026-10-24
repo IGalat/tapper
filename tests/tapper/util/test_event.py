@@ -9,7 +9,7 @@ class Subscriber:
     received_messages: list[Any]
 
     def __init__(self) -> None:
-        self.received_messages = list()
+        self.received_messages = []
 
     def receive_message(self, sub_message: Any) -> bool:
         self.received_messages.append(sub_message)

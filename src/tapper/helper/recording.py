@@ -1,6 +1,6 @@
+from collections.abc import Callable
 from functools import partial
 from typing import Any
-from typing import Callable
 
 from tapper import send
 from tapper.helper._util import record_util as _record_util
@@ -14,7 +14,7 @@ def _set_new_recording(new_recording: str) -> None:
     last_recorded = new_recording
 
 
-def action_playback_last(speed: float = 1) -> partial:
+def action_playback_last(speed: float = 1) -> partial[None]:
     """For inserting in tap."""
     return partial(playback_last, speed=speed)
 
@@ -36,7 +36,7 @@ def start() -> Callable[[], None]:
 
 def stop(
     callback: Callable[[str], Any] = lambda s: None,
-    config: RecordConfig = RecordConfig(),
+    config: RecordConfig | None = None,
 ) -> Callable[[], None]:
     """
     Gives a function, that:
@@ -47,12 +47,16 @@ def stop(
     :param config: config settings.
     :return: callable stop, to be set into a Tap.
     """
-    return partial(_record_util.stop_recording, [_set_new_recording, callback], config)
+    return partial(
+        _record_util.stop_recording,
+        [_set_new_recording, callback],
+        config or RecordConfig(),
+    )
 
 
 def toggle(
     callback: Callable[[str], Any] = lambda s: None,
-    config: RecordConfig = RecordConfig(),
+    config: RecordConfig | None = None,
 ) -> Callable[[], None]:
     """
     Gives a function, that:
@@ -65,5 +69,7 @@ def toggle(
     :return: callable toggle, to be set into a Tap.
     """
     return partial(
-        _record_util.toggle_recording, [_set_new_recording, callback], config
+        _record_util.toggle_recording,
+        [_set_new_recording, callback],
+        config or RecordConfig(),
     )

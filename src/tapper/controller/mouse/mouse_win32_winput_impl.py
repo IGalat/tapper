@@ -1,5 +1,3 @@
-from typing import Optional
-
 from winput import winput
 
 from tapper.controller.mouse.mouse_api import MouseDriver
@@ -58,10 +56,10 @@ class Win32MouseDriver(MouseDriver):
             winput.release_mouse_button(symbol_button_map[symbol][0])
         except KeyError:
             if symbol not in symbol_wheel_map:
-                raise KeyError
+                raise KeyError(symbol) from None
 
     def move(
-        self, x: Optional[int] = None, y: Optional[int] = None, relative: bool = False
+        self, x: int | None = None, y: int | None = None, relative: bool = False
     ) -> None:
         winput.set_mouse_pos(*calc_move(self.get_pos, x, y, relative))
 

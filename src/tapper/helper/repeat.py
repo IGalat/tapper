@@ -1,6 +1,6 @@
+from collections.abc import Callable
 from functools import partial
 from typing import Any
-from typing import Callable
 
 from tapper.helper._util import repeat_util as _repeat_util
 from tapper.helper.model import Repeatable

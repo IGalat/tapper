@@ -68,8 +68,11 @@ SECTION 3: Extending the functionality.
 ------------------------------------
 """
 
-keys_held_down = lambda os_: [*keyboard.get_key_list(os_), *mouse.regular_buttons]
-"""Keys that can be held down."""
+
+def keys_held_down(os_: str | None) -> list[str]:
+    """Keys that can be held down."""
+    return [*keyboard.get_key_list(os_), *mouse.regular_buttons]
+
 
 listeners = [
     KeyboardSignalListener,

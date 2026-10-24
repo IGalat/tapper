@@ -28,9 +28,9 @@ from tapper.model.send import WheelInstruction
 from tapper.model.tap_tree import Group
 from tapper.model.tap_tree_shadow import SGroup
 from tapper.model.types_ import KwTriggerConditions
-from tapper.parser.common import CURSOR_MOVE
-from tapper.parser.common import MILLIS
-from tapper.parser.common import SECONDS
+from tapper.parser.common import CursorMove
+from tapper.parser.common import Millis
+from tapper.parser.common import Seconds
 from tapper.parser.send_parser import SendParser
 from tapper.parser.trigger_parser import TriggerParser
 from tapper.signal.base_listener import SignalListener
@@ -87,10 +87,10 @@ def default_send_parser(os: str | None = None) -> SendParser:
     for alias, references in [*keyboard.aliases.items(), *mouse.aliases.items()]:
         send_parser.aliases[alias] = references[0]
 
-    send_parser.regexes[SECONDS.regex] = lambda s: SleepInstruction(SECONDS.fn(s))
-    send_parser.regexes[MILLIS.regex] = lambda s: SleepInstruction(MILLIS.fn(s))
-    send_parser.regexes[CURSOR_MOVE.regex] = lambda s: CursorMoveInstruction(
-        *CURSOR_MOVE.fn(s)
+    send_parser.regexes[Seconds.regex] = lambda s: SleepInstruction(Seconds.fn(s))
+    send_parser.regexes[Millis.regex] = lambda s: SleepInstruction(Millis.fn(s))
+    send_parser.regexes[CursorMove.regex] = lambda s: CursorMoveInstruction(
+        *CursorMove.fn(s)
     )
 
     return send_parser

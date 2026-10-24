@@ -49,7 +49,8 @@ class TestWin32Listener:
 
         listener.on_signal = on_signal
 
-        event = lambda action, add: MouseEvent((0, 0), action, 0, add)
+        def event(action: int, add: int | None) -> MouseEvent:
+            return MouseEvent((0, 0), action, 0, add)
 
         result = listener.mouse_callback(event(522, 1))
         assert last_signal == ("scroll_wheel_up", KeyDirBool.DOWN)

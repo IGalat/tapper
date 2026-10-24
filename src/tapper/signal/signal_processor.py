@@ -89,9 +89,6 @@ class SignalProcessor:
                 return False
 
         if tap.trigger.main.time:
-            if symbol in state and tap.trigger.main.time < state[symbol]:
-                return True
-            else:
-                return False
+            return bool(symbol in state and tap.trigger.main.time < state[symbol])
 
         return True

@@ -13,7 +13,9 @@ from tapper.helper import repeat
 
 
 def print_pixel(color: tuple[int, int, int], coords: tuple[int, int]) -> None:
-    int_to_hex_str = lambda int_: ("0" + repr(hex(int_))[3:-1].upper())[-2:]
+    def int_to_hex_str(int_: int) -> str:
+        return ("0" + repr(hex(int_))[3:-1].upper())[-2:]
+
     color_hex = (
         int_to_hex_str(color[0]) + int_to_hex_str(color[1]) + int_to_hex_str(color[2])
     )

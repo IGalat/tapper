@@ -18,7 +18,10 @@ from tapper.state import keeper
 from testutil_model import Dummy
 from testutil_model import DummyActionRunner
 
-generic_action = lambda: "Will check if this was scheduled to run."
+
+def generic_action() -> str:
+    return "Will check if this was scheduled to run."
+
 
 left_control = "left_control"
 right_control = "right_control"
@@ -165,8 +168,12 @@ class TestSignalProcessor:
         assert self.runner.actions_ran[0] == [generic_action]
 
     def test_order(self) -> None:
-        another_action = lambda: "some"
-        third_action = lambda: "some3"
+        def another_action() -> str:
+            return "some"
+
+        def third_action() -> str:
+            return "some3"
+
         self.root.add(
             tap([["a"]]),
             tap([ctrl, ["a"]], action=another_action),
@@ -198,7 +205,9 @@ class TestSignalProcessor:
         ]
 
     def test_order_with_control(self) -> None:
-        another_action = lambda: "some"
+        def another_action() -> str:
+            return "some"
+
         self.root.add(tap([["a"]]))
         self.control.add(tap([["a"]], action=another_action))
         assert self.processor.on_signal(down("a")) == ListenerResult.SUPPRESS
@@ -222,7 +231,7 @@ class TestSignalProcessor:
         if isinstance(keys, str):
             keys = [keys]
         if isinstance(keys, list):
-            keys = {key: 0 for key in keys}
+            keys = dict.fromkeys(keys, 0)
         if isinstance(keys, dict):
             now = time.perf_counter()
             for symbol, offset in keys.items():

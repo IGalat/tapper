@@ -20,7 +20,7 @@ class _ActionLocal(threading.local):
 config_thread_local_storage = _ActionLocal()
 
 
-class StopTapperActionException(Exception):
+class StopTapperActionError(Exception):
     """Normal way to interrupt tapper's action. Will not cause error logs etc."""
 
 
@@ -33,7 +33,7 @@ paused = False
 
 kill_id = uuid.uuid4()
 """When this is changed, all running actions will be killed
-with StopTapperActionException when they call tapper.sleep."""
+with StopTapperActionError when they call tapper.sleep."""
 
 shutdown = threading.Event()
 """Set to make tapper.start() stop everything and return."""

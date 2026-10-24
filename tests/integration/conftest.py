@@ -1,7 +1,7 @@
 import time
+from collections.abc import Callable
 from functools import partial
 from typing import Any
-from typing import Callable
 
 import pytest
 

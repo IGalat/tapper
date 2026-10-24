@@ -1,6 +1,6 @@
 import time
+from collections.abc import Iterator
 from typing import Any
-from typing import Iterator
 from unittest.mock import MagicMock
 from unittest.mock import patch
 
@@ -86,8 +86,9 @@ class TestFind:
         assert xy == pytest.approx(btn_red_xy, abs=10)
 
     def test_target_wrong_type(self) -> None:
+        not_an_image: Any = 1
         with pytest.raises(TypeError):
-            img.find(1)  # noqa
+            img.find(not_an_image)
 
 
 class TestFindFuzz:
@@ -126,6 +127,7 @@ class TestFindOneOf:
     def test_simplest(self) -> None:
         btn_yellow = img_test_util.btn_yellow()
         result, xy = img.find_one_of([btn_yellow], outer=img_test_util.btn_all())
+        assert isinstance(result, numpy.ndarray)
         assert numpy.array_equal(result, btn_yellow)
         assert xy == pytest.approx(btn_yellow_xy, abs=10)
 
@@ -140,6 +142,7 @@ class TestFindOneOf:
             ],
             outer=img_test_util.btn_all(),
         )
+        assert isinstance(result, numpy.ndarray)
         assert numpy.array_equal(result, btn_yellow)
         assert xy == pytest.approx(btn_yellow_xy, abs=10)
 
@@ -154,6 +157,7 @@ class TestFindOneOf:
             ],
             outer=img_test_util.btn_all(),
         )
+        assert isinstance(result, numpy.ndarray)
         assert numpy.array_equal(result, btn_red)
         assert xy == pytest.approx(btn_red_xy, abs=10)
 
@@ -164,6 +168,7 @@ class TestFindOneOf:
             [(btn_red, (150, 150, 250, 250)), (btn_yellow, None)],
             outer=img_test_util.btn_all(),
         )
+        assert isinstance(result, numpy.ndarray)
         assert numpy.array_equal(result, btn_yellow)
         assert xy == pytest.approx(btn_yellow_xy, abs=10)
 
@@ -188,6 +193,7 @@ class TestWaitForOneOf:
         mock_get_sct.return_value = img_test_util.btn_all()
         btn_yellow = img_test_util.btn_yellow()
         result, xy = img.wait_for_one_of([btn_yellow])
+        assert isinstance(result, numpy.ndarray)
         assert numpy.array_equal(result, btn_yellow)
         assert xy == pytest.approx(btn_yellow_xy, abs=10)
 
@@ -201,12 +207,13 @@ class TestWaitForOneOf:
                 img_test_util.from_matrix([[red, red, black]]),
             ],
         )
+        assert isinstance(result, numpy.ndarray)
         assert numpy.array_equal(result, btn_yellow)
         assert xy == pytest.approx(btn_yellow_xy, abs=10)
 
     def test_no_match(self, mock_get_sct: Any, mock_sleep) -> None:
         mock_get_sct.return_value = img_test_util.btn_all()
-        image, xy = img.wait_for_one_of(
+        image, _xy = img.wait_for_one_of(
             [
                 img_test_util.absolutes(),
                 img_test_util.get_picture("btn_blue_changed.png"),
@@ -226,7 +233,7 @@ class TestFindRaw:
         assert xy == pytest.approx(btn_pink_xy, abs=10)
 
     def test_low_match(self) -> None:
-        conf, xy = img.get_find_raw(
+        conf, _xy = img.get_find_raw(
             img_test_util.absolutes(), outer=img_test_util.btn_all()
         )
         assert conf < 0.8

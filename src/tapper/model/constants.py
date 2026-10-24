@@ -1,8 +1,8 @@
-from enum import Enum
 from enum import Flag
+from enum import StrEnum
 
 
-class KeyDir(str, Enum):
+class KeyDir(StrEnum):
     """Key direction. This is used for commands.
 
     Some keys may only be pressed (example: mouse wheel).
@@ -35,13 +35,13 @@ class KeyDirBool(Flag):
         return self.name if self.name else ""
 
 
-class OS(str, Enum):
+class OS(StrEnum):
     dummy = "dummy"
     win32 = "win32"
     linux = "linux"
 
 
-class Aspect(str, Enum):
+class Aspect(StrEnum):
     """A device or OS facility that tapper listens to and commands.
     Keys of boot.platforms tables, and topics in event subscription."""
 

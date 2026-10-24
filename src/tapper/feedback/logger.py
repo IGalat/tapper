@@ -1,14 +1,14 @@
 import atexit
 import logging.config
-import os
+from collections.abc import Callable
 from functools import wraps
 from logging.handlers import QueueHandler
+from pathlib import Path
 from typing import Any
-from typing import Callable
 from typing import TypeVar
 from typing import cast
 
-from tapper.controller.flow_control import StopTapperActionException
+from tapper.controller.flow_control import StopTapperActionError
 
 log = logging.getLogger("tapper")
 
@@ -67,7 +67,7 @@ def get_config(
     if log_level_file is not None:
         logger_file_config["level"] = logging.getLevelName(log_level_file)
         logger_file_config["filename"] = log_folder + logger_file_config["filename"]
-        os.makedirs(log_folder, exist_ok=True)
+        Path(log_folder).mkdir(parents=True, exist_ok=True)
         logger_config["handlers"].update({"file": logger_file_config})
         include_handlers.append("file")
     logger_config["handlers"]["queue_handler"]["handlers"] = include_handlers
@@ -100,15 +100,15 @@ class LogExceptions:
 
     def __call__(self, f: TFun) -> TFun:
         @wraps(f)
-        def wrapper(*args, **kwargs) -> Any:
+        def wrapper(*args: Any, **kwargs: Any) -> Any:
             try:
                 return f(*args, **kwargs)
-            except StopTapperActionException:
+            except StopTapperActionError:
                 log.debug("Action stopped by tapper.")
             except Exception as e:
                 log.log(
                     self.log_level,
-                    f"Exception while performing action: {repr(e)}",
+                    f"Exception while performing action: {e!r}",
                     exc_info=True,
                 )
 

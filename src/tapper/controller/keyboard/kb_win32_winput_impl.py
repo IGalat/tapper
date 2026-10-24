@@ -24,13 +24,14 @@ symbol_code_map = datastructs.symbols_to_codes(
 user32 = winput.user32
 
 
-change_lang = lambda hwnd, locale_id: win32gui.PostMessage(
-    hwnd, win32con.WM_INPUTLANGCHANGEREQUEST, 0, locale_id
-)
+def change_lang(hwnd: int, locale_id: int) -> None:
+    win32gui.PostMessage(hwnd, win32con.WM_INPUTLANGCHANGEREQUEST, 0, locale_id)
 
-change_lang_system_wide = lambda locale_id: win32gui.PostMessage(
-    win32con.HWND_BROADCAST, win32con.WM_INPUTLANGCHANGEREQUEST, 0, locale_id
-)
+
+def change_lang_system_wide(locale_id: int) -> None:
+    win32gui.PostMessage(
+        win32con.HWND_BROADCAST, win32con.WM_INPUTLANGCHANGEREQUEST, 0, locale_id
+    )
 
 
 def key_state(code: int) -> int:

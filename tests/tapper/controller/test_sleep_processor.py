@@ -1,15 +1,15 @@
 import time
+from collections.abc import Callable
 from dataclasses import dataclass
 from dataclasses import field
 from typing import Any
-from typing import Callable
 from unittest.mock import MagicMock
 from unittest.mock import call
 
 import pytest
 
 from tapper.controller.sleep_processor import SleepCommandProcessor
-from tapper.controller.sleep_processor import StopTapperActionException
+from tapper.controller.sleep_processor import StopTapperActionError
 
 
 @dataclass
@@ -89,7 +89,7 @@ class TestSleep:
 class TestSleepKill:
     def test_immediate_kill(self, sleep_fixture: SleepFixture) -> None:
         sleep_fixture.processor.kill_check_fn = lambda: True
-        with pytest.raises(StopTapperActionException):
+        with pytest.raises(StopTapperActionError):
             sleep_fixture.sleep(20)
 
     def test_killed_after_some_time_interval(self, sleep_fixture: SleepFixture) -> None:
@@ -97,7 +97,7 @@ class TestSleepKill:
         sleep_fixture.processor.kill_check_fn.side_effect = lambda: bool(
             sleep_fixture.get_time_slept() >= 1.234
         )
-        with pytest.raises(StopTapperActionException):
+        with pytest.raises(StopTapperActionError):
             sleep_fixture.sleep(10)
         assert sleep_fixture.get_time_slept() == pytest.approx(1.234, abs=0.01)
         assert len(sleep_fixture.processor.kill_check_fn.call_args_list) >= 123
@@ -107,7 +107,7 @@ class TestSleepPause:
     def test_killed_while_paused(self, sleep_fixture: SleepFixture) -> None:
         sleep_fixture.processor.pause_check_fn.return_value = True
         sleep_fixture.processor.kill_check_fn.side_effect = [False, False, True]
-        with pytest.raises(StopTapperActionException):
+        with pytest.raises(StopTapperActionError):
             sleep_fixture.sleep(1)
 
     def test_time_slept_extends_with_pause(self, sleep_fixture: SleepFixture) -> None:

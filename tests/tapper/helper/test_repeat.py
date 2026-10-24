@@ -1,9 +1,9 @@
 import threading
 import time
+from collections.abc import Callable
+from collections.abc import Generator
 from dataclasses import dataclass
 from typing import Any
-from typing import Callable
-from typing import Generator
 from unittest.mock import call
 from unittest.mock import patch
 
@@ -11,7 +11,7 @@ import pytest
 
 import tapper
 from tapper.controller import flow_control
-from tapper.controller.flow_control import StopTapperActionException
+from tapper.controller.flow_control import StopTapperActionError
 from tapper.helper import repeat
 from tapper.helper._util import repeat_util
 
@@ -160,7 +160,7 @@ class TestRepeatWhilePressed:
         assert mock_sleep.call_count == 4
 
     def test_nonexistent_symbol(self) -> None:
-        with pytest.raises(Exception):
+        with pytest.raises(ValueError):
             repeat.while_pressed("some_key", lambda: False)
 
     def test_max_repeats(self, mock_pressed: Any, mock_sleep: Any) -> None:
@@ -264,7 +264,7 @@ class TestKill:
         survivor = Counter()
 
         def kill(*_: Any) -> None:
-            raise StopTapperActionException
+            raise StopTapperActionError
 
         monkeypatch.setattr(tapper, "sleep", kill)
         repeat.toggle(killed.tick)()

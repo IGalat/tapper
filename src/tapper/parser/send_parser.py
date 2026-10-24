@@ -1,10 +1,9 @@
 import re
+from collections.abc import Callable
 from dataclasses import dataclass
 from dataclasses import field
 from dataclasses import replace
 from functools import cache
-from typing import Callable
-from typing import Optional
 
 from tapper.model import constants
 from tapper.model import keyboard
@@ -25,8 +24,13 @@ COMBO_DELIMITER = ";"
 
 default_shift = "left_shift"
 
-ki_shift_down = lambda shift=default_shift: KeyInstruction(shift, constants.KeyDir.DOWN)
-ki_shift_up = lambda shift=default_shift: KeyInstruction(shift, constants.KeyDir.UP)
+
+def ki_shift_down(shift: str = default_shift) -> KeyInstruction:
+    return KeyInstruction(shift, constants.KeyDir.DOWN)
+
+
+def ki_shift_up(shift: str = default_shift) -> KeyInstruction:
+    return KeyInstruction(shift, constants.KeyDir.UP)
 
 
 def parse_wrap(combo_wrap: str) -> re.Pattern[str]:
@@ -52,9 +56,6 @@ class _Key:
     """Parsed symbol."""
     props: list[str]
     """Unparsed properties."""
-
-    def __hash__(self) -> int:
-        return super().__hash__()
 
 
 def to_content(combo: re.Match[str]) -> str:
@@ -91,7 +92,7 @@ def resolve_last_with_props(
                 raise SendParseError
             else:
                 result[-1] = replace(ins, dir=constants.KeyDir(dir))
-                if constants.KeyDir.DOWN != dir:
+                if dir != constants.KeyDir.DOWN:
                     mult_allowed = False
         else:
             raise SendParseError
@@ -110,13 +111,13 @@ def resolve_chain_opening_with_props(
     return result
 
 
-def sleep_prop(prop: str) -> Optional[SleepInstruction]:
+def sleep_prop(prop: str) -> SleepInstruction | None:
     if (parsed := common.parse_sleep_time(prop)) is not None:
         return SleepInstruction(parsed)
     return None
 
 
-def mult_prop(prop: str) -> Optional[int]:
+def mult_prop(prop: str) -> int | None:
     if re.fullmatch(r"\d+x", prop):
         result = int(prop[:-1])
         if result <= 0:
@@ -125,7 +126,7 @@ def mult_prop(prop: str) -> Optional[int]:
     return None
 
 
-def dir_prop(prop: str) -> Optional[str]:
+def dir_prop(prop: str) -> str | None:
     try:
         return constants.KeyDir(prop)
     except ValueError:
@@ -157,18 +158,24 @@ class SendParser:
     )
     """Regex and the function that builds the instruction from the matched symbol."""
 
-    def __hash__(self) -> int:
-        return super().__hash__()
+    _parsed: dict[tuple[str, str | None], list[SendInstruction]] = field(
+        default_factory=dict, repr=False, compare=False
+    )
+    """Memo of parse() by (command, shift_in): a hotkey's text is parsed once."""
 
     def set_wrap(self, combo_wrap: str) -> None:
         self.pattern = parse_wrap(combo_wrap)
 
-    @cache
     def parse(self, command: str, shift_in: str | None = None) -> list[SendInstruction]:
         """Parse send command into sequential instructions.
 
         :param shift_in: the shift key that is held down when sending, if any.
         """
+        if (command, shift_in) not in self._parsed:
+            self._parsed[(command, shift_in)] = self._parse(command, shift_in)
+        return self._parsed[(command, shift_in)]
+
+    def _parse(self, command: str, shift_in: str | None) -> list[SendInstruction]:
         self.pattern = self.pattern or parse_wrap(COMBO_WRAP)
 
         shift = shift_in or default_shift
@@ -229,7 +236,6 @@ class SendParser:
             result.append(ki_shift_down(shift))
         return result
 
-    @cache
     def _parse_combo(self, content: str) -> list[SendInstruction]:
 
         if not content:
@@ -277,10 +283,9 @@ class SendParser:
         result.extend(result_wrap[::-1])
         return result
 
-    @cache
     def parse_chain_split(
         self, key: _Key
-    ) -> tuple[list[SendInstruction], Optional[SendInstruction]]:
+    ) -> tuple[list[SendInstruction], SendInstruction | None]:
         """
         In combo like       "a+b 20ms+lmb 2x"
         :param key: one of   ^ ^^^^^^
@@ -302,8 +307,8 @@ class SendParser:
         if key.props:
             try:
                 return resolve_chain_opening_with_props(opening, key.props), closing
-            except ValueError:
-                raise SendParseError
+            except ValueError as e:
+                raise SendParseError from e
 
         return [opening], closing
 
@@ -314,7 +319,6 @@ class SendParser:
         except KeyError:
             return symbol
 
-    @cache
     def parse_last_split(self, key: _Key) -> list[SendInstruction]:
         """
         In combo like       "a+b 20ms+lmb 2x"
@@ -340,11 +344,10 @@ class SendParser:
         if key.props:
             try:
                 return resolve_last_with_props(base_ins, key.props)
-            except ValueError:
-                raise SendParseError
+            except ValueError as e:
+                raise SendParseError from e
         return [base_ins]
 
-    @cache
     def parse_regex_symbol(self, symbol: str) -> list[SendInstruction]:
         for regex, build in self.regexes.items():
             if regex.fullmatch(symbol):

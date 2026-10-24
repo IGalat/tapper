@@ -1,11 +1,11 @@
 import time
-from typing import Iterator
+from collections.abc import Iterator
+from typing import Any
 from unittest.mock import MagicMock
 from unittest.mock import patch
 
 import img_test_util
 import pytest
-from typing_extensions import Any
 
 from tapper.helper import img
 

@@ -41,7 +41,8 @@ def test_toggled(f: Fixture) -> None:
     )
     f.start()
 
-    tp = lambda: f.send_real("t$(50ms)p")
+    def tp() -> None:
+        f.send_real("t$(50ms)p")
 
     tp()
     assert ends_with(f.emul_signals, click("07"))
@@ -118,7 +119,8 @@ def test_win(f: Fixture) -> None:
     )
     f.start()
 
-    kj = lambda: f.send_real("k$(50ms)j")
+    def kj() -> None:
+        f.send_real("k$(50ms)j")
 
     kj()
     assert f.actions == [0, 10]
@@ -157,7 +159,8 @@ def test_win_open(f: Fixture) -> None:
     )
     f.start()
 
-    kj = lambda: f.send_real("k$(50ms)j")
+    def kj() -> None:
+        f.send_real("k$(50ms)j")
 
     tapper.window.maximize("foos")
     kj()
@@ -183,7 +186,8 @@ def test_lang(f: Fixture) -> None:
     )
     f.start()
 
-    kj = lambda: f.send_real("k$(50ms)j")
+    def kj() -> None:
+        f.send_real("k$(50ms)j")
 
     tapper.kb.set_lang("portuguese")
     kj()

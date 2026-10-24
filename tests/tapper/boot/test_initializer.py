@@ -1,8 +1,8 @@
 import functools
 import logging
 import time
+from collections.abc import Callable
 from dataclasses import dataclass
-from typing import Callable
 from unittest.mock import MagicMock
 
 import pytest

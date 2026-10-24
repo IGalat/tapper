@@ -1,9 +1,9 @@
 """What each OS implements, by aspect. A missing key means not implemented there."""
 
+from collections.abc import Callable
 from dataclasses import dataclass
 from dataclasses import field
 from typing import Any
-from typing import Callable
 
 from tapper import config
 from tapper.model import constants

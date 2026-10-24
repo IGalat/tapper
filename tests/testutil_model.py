@@ -1,9 +1,9 @@
 from __future__ import annotations
 
 from collections import defaultdict
+from collections.abc import Callable
 from dataclasses import dataclass
 from typing import Any
-from typing import Callable
 from unittest.mock import MagicMock
 
 from tapper.action.runner import ActionRunner

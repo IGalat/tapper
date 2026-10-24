@@ -1,7 +1,7 @@
 import time
+from collections.abc import Callable
 from dataclasses import dataclass
 from typing import Any
-from typing import Callable
 from typing import assert_never
 
 import tapper
@@ -63,9 +63,11 @@ def toggle_recording(
     callbacks: list[Callable[[str], Any]], config: RecordConfig
 ) -> None:
     global recording_
-    timeout = lambda time2: time.perf_counter() - time2 > config.max_recording_time
 
-    if recording_ is None or (recording_ and timeout(recording_[0].time)):
+    def timed_out(started_at: float) -> bool:
+        return time.perf_counter() - started_at > config.max_recording_time
+
+    if recording_ is None or (recording_ and timed_out(recording_[0].time)):
         start_recording()
     else:
         stop_recording(callbacks, config)
@@ -184,15 +186,16 @@ def compress_down_ups(instructions: list[SendInstruction]) -> None:
             continue
         in0 = instructions[i]
         in1 = instructions[i + 1]
-        if isinstance(in0, KeyInstruction) and isinstance(in1, KeyInstruction):
-            if (
-                in0.dir == KeyDir.DOWN
-                and in1.dir == KeyDir.UP
-                and in0.symbol == in1.symbol
-            ):
-                instructions.pop(i)
-                instructions.pop(i)
-                instructions.insert(i, KeyInstruction(in0.symbol, KeyDir.CLICK))
+        if (
+            isinstance(in0, KeyInstruction)
+            and isinstance(in1, KeyInstruction)
+            and in0.dir == KeyDir.DOWN
+            and in1.dir == KeyDir.UP
+            and in0.symbol == in1.symbol
+        ):
+            instructions.pop(i)
+            instructions.pop(i)
+            instructions.insert(i, KeyInstruction(in0.symbol, KeyDir.CLICK))
 
 
 def to_strings(instructions: list[SendInstruction]) -> list[str]:
