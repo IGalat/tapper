@@ -221,7 +221,7 @@ def get_snip(
     :param bbox: Bounding box of the screenshot or image. If None, the whole screen or image is snipped.
     :param prefix: Optional name, may be a path of image to save, without extension. If not specified,
     will not be saved to disk.
-    :param bbox_to_name: If true, will append to the name "-BBOX({x1},{y1},{x2},{y2})", with corner coordinates.
+    :param bbox_to_name: If true, will append to the name "-BBOX({x1}_{y1}_{x2}_{y2})", with corner coordinates.
     :param override_existing: Will override existing file if prefix exists, otherwise will save as prefix(2).png
     :return: Resulting image RGB, transformed to numpy array.
 

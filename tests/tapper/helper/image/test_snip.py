@@ -53,7 +53,7 @@ class TestSnip:
         mock_get_sct.return_value = absolutes
         img.get_snip(bbox=(0, 0, 20, 20), prefix="qwe", bbox_to_name=True)
         assert mock_save_to_disk.call_count == 1
-        assert mock_save_to_disk.call_args == call(absolutes, "qwe-BBOX(0,0,20,20).png")
+        assert mock_save_to_disk.call_args == call(absolutes, "qwe-BBOX(0_0_20_20).png")
 
     def test_no_override_creates_different_file(
         self, tmp_path: Path, mock_get_sct

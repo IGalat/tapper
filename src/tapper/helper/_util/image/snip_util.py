@@ -72,7 +72,7 @@ def finish_snip(
     sct = base.get_screenshot_if_none_and_cut(None, bbox)
     if prefix is not None:
         bbox_str = (
-            f"-BBOX({bbox[0]},{bbox[1]},{bbox[2]},{bbox[3]})"
+            f"-BBOX({bbox[0]}_{bbox[1]}_{bbox[2]}_{bbox[3]})"
             if bbox and bbox_to_name
             else ""
         )
