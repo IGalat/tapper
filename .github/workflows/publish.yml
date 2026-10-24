@@ -17,7 +17,9 @@ jobs:
       contents: read
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: jdx/mise-action@v5
       - run: mise run build
+      # PEP 740 provenance; uv publish uploads the .publish.attestation files this writes next to dist/*.
+      - uses: astral-sh/attest-action@39b6ce43875c196a579e31635b11aa2a2036384a # v0.0.7
       - run: uv publish

@@ -24,7 +24,7 @@ jobs:
       MISE_ENV: ${{ matrix.mise_env }}
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       # Installs python + uv from mise.toml (+ mise.$MISE_ENV.toml) and puts them on PATH.
       - uses: jdx/mise-action@v5
