@@ -599,7 +599,7 @@ wheels = [
 
 [[package]]
 name = "tapper"
-version = "2024.9.4"
+version = "2026.10.1"
 source = { editable = "." }
 dependencies = [
     { name = "evdev", marker = "sys_platform == 'linux'" },

@@ -5,7 +5,7 @@ build-backend = "uv_build"
 
 [project]
 name = "tapper"
-version = "2024.9.4"  # YYYY.M.MICRO
+version = "2026.10.1"  # YYYY.M.MICRO
 description = "Modern Hotkey and Macro Tool"
 authors = [{ name = "IGalat", email = "author_email@example.com" }]
 license = { file = "LICENSE" }
