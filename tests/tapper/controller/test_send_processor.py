@@ -2,9 +2,9 @@ import time
 
 import pytest
 
-from tapper.action import wrapper
 from tapper.boot import initializer
 from tapper.controller import flow_control
+from tapper.controller.flow_control import ActionConfig
 from tapper.controller.flow_control import config_thread_local_storage
 from tapper.controller.keyboard.kb_api import KeyboardController
 from tapper.controller.mouse.mouse_api import MouseController
@@ -45,7 +45,7 @@ class TestSendCommandProcessor:
     toggled: list[str]
 
     @pytest.fixture(autouse=True)
-    def setup(self, dummy: Dummy) -> None:
+    def setup(self, dummy: Dummy, monkeypatch: pytest.MonkeyPatch) -> None:
         self.all_signals = []
         self.real_signals = []
 
@@ -76,17 +76,18 @@ class TestSendCommandProcessor:
         mc._emul_keeper = emul
         self.mc = mc
 
-        self.sender = SendCommandProcessor(
-            os="",
-            parser=parser,
-            kb_controller=kbc,
-            mouse_controller=mc,
-            sleep_fn=lambda f: self.all_signals.append(sleep(f)),
-        )
+        sender = SendCommandProcessor()
+        sender.os = ""
+        sender.parser = parser
+        sender.kb_controller = kbc
+        sender.mouse_controller = mc
+        sender.sleep_fn = lambda f: self.all_signals.append(sleep(f))
+        self.sender = sender
+        monkeypatch.setattr(flow_control, "initialized", True)
 
         event.subscribe(listener.name, lambda signal: self.real_signals.append(signal))
 
-        config_thread_local_storage.action_config = wrapper.ActionConfig(
+        config_thread_local_storage.action_config = ActionConfig(
             0, 0, flow_control.kill_id
         )
         yield

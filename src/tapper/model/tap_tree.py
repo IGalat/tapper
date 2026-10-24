@@ -28,6 +28,7 @@ class TapGeneric(ABC):
     """
     trigger_conditions: dict[str, Any]
     """Keyword trigger conditions that can be used as part of `Tap` or `Group`. See config for docs."""
+    _parent: Optional["Group"]
 
 
 @dataclass(init=False)
@@ -41,7 +42,6 @@ class Tap(TapGeneric):
     Action to be executed when triggered. Will run in a separate thread.
     If string is specified, it will send(action) instead.
     """
-    _parent: "Group"
 
     def __init__(
         self,
@@ -81,7 +81,6 @@ class Group(TapGeneric):
     name: str | None
 
     _children: list[TapGeneric | dict[TriggerStr, Action | str]]
-    _parent: Optional["Group"] = None
 
     def add(self, *children: TapGeneric | dict[TriggerStr, Action | str]) -> "Group":
         """

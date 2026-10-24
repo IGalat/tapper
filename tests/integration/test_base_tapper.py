@@ -98,6 +98,12 @@ class TestSimple:
         assert f.emul_signals == click("012")
 
 
+class TestSend:
+    def test_before_start_fails(self, f: Fixture) -> None:
+        with pytest.raises(RuntimeError, match="not initialized"):
+            tapper.send("a")
+
+
 class TestSleep:
     def test_before_start_fails(self, f: Fixture) -> None:
         with pytest.raises(RuntimeError, match="not initialized"):

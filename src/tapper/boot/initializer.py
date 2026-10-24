@@ -165,6 +165,8 @@ def init(
         mc._emul_keeper = emul_keeper
         mc._state_keeper = state_keeper
 
+    if config.sleep_check_interval <= 0:
+        raise ValueError("config.sleep_check_interval must be greater than 0.")
     sleep_processor.check_interval = config.sleep_check_interval
     sleep_processor.kill_check_fn = flow_control.should_be_killed
     sleep_processor.pause_check_fn = flow_control.should_be_paused
@@ -172,8 +174,10 @@ def init(
 
     send_processor.os = os
     send_processor.parser = default_send_parser(os)
-    send_processor.kb_controller = kbc
-    send_processor.mouse_controller = mc
+    if kbc:
+        send_processor.kb_controller = kbc
+    if mc:
+        send_processor.mouse_controller = mc
     send_processor.sleep_fn = sleep_processor.sleep
 
     log.info("Tapper init complete")

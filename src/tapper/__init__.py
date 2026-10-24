@@ -17,8 +17,8 @@ from tapper.util import datastructs as _datastructs
 _runtime: _initializer.Runtime
 """Set by init()."""
 
-_send_processor = _SendCommandProcessor.from_none()
-_sleep_processor = _SleepCommandProcessor.from_none()
+_send_processor = _SendCommandProcessor()
+_sleep_processor = _SleepCommandProcessor()
 _blocking = True
 
 Tap = _tap_tree.Tap

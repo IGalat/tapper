@@ -1,6 +1,7 @@
 from typing import Callable
 from typing import assert_never
 
+from tapper.controller import flow_control
 from tapper.controller.flow_control import config_thread_local_storage
 from tapper.controller.keyboard.kb_api import KeyboardController
 from tapper.controller.mouse.mouse_api import MouseController
@@ -25,25 +26,6 @@ class SendCommandProcessor:
     mouse_controller: MouseController
     sleep_fn: Callable[[float], None]
 
-    def __init__(
-        self,
-        os: str,
-        parser: SendParser,
-        kb_controller: KeyboardController,
-        mouse_controller: MouseController,
-        sleep_fn: Callable[[float], None],
-    ) -> None:
-        self.os = os
-        self.parser = parser
-        self.kb_controller = kb_controller
-        self.mouse_controller = mouse_controller
-        self.sleep_fn = sleep_fn
-
-    @classmethod
-    def from_none(cls) -> "SendCommandProcessor":
-        """To be filled during init."""
-        return SendCommandProcessor(None, None, None, None, None)
-
     def send(
         self,
         command: str,
@@ -59,6 +41,10 @@ class SendCommandProcessor:
         :param press_duration: Time between key press and release, only applies on click, not on up/down.
         :param speed: All sleep commands are divided by this number. Does not influence interval or press_duration.
         """
+        if not flow_control.initialized:
+            raise RuntimeError(
+                "tapper is not initialized. You should call this inside an action instead."
+            )
         config = config_thread_local_storage.action_config
         if interval is None:
             interval = config.send_interval if config else 0

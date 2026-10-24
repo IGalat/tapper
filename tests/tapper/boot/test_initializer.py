@@ -61,8 +61,8 @@ def keyboard_only(
     runtime = initializer.init(
         make_group("root"),
         make_group("control"),
-        SendCommandProcessor.from_none(),
-        SleepCommandProcessor.from_none(),
+        SendCommandProcessor(),
+        SleepCommandProcessor(),
     )
     return KeyboardOnly(runtime, listener, kbc, kb_driver)
 

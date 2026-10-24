@@ -1,11 +1,20 @@
 import threading
 import uuid
-from typing import Any
+from dataclasses import dataclass
+
+
+@dataclass
+class ActionConfig:
+    """Config for a single action. See tap_tree for info on configs."""
+
+    send_interval: float
+    send_press_duration: float
+    kill_id: uuid.UUID
 
 
 class _ActionLocal(threading.local):
-    action_config: Any = None
-    """ActionConfig of the running action; None outside of actions (e.g. main thread after init)."""
+    action_config: ActionConfig | None = None
+    """None outside of actions (e.g. main thread after init)."""
 
 
 config_thread_local_storage = _ActionLocal()

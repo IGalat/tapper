@@ -19,7 +19,8 @@ from tapper.model.types_ import TriggerStr
 from tapper.parser.trigger_parser import TriggerParser
 
 
-def find_property(prop_name: str, group: Group) -> Any:
+def find_property(prop_name: str, group: Group | None) -> Any:
+    assert group is not None  # root has every property, see verify_settings_exist
     if (result := getattr(group, prop_name)) is not None:
         return result
     return find_property(prop_name, group._parent)

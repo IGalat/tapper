@@ -36,6 +36,10 @@ class Win32MouseSignalListener(MouseSignalListener):
             return ListenerResult.PROPAGATE
 
         elif action == 522:
+            assert (
+                event.additional_data is not None
+            )  # wheel delta, winput always sets it
+
             if event.additional_data > 0:
                 return self.on_signal(("scroll_wheel_up", KeyDirBool.DOWN))
             else:

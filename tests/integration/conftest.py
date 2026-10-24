@@ -7,9 +7,9 @@ import pytest
 
 import tapper
 from tapper import config
-from tapper.action import wrapper
 from tapper.boot import platforms
 from tapper.boot.platforms import Platform
+from tapper.controller.flow_control import ActionConfig
 from tapper.controller.keyboard.kb_api import KeyboardController
 from tapper.controller.mouse.mouse_api import MouseController
 from tapper.controller.send_processor import SendCommandProcessor
@@ -79,7 +79,7 @@ def f(
     tapper.control_group = make_group("control_group")
     tapper.controller.flow_control.initialized = False
     tapper.controller.flow_control.config_thread_local_storage.action_config = (
-        wrapper.ActionConfig(0, 0, tapper.controller.flow_control.kill_id)
+        ActionConfig(0, 0, tapper.controller.flow_control.kill_id)
     )
 
     listener = dummy.Listener()
@@ -126,7 +126,7 @@ def f(
         sender = tapper._send_processor
         sender.sleep_fn = partial(sleep_logged, signals=fixture.emul_signals)
 
-        real_sender = SendCommandProcessor.from_none()
+        real_sender = SendCommandProcessor()
         real_sender.os = sender.os
         real_sender.parser = sender.parser
         real_sender.sleep_fn = partial(sleep_logged, signals=fixture.real_signals)

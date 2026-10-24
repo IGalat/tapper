@@ -27,7 +27,7 @@ def parse_sleep_time(length_of_time: float | str) -> float:
 class SleepCommandProcessor:
     """Implementation of tapper's "sleep" command."""
 
-    check_interval: float
+    check_interval: float = 0.1
     """How often the check is made for whether to continue sleeping."""
     kill_check_fn: Callable[[], bool] = flow_control.should_be_killed
     """Checks whether action should be killed."""
@@ -35,17 +35,6 @@ class SleepCommandProcessor:
     """Checks whether action should be paused."""
     actual_sleep_fn: Callable[[float], None] = time.sleep
     get_time_fn: Callable[[], float] = time.perf_counter
-
-    @classmethod
-    def from_none(cls) -> "SleepCommandProcessor":
-        """To be filled during init."""
-        return SleepCommandProcessor(None)
-
-    def __post_init__(self) -> None:
-        if self.check_interval is not None and self.check_interval <= 0:
-            raise ValueError(
-                "SleepCommandProcessor check_interval must be greater than 0."
-            )
 
     def sleep(self, length_of_time: float | str) -> None:
         """

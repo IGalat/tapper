@@ -4,8 +4,8 @@ import time
 from typing import Callable
 
 import tapper
-from tapper.action.wrapper import ActionConfig
 from tapper.controller import flow_control
+from tapper.controller.flow_control import ActionConfig
 from tapper.controller.flow_control import StopTapperActionException
 from tapper.controller.flow_control import config_thread_local_storage
 from tapper.helper.model import Repeatable
@@ -35,8 +35,8 @@ def _run_task(repeatable: Repeatable) -> None:
     global running_repeatable
     running_repeatable = repeatable
     config_thread_local_storage.action_config = ActionConfig(
-        send_interval=tapper.root.send_interval,
-        send_press_duration=tapper.root.send_press_duration,
+        send_interval=tapper._runtime.root.send_interval,
+        send_press_duration=tapper._runtime.root.send_press_duration,
         kill_id=flow_control.kill_id,
     )
     for i in range(repeatable.max_repeats or 99999999999999):

@@ -82,11 +82,11 @@ def setup_logging(
     config = get_config(log_level_console, log_level_file, log_folder)
 
     logging.config.dictConfig(config)
-    queue_handler = logging.getHandlerByName("queue_handler")
-    if queue_handler is not None:
-        queue_handler = cast(QueueHandler, queue_handler)  # just for typing
-        queue_handler.listener.start()
-        atexit.register(queue_handler.listener.stop)
+    queue_handler = cast(QueueHandler, logging.getHandlerByName("queue_handler"))
+    listener = queue_handler.listener
+    assert listener is not None  # dictConfig creates it from the "handlers" key
+    listener.start()
+    atexit.register(listener.stop)
 
 
 TFun = TypeVar("TFun", bound=Callable[..., Any])
