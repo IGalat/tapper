@@ -27,7 +27,9 @@ def find_fuzzy_cv2(target: ndarray, outer: ndarray) -> tuple[float, XyCoordsT]:
     return max_val, (int(x), int(y))
 
 
-mss_instance = mss.MSS()
+@lru_cache
+def get_mss() -> mss.MSS:
+    return mss.MSS()
 
 
 @lru_cache(maxsize=5)
@@ -72,11 +74,11 @@ def get_screenshot_if_none_and_cut(
         return maybe_image
     if bbox is not None:
         try:
-            sct = mss_instance.grab(bbox)
+            sct = get_mss().grab(bbox)
         except Exception as e:
             raise e
     else:
-        sct = mss_instance.grab(mss_instance.monitors[0])
+        sct = get_mss().grab(get_mss().monitors[0])
     pil_rgb = PIL.Image.frombytes("RGB", sct.size, sct.bgra, "raw", "BGRX")
     return np.asarray(pil_rgb)
 
