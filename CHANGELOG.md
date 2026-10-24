@@ -5,6 +5,58 @@ Versions follow [CalVer](https://calver.org) with format YYYY.0M.MICRO.
 Until status changes from "Beta" to "Stable", don't expect backwards compatibility.
 
 
+## 2026.10.1 - Sleep, logging, py3.12
+
+### Breaking changes:
+
+Python 3.12+ required (was 3.10+).
+
+`helper.actions` split into `helper.repeat` and `helper.recording`.
+
+`img`: API fully rewritten.
+
+### Major changes:
+
+`tapper.sleep(time)` - use instead of `time.sleep` in actions. Accepts seconds or `"1s"`/`"50ms"`.
+`send` uses it internally. Enables new controls:
+`controls.pause_actions_on/off/toggle` and `controls.kill_running_actions`.
+`config.sleep_check_interval` sets how often sleep checks for pause/kill.
+
+Logging: `tapper.log` logger to console and optionally to file.
+Configured by `config` variables.
+Exceptions in actions are logged instead of silently dying with the thread.
+
+Slow subscribers of `tapper.util.event` no longer block the OS input hook; delivery runs on a worker thread.
+
+### Minor changes:
+
+`RecordConfig` moved to `helper.model`; `non_compress_action_delay` renamed to `max_compress_action_interval`.
+
+`Tap("a", None)` is formally a no-op action; with default suppression it swallows the key.
+
+`mouse.click(x_or_xy, y, relative)` and `mouse.right_click(...)`; `mouse.move` accepts an `(x, y)` tuple.
+
+`window.to_next_of_same_group()` - switch to next window of the same app.
+
+`repeat.toggle` accepts an optional `condition`.
+
+`lang.to_en` raises `NotImplementedError` for languages without a charset, instead of garbage output.
+
+### Fixes:
+
+`suppress_trigger=False` on `Tap` / `Group` was ignored and treated as "inherit".
+
+`mouse.pressed("lmb")` and other aliases didn't work.
+
+`send` called outside an action (after init) crashed; now uses zero interval and press duration.
+
+Unknown virtual key codes on Windows crashed the keyboard hook.
+
+Shift key held by the user was leaking into the parsed `send` for subsequent calls.
+
+Window queries are cached for 100ms, cutting lag with many `window` trigger conditions.
+
+
 ## 2024.9.4 - Action config
 
 ### Major changes:

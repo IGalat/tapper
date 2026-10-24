@@ -26,7 +26,7 @@ root.add(
     Group(win_exec="chrome.exe").add(
         Tap("=", "mmb", cursor_in=((0, 0), (1700, 45)))  # close tabs with "="
     ),
-    {"shift+caps": helper.actions.record_toggle(print)}  # record actions, print when done
+    {"shift+caps": helper.recording.toggle(print)}  # record actions, print when done
 )
 start()
 
@@ -39,6 +39,8 @@ Install Python 3.12 or later, then install via [pip](https://pythonbasics.org/ho
 ```
 pip install tapper[all]
 ```
+
+`tapper[img]` or `tapper[tray]` install only one of the optional features.
 
 For Linux, see [a separate instruction](https://github.com/IGalat/tapper/blob/master/docs/dev/os_specific.md#installation).
 
@@ -137,6 +139,12 @@ You can `start` **tapper** after this. It allows for **tapper**-related actions 
 
 Before `init` or `start` components are not initialized.
 
+---
+
+Use `tapper.sleep` instead of `time.sleep` inside actions. It accepts seconds or `"50ms"`/`"3s"`,
+and lets you pause or kill actions with `helper.controls.pause_actions_toggle` and `kill_running_actions`
+(`send` sleeps the same way, so it is covered too). `tapper.log` logs to console, and to a file if configured.
+
 ### Usage philosophy
 
 A single script is all you need. `Group` the `Tap`s and `dict`s for convenience and performance, add them to the `root` Group.
@@ -167,10 +175,10 @@ so there is an input delay that depends on how long processing takes.
 - Controllers: allow you to check status and give commands. ```from tapper import kb, mouse, window```
   - [Keyboard](https://github.com/IGalat/tapper/blob/master/src/tapper/controller/keyboard/kb_api.py#L46).
   Get key state or issue commands; get/set language. For commands `send` is more convenient though.
-  - [Mouse](https://github.com/IGalat/tapper/blob/master/src/tapper/controller/mouse/mouse_api.py#L61).
+  - [Mouse](https://github.com/IGalat/tapper/blob/master/src/tapper/controller/mouse/mouse_api.py#L75).
   Same thing.
-  - [Window](https://github.com/IGalat/tapper/blob/master/src/tapper/controller/window/window_api.py#L118).
-  Get state, check if window is open/active, set window as active, close, max/min/restore.
+  - [Window](https://github.com/IGalat/tapper/blob/master/src/tapper/controller/window/window_api.py#L112).
+  Get state, check if window is open/active, set window as active, close, max/min/restore, switch to next window of same app.
 - `Tap`, `Group`, `root`, `control_group`.
 - Conditions for `Tap` and `Group`: only if all conditions work, will triggering actions be possible.
 - `send` - a versatile text-to-command tool.
@@ -212,7 +220,7 @@ Here are existing Conditions:
 | kb_key_not_pressed    | str                             | Opposite of previous.                                                                                                                                                                                  | kb_key_not_pressed="esc"                                                                                                                                                                              |
 | mouse_key_pressed     | str                             | Same as kb_key_pressed for mouse.                                                                                                                                                                      | mouse_key_pressed="right_mouse_button"                                                                                                                                                                |
 | mouse_key_not_pressed | str                             | Same as kb_key_not_pressed for mouse.                                                                                                                                                                  | mouse_key_not_pressed="rmb"                                                                                                                                                                           |
-| cursor_near           | (int, int) or ((int, int), int) | Cursor is within circular area of target. <br/>Accepts (x, y) or ((x, y), radius).  Default radius is [50](https://github.com/IGalat/tapper/blob/master/src/tapper/controller/mouse/mouse_api.py#L92). | cursor_near=(500, 720) <br/>cursor_near=((860, 650), 400)                                                                                                                                             |
+| cursor_near           | (int, int) or ((int, int), int) | Cursor is within circular area of target. <br/>Accepts (x, y) or ((x, y), radius).  Default radius is [50](https://github.com/IGalat/tapper/blob/master/src/tapper/controller/mouse/mouse_api.py#L100). | cursor_near=(500, 720) <br/>cursor_near=((860, 650), 400)                                                                                                                                             |
 | cursor_in             | (int, int, int, int)            | Cursor is within a rectangle (min_x, min_y, max_x, max_y)                                                                                                                                              | cursor_in=((100, 100, 250, 300))                                                                                                                                                                      |
 | win                   | str                             | Window with this name or exec is active. <br/>Comparison is not strict, so if supplied arg is contained with ignorecase, it's good enough.                                                             | win="youtube" <br/>win="notepad"                                                                                                                                                                      |
 | win_title             | str                             | Same as "win", but only titles are considered.                                                                                                                                                         | win_title="chrome"  # won't work unless page contains "chrome". <br/>win_title="youtube"  # will only work when page name is "youtube", or if "youtube" is in the name of a document of notepad, etc. |
@@ -221,8 +229,8 @@ Here are existing Conditions:
 | open_win_title        | str                             | Same as "open_win", but only titles are considered.                                                                                                                                                    | open_win_title="favourite song name in a player or youtube"                                                                                                                                           |
 | open_win_exec         | str                             | Same as "open_win", but only execs are considered, and **strict**.                                                                                                                                     | open_win_exec="notepad++.exe"                                                                                                                                                                         |
 
-You can easily [write your own](https://github.com/IGalat/tapper/blob/master/src/tapper/trigger_conditions.py#L12),
-then [add them](https://github.com/IGalat/tapper/blob/master/src/tapper/config.py#L80).
+You can easily [write your own](https://github.com/IGalat/tapper/blob/master/src/tapper/trigger_conditions.py#L9),
+then [add them](https://github.com/IGalat/tapper/blob/master/src/tapper/config.py#L88).
 
 ### `send` command allows you to:
 
@@ -251,8 +259,6 @@ Alias is a symbol that refers to one or more other symbols, such as `shift` for 
 Here is a list of all keys and aliases for
 [keyboard](https://github.com/IGalat/tapper/blob/master/src/tapper/model/keyboard.py)
 and [mouse](https://github.com/IGalat/tapper/blob/master/src/tapper/model/mouse.py).
-
-You can call `get_possible_signal_symbols()` for `kb`/`mouse` to get them as well.
 
 
 ### Multi-language support
@@ -295,7 +301,7 @@ send(ua("І Жак"))
 You can use language identifiers `en-US`, aliases where they exist `en`, locale codes `1033`,
 or objects you got from `tapper.kb.lang()`.
 
-See currently supported languages [here](https://github.com/IGalat/tapper/blob/master/src/tapper/model/languages.py#L23).
+See currently supported languages [here](https://github.com/IGalat/tapper/blob/master/src/tapper/model/languages.py#L21).
 
 If you need another language - it's very easy to add, use [this](https://github.com/IGalat/tapper/blob/master/tests/manual/tapper_lang_helper.py) and make a pull request!
 
@@ -334,7 +340,7 @@ This will result in `hello` not `hllo`.
 
 ### Pub/sub
 
-This is not main use of **tapper**, but you will receive [Signals](https://github.com/IGalat/tapper/blob/master/src/tapper/model/types_.py#L6)
+This is not main use of **tapper**, but you will receive [Signals](https://github.com/IGalat/tapper/blob/master/src/tapper/model/types_.py#L7)
 when subscribing to devices:
 
 ```python
@@ -354,24 +360,24 @@ event.unsubscribe("keyboard", my_function)
 event.unsubscribe("mouse", my_function)
 ```
 
-This is not blocking, events are received in separate listener threads.
+This is not blocking: events are delivered on one worker thread, in order, so the OS input hook is never delayed.
 
 ## Convenience functions
 
 ```python
-from tapper.helper import actions, controls
+from tapper.helper import repeat, recording, controls
 ```
 
 ### Actions repeat
 
-[helpers.action.repeat_while](https://github.com/IGalat/tapper/blob/master/src/tapper/helper/actions.py#L11)
+[repeat.while_fn](https://github.com/IGalat/tapper/blob/master/src/tapper/helper/repeat.py#L9)
 repeats while the condition function returns something that gets bool(result) == True.
 
 ```python
-Tap("t", repeat_while(lambda: datetime.datetime.now().hour >= 22,
-                        send("Go to sleep!"),
-                        period_s=1200,
-                        max_repeats=4))
+Tap("t", repeat.while_fn(lambda: datetime.datetime.now().hour >= 22,
+                         lambda: send("Go to sleep!"),
+                         interval=1200,
+                         max_repeats=4))
 ```
 
 This will upon pressing `t` start looping, and if the hour is 22 or later,
@@ -381,30 +387,31 @@ It will stop looping at midnight (as hour is < 22 now), or after 4 iterations.
 
 ---
 
-[helpers.action.repeat_while_pressed](https://github.com/IGalat/tapper/blob/master/src/tapper/helper/actions.py#L30)
+[repeat.while_pressed](https://github.com/IGalat/tapper/blob/master/src/tapper/helper/repeat.py#L39)
 will repeat the action as long as the specified key is pressed. It doesn't have to be the same key as in hotkey:
 
 ```python
-Tap("a", repeat_while_pressed("ctrl", retry_my_stuff_function, 1, 15))
-Tap("b", repeat_while_pressed("b", retry_my_stuff_function))
+Tap("a", repeat.while_pressed("ctrl", retry_my_stuff_function, 1, 15))
+Tap("b", repeat.while_pressed("b", retry_my_stuff_function))
 ```
 
 Pressing `a` will do at most 15 iterations, 1 second apart, as long as `ctrl` is pressed.
 
 Pressing `b` will run repeats as long as `b` is held down, and will use defaults - infinite retries 0.1 sec apart.
 
-Note: retries will be executed in a separate thread, not the one that called the function.
+Note: all repeats run in one separate thread, so starting a new repeat stops the current one.
 
 ---
 
-[helpers.action.toggle_repeat](https://github.com/IGalat/tapper/blob/master/src/tapper/helper/actions.py#L48)
+[repeat.toggle](https://github.com/IGalat/tapper/blob/master/src/tapper/helper/repeat.py#L63)
 will start repeating on first click, end on the second.
 
 ```python
-Tap("ctrl+l", toggle_repeat(send("\nrpal 6.2 LF ICC 25HM with prof\n"), 27))
+Tap("ctrl+l", repeat.toggle(lambda: send("\nrpal 6.2 LF ICC 25HM with prof\n"), 27))
 ```
 
 One `ctrl+l` click will start sending the phrase immediately and every 27 sec, another will stop it.
+An optional `condition` stops it early, like in `while_fn`.
 
 ---
 
@@ -413,32 +420,24 @@ One `ctrl+l` click will start sending the phrase immediately and every 27 sec, a
 You can record your actions, then get a string you can `send`.
 
 ```python
-recording_: str = ""
-
-
-def set_recording(new_recording: str) -> None:
-  global recording_
-  recording = new_recording
-
-
 root.add(Group("recording").add({
-  "f7": actions.toggle(set_recording),
-  "ctrl+f7": actions.start(),
-  "alt+f7": actions.stop(set_recording),
-  "f8": lambda: send(recording_, interval=0.1, speed=2),
-  "ctrl+f8": lambda: pyperclip.copy(recording_),
+  "f7": recording.toggle(),
+  "ctrl+f7": recording.start(),
+  "alt+f7": recording.stop(),
+  "f8": recording.action_playback_last(speed=2),
+  "ctrl+f8": lambda: pyperclip.copy(recording.last_recorded),
 }))
 ```
 
 On pressing `f7` or `ctrl+f7`, it'll start recording, then on `f7` or `alt+f7` recording will stop, transform to string,
-and `set_recording` function will be called with that string.
+and store it in `recording.last_recorded`. `toggle` and `stop` also accept a callback that receives the string.
 
-In this example we're saving the recording, and then on `f8` it will play back on double speed and with set interval.
+In this example, `f8` will play the last recording back on double speed.
 
 `ctrl+f8` will copy it to your clipboard (using external lib `pyperclip`) so you can save it for a macro.
 
-You can supply a [RecordConfig](https://github.com/IGalat/tapper/blob/master/src/tapper/helper/helper_model.py#L5)
-to `record_toggle` or `record_stop` to modify details about the string you get.
+You can supply a [RecordConfig](https://github.com/IGalat/tapper/blob/master/src/tapper/helper/model.py#L9)
+to `toggle` or `stop` to modify details about the string you get.
 
 ---
 
@@ -451,7 +450,7 @@ from tapper.helper import img
 allows you to:
 
 - search for an image on a screen (or in image), fuzzy search is an option
-- wait for image (or one of the images) to appear
+- wait for image (or one of the images) to appear, or to disappear
 - snip the screen easily and save in a format convenient for **tapper** usage
 - all of this for a single pixel, which works much faster
 
@@ -476,7 +475,7 @@ if img.find("snip-(BBOX_953_531_997_686).png"):
 You can also specify the bounding box separately, or not at all:
 
 ```python
-img.find(("my_pic.png", (953, 531, 997, 686)))  # bbox separate from name
+img.find("my_pic.png", bbox=(953, 531, 997, 686))  # bbox separate from name
 img.find("my_pic.png")  # search the whole screen
 ```
 
@@ -500,7 +499,7 @@ img.wait_for("my_pic.png")
 
 This will regularly take screenshots and check if the picture is found on screen.
 
-You can control the search interval and timeout:
+You can control the search interval and timeout; `wait_for_disappear` is the inverse:
 
 ```python
 img.wait_for("my_pic.png", timeout=15, interval=0.5)
@@ -534,45 +533,45 @@ Each image may have a different bounding box.
 Similar functions for pixel:
 
 ```python
-"f2": img.pixel_str(pyperclip.copy)
+"f2": img.pixel_info(pyperclip.copy)
 ```
 
 Press `f2` once, and you'll get a string of RGB color and xy-position of the pixel to your clipboard, like:
 
 `"(255, 255, 255), (1919, 1079)"`
 
-Or get the same thing as tuples:
+The format is configurable with `str_format`, see `PixelStrFormatT`. Or get the same thing as tuples:
 
 ```python
 def my_pixel_callback(color: tuple[int, int, int], coords: tuple[int, int]):
   ...
 
-"f2": img.pixel_info(my_pixel_callback)
+"f2": img.pixel_info(callback_for_data=my_pixel_callback)
 ```
 
 There is an immediate, non-callback option:
 
 ```python
-my_pixel = pixel_get_color(1920 - 1, 1080 - 1)
+my_pixel = img.pixel_get_color((1920 - 1, 1080 - 1))
 assert my_pixel == (64, 45, 182)
+assert img.pixel_get_color_hex((1919, 1079)) == "#402db6"
 ```
 
 ---
 
-Use the string from `img.pixel_str` to find or wait for a pixel:
+Use the color and coords from `img.pixel_info` to find or wait for a pixel:
 
 ```python
-my_pixel_precise_coords = (255, 255, 255), (1919, 1079)
-if img.pixel_find(my_pixel_precise_coords):
+if img.pixel_find((255, 255, 255), (1919, 1079)):
     ...
 
 if img.pixel_wait_for((255, 255, 255), (1000, 1020, 1919, 1079)):  # search in wider area
     ...
 
-yes_btn_pixel = (67, 240, 13), (560, 780)  # will only be searched for in one spot
-no_btn_pixel = (255, 13, 13), None  # will be searched for on the whole screen, as bbox=None
-if img.pixel_wait_for_one_of([yes_btn_pixel, no_btn_pixel]):
+if img.pixel_wait_for_disappear("#ffffff", (1919, 1079), timeout=10):  # colors can be hex
     ...
+
+xy, color = img.pixel_get_with_best_match_color((255, 13, 13), (0, 0, 500, 500))  # closest color in bbox
 ```
 
 ---
@@ -587,7 +586,7 @@ This exists for efficiency, as taking screenshot every time in a loop or a funct
 sct = img.get_snip()
 for i in range(100):
     bbox = (i, i, i + 100, i + 1)
-    if img.find((my_img_of_horizontal_line_100_by_1_px, bbox), sct):
+    if img.find(my_img_of_horizontal_line_100_by_1_px, bbox, sct):
     return i
 ```
 
