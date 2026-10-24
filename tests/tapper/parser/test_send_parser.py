@@ -131,6 +131,19 @@ class TestSimplestCombosAndMix:
         assert parse("$(1234ms)") == [SleepInstruction(1.234)]
 
 
+class TestCustomWrap:
+    def test_content_follows_the_wrap(self) -> None:
+        parser = initializer.default_send_parser()
+        parser.set_wrap(r"<<<_>>>")
+        assert parser.parse("a<<<esc;b 2x>>>c") == [
+            KI("a"),
+            KI("escape"),
+            KI("b"),
+            KI("b"),
+            KI("c"),
+        ]
+
+
 class TestCombosWithoutProps:
     def test_simplest(self, parse: ParseFn) -> None:
         assert parse("$(alt+q)") == [KI("left_alt", down), KI("q"), KI("left_alt", up)]

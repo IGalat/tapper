@@ -35,7 +35,7 @@ def ki_shift_up(shift: str = default_shift) -> KeyInstruction:
 
 def parse_wrap(combo_wrap: str) -> re.Pattern[str]:
     prefix, suffix = combo_wrap.split("_")
-    return re.compile(prefix + COMBO_CONTENT + suffix)
+    return re.compile(f"{prefix}({COMBO_CONTENT}){suffix}")
 
 
 @cache
@@ -59,8 +59,7 @@ class _Key:
 
 
 def to_content(combo: re.Match[str]) -> str:
-    """Extracts contents of the combo from re.Match object."""
-    return combo.group()[2:-1]  # todo len, minus escaping backslashes
+    return combo.group(1)
 
 
 def resolve_last_with_props(
