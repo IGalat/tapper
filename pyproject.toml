@@ -85,17 +85,44 @@ tmp_path_retention_count = 0
 src = ["src", "tests"]
 
 [tool.ruff.lint]
-# E/F/W: pycodestyle + pyflakes (what flake8 did), I: import order (replaces reorder-python-imports),
-# T10: leftover breakpoint()/pdb calls.
-# Candidates to enable later: "UP" (pyupgrade), "B" (bugbear).
-select = ["E", "F", "W", "I", "T10"]
+# - `ruff check --fix` applies safe fixes only; UP/SIM/C4/RUF leave "unsafe" ones behind,
+#   apply them with `--unsafe-fixes` and read that diff.
+# - A rule is wrong for one line: `# noqa: CODE  # why`. RUF100 flags the noqa once it stops being needed.
+select = [
+    "E",    # pycodestyle errors the formatter doesn't already enforce
+    "W",    # pycodestyle warnings (stray whitespace, deprecated syntax)
+    "F",    # pyflakes: undefined/unused names, unused imports, broken f-strings
+    "I",    # import order; force-single-line below keeps the old reorder-python-imports style
+    "T10",  # leftover breakpoint()/pdb calls
+    "UP",   # pyupgrade to the 3.12 baseline: X | None, `type` aliases, PEP 695 generics; some fixes unsafe
+    "SIM",  # simplifications: collapsible ifs, needless bool, yoda comparisons; fixes are unsafe
+    "C4",   # comprehension/literal rewrites: dict(), list(x for ...), needless comprehensions
+    "PIE",  # misc: unnecessary pass, duplicate class fields, needless range starts
+    "ISC",  # implicit string concatenation across lines, usually a missing comma in a list
+    "TID",  # banned and relative imports
+    "DTZ",  # naive datetimes; nothing uses datetime today, this guards the future
+    "B",    # bugbear: raise-from in except, cache on methods, mutable/call defaults, zip strict=
+    "RUF",  # ruff's own: unused noqa, unpacked-but-unused vars, mutable class attrs; RUF001-003 off for languages.py
+    "BLE",  # no blind `except Exception`; around user callbacks keep it with `# noqa: BLE001  # why`
+    "N",    # pep8 naming; a hit is usually an API rename, so it is a decision, not a fix
+    "PTH",  # pathlib over os.path; Path() rejects bytes paths, os.fsdecode() first
+    "T20",  # no print statements (tests/manual excluded, see below)
+]
 ignore = [
     "E501",  # line length is handled by the formatter
-    "E731",  # lambda assignment: used deliberately throughout
+]
+
+[tool.ruff.lint.per-file-ignores]
+"src/tapper/model/languages.py" = ["RUF001", "RUF002", "RUF003"]  # charsets contain lookalike glyphs on purpose
+"tests/**" = [
+    "BLE001",  # harnesses catch everything to report it
+]
+"tests/manual/**" = [
+    "T20",  # printing is how the manual scripts report
 ]
 
 [tool.ruff.lint.isort]
-force-single-line = true  # same style as the old reorder-python-imports hook
+force-single-line = true
 
 [tool.ruff.format]
 quote-style = "double"
@@ -109,3 +136,5 @@ include = ["src"]
 typeCheckingMode = "standard"
 reportMissingImports = "none"  # optional OS/extra deps (winput, pywin32, evdev, cv2...)
 reportMissingModuleSource = "none"
+reportMissingTypeArgument = "error"
+reportMissingParameterType = "error"
