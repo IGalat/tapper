@@ -78,6 +78,12 @@ class TestTreeTransformer:
             assert t.original == tap
             assert t.action == send_action
 
+    def test_none_action_stays_none(self, transform: TransformFn, group: Group) -> None:
+        group.add(Tap("a", None), {"b": None})
+        shadow_group = transform(group)
+
+        assert [child.action for child in shadow_group.children] == [None, None]
+
     def test_nesting(self, transform: TransformFn, group: Group) -> None:
         tap1 = Tap("1", send_action)
         group1 = Group().add(tap1)

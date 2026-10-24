@@ -4,7 +4,7 @@ from typing import Any
 from typing import Optional
 
 from tapper.model.constants import ListenerResult
-from tapper.model.types_ import Action
+from tapper.model.types_ import TapAction
 from tapper.model.types_ import TriggerStr
 
 
@@ -37,16 +37,17 @@ class Tap(TapGeneric):
 
     trigger: TriggerStr
     """Combo or a single key that will trigger the action."""
-    action: Action | str
+    action: TapAction
     """
     Action to be executed when triggered. Will run in a separate thread.
     If string is specified, it will send(action) instead.
+    None does nothing: with the default suppress_trigger, that swallows the key.
     """
 
     def __init__(
         self,
         trigger: TriggerStr,
-        action: Action | str,
+        action: TapAction,
         executor: int | None = None,
         suppress_trigger: bool | None = None,
         send_interval: float | None = None,
@@ -81,9 +82,9 @@ class Group(TapGeneric):
 
     name: str | None
 
-    _children: list[TapGeneric | dict[TriggerStr, Action | str]]
+    _children: list[TapGeneric | dict[TriggerStr, TapAction]]
 
-    def add(self, *children: TapGeneric | dict[TriggerStr, Action | str]) -> "Group":
+    def add(self, *children: TapGeneric | dict[TriggerStr, TapAction]) -> "Group":
         """
         Add new child elements to the group.
 

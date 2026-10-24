@@ -1,7 +1,6 @@
 import functools
 import threading
 from concurrent.futures import wait
-from typing import Any
 
 import hypothesis
 import hypothesis.strategies as st
@@ -94,13 +93,6 @@ class TestActionRunnerImpl:
             raise UnicodeError
 
         simple_runner.run(throw)
-        assert_runner_still_runs(simple_runner)
-
-    def test_none_action_does_not_break_the_runner(
-        self, simple_runner: ActionRunnerImpl
-    ) -> None:
-        none_action: Any = None
-        simple_runner.run(none_action)
         assert_runner_still_runs(simple_runner)
 
     def test_no_queue_for_1_thread(self) -> None:

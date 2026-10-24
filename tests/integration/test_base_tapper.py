@@ -99,6 +99,15 @@ class TestSimple:
         assert f.emul_signals == click("012")
 
 
+class TestNoneAction:
+    def test_swallows_the_key_and_runs_nothing(self, f: Fixture) -> None:
+        tapper.root.add({"a": None, "b": "q"})
+        f.start()
+
+        f.send_real("ab")
+        assert f.emul_signals == click("q")
+
+
 class TestSend:
     def test_before_start_fails(self, f: Fixture) -> None:
         with pytest.raises(RuntimeError, match="not initialized"):

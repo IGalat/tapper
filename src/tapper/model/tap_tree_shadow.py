@@ -34,7 +34,7 @@ class STap(STapGeneric):
     """Shadow Tap: used during runtime."""
 
     trigger: Trigger
-    action: Action
+    action: Action | None
     executor: int
     suppress_trigger: constants.ListenerResult
 

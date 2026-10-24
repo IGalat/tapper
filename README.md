@@ -64,6 +64,8 @@ It can be written like this:
 root.add(Tap("`", lambda: send("_")))
 ```
 
+An action of `None` does nothing, which with the default trigger suppression swallows the key.
+
 Writing it out like this is more verbose, but has additional versatility:
 
 ```python

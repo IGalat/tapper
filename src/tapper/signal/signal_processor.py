@@ -40,10 +40,12 @@ class SignalProcessor:
         symbol, direction = signal
         state = self.state_keeper.get_state(time.perf_counter())
         if tap := self.match(self.control, symbol, direction, state):
-            self.runner.run_control(wrapper.wrapped_action(tap))
+            if tap.action is not None:
+                self.runner.run_control(wrapper.wrapped_action(tap))
             return tap.suppress_trigger
         elif tap := self.match(self.root, symbol, direction, state):
-            self.runner.run(wrapper.wrapped_action(tap), tap.executor)
+            if tap.action is not None:
+                self.runner.run(wrapper.wrapped_action(tap), tap.executor)
             return tap.suppress_trigger
         else:
             return ListenerResult.PROPAGATE

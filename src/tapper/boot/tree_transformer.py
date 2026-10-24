@@ -14,6 +14,7 @@ from tapper.model.tap_tree_shadow import STap
 from tapper.model.types_ import Action
 from tapper.model.types_ import KwTriggerConditions
 from tapper.model.types_ import SendFn
+from tapper.model.types_ import TapAction
 from tapper.model.types_ import TriggerConditionFn
 from tapper.model.types_ import TriggerStr
 from tapper.parser.trigger_parser import TriggerParser
@@ -97,7 +98,7 @@ class TreeTransformer:
         return result
 
     def _transform_dict(
-        self, taps: dict[TriggerStr, Action | str], parent: Group
+        self, taps: dict[TriggerStr, TapAction], parent: Group
     ) -> list[STap]:
         result = []
         executor = find_property("executor", parent)
@@ -114,7 +115,7 @@ class TreeTransformer:
             result.append(stap)
         return result
 
-    def to_action(self, action: Action | str) -> Action:
+    def to_action(self, action: TapAction) -> Action | None:
         if isinstance(action, str):
             if (
                 action in self.trigger_parser.registered_symbols

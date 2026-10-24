@@ -51,9 +51,12 @@ Examples:
 Last key in the combo is called main key, other keys are auxiliary.
 """
 
-Action = Callable[[], Any]
+type Action = Callable[[], Any]
 """An action to run in ActionRunner.
 It must require no arguments. Use `functools.partial` to provide arguments beforehand."""
+
+type TapAction = Action | str | None
+"""What user can actually put into "action" of a Tap."""
 
 SendFn = Callable[[str], None]
 """Send command type."""

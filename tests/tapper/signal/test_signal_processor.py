@@ -34,7 +34,7 @@ alt = [left_alt, right_alt]
 
 def tap(
     keys: list[list[str]],
-    action: Action = generic_action,
+    action: Action | None = generic_action,
     time_main: float = 0,
     direction: KeyDirBool = KeyDirBool.DOWN,
     ordinal: int = 0,
@@ -159,6 +159,16 @@ class TestSignalProcessor:
         self.press({left_alt: 2.2})
         assert self.processor.on_signal(down("wheel_up")) == ListenerResult.SUPPRESS
         assert self.runner.actions_ran[0] == [generic_action]
+
+    def test_none_action_only_suppresses(self) -> None:
+        self.root.add(tap([["a"]], action=None))
+        assert self.processor.on_signal(down("a")) == ListenerResult.SUPPRESS
+        assert not self.runner.actions_ran
+
+    def test_none_action_propagates_when_not_suppressing(self) -> None:
+        self.root.add(tap([["a"]], action=None, result=ListenerResult.PROPAGATE))
+        assert self.processor.on_signal(down("a")) == ListenerResult.PROPAGATE
+        assert not self.runner.actions_ran
 
     def test_nested_simplest(self) -> None:
         sg = SGroup().add(tap([["a"]]))
