@@ -2,18 +2,20 @@ import time
 from dataclasses import dataclass
 from typing import Any
 from typing import Callable
+from typing import assert_never
 
 import tapper
 from tapper import config as tapper_config
-from tapper import controller
-from tapper import model
 from tapper import mouse
 from tapper.boot import initializer
+from tapper.controller.mouse import mouse_api
 from tapper.helper.model import RecordConfig
 from tapper.model import keyboard
 from tapper.model.constants import Aspect
 from tapper.model.constants import KeyDir
 from tapper.model.constants import KeyDirBool
+from tapper.model.mouse import button_aliases
+from tapper.model.mouse import wheel_aliases
 from tapper.model.send import CursorMoveInstruction
 from tapper.model.send import KeyInstruction
 from tapper.model.send import SendInstruction
@@ -36,7 +38,7 @@ def calc_short_aliases(aliases: SymbolsWithAliases) -> dict[str, str]:
 
 
 preferred_aliases: dict[str, str] = calc_short_aliases(
-    {**keyboard.aliases, **model.mouse.button_aliases, **model.mouse.wheel_aliases}
+    {**keyboard.aliases, **button_aliases, **wheel_aliases}
 )
 
 
@@ -148,7 +150,7 @@ def reduce_mouse_moves(records: list[SignalRecord], min_movement: int) -> None:
     pos = records[0].mouse_pos
     for i in range(len(records) - 1):
         r = records[i + 1]
-        if r.mouse_pos and controller.mouse.mouse_api.is_near(
+        if r.mouse_pos and mouse_api.is_near(
             r.mouse_pos[0],
             r.mouse_pos[1],
             pos[0],
@@ -170,16 +172,14 @@ def to_instructions(records: list[SignalRecord]) -> list[SendInstruction]:
         symbol = record.signal[0]
         if symbol in preferred_aliases:
             symbol = preferred_aliases[symbol]
-        meta_instruction = initializer.get_symbols(tapper_config.os)[symbol]
-        instruction = meta_instruction(symbol)
-        if isinstance(instruction, KeyInstruction):
-            if record.signal[1] == KeyDirBool.DOWN:
-                instruction.dir = KeyDir.DOWN
-            else:
-                instruction.dir = KeyDir.UP
-        elif not isinstance(instruction, WheelInstruction):
-            raise TypeError(f"Got instruction type {type(instruction)}")
-        result.append(instruction)
+        instruction_type = initializer.get_symbols(tapper_config.os)[symbol]
+        if instruction_type is KeyInstruction:
+            dir = KeyDir.DOWN if record.signal[1] == KeyDirBool.DOWN else KeyDir.UP
+            result.append(KeyInstruction(symbol, dir))
+        elif instruction_type is WheelInstruction:
+            result.append(WheelInstruction(symbol))
+        else:
+            raise TypeError(f"Got instruction type {instruction_type}")
     return result
 
 
@@ -219,7 +219,7 @@ def to_strings(instructions: list[SendInstruction]) -> list[str]:
         elif isinstance(ins, SleepInstruction):
             result.append(f"{ins.time:.3g}s")
         else:
-            raise TypeError(type(ins))
+            assert_never(ins)
     return result
 
 

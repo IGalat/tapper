@@ -102,7 +102,7 @@ def find(
             bbox = coords_to_bbox_1_pixel(bbox_or_coords)
         elif len(bbox_or_coords) == 4:
             bbox = bbox_or_coords
-    outer = base.get_screenshot_if_none_and_cut(outer_maybe, bbox)
+    outer = base.get_screenshot_if_none_and_cut(base.to_pixel_matrix(outer_maybe), bbox)
     if (match := get_first_match_coords(outer, color, variation)) is None:
         return None
 

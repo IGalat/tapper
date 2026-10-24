@@ -87,17 +87,10 @@ def default_send_parser(os: str | None = None) -> SendParser:
     for alias, references in [*keyboard.aliases.items(), *mouse.aliases.items()]:
         send_parser.aliases[alias] = references[0]
 
-    send_parser.regexes[SECONDS.regex] = (
-        SleepInstruction,
-        SECONDS.fn,
-    )
-    send_parser.regexes[MILLIS.regex] = (
-        SleepInstruction,
-        MILLIS.fn,
-    )
-    send_parser.regexes[CURSOR_MOVE.regex] = (
-        CursorMoveInstruction,
-        CURSOR_MOVE.fn,
+    send_parser.regexes[SECONDS.regex] = lambda s: SleepInstruction(SECONDS.fn(s))
+    send_parser.regexes[MILLIS.regex] = lambda s: SleepInstruction(MILLIS.fn(s))
+    send_parser.regexes[CURSOR_MOVE.regex] = lambda s: CursorMoveInstruction(
+        *CURSOR_MOVE.fn(s)
     )
 
     return send_parser

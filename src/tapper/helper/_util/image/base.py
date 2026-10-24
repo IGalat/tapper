@@ -1,6 +1,7 @@
 import os.path
 import sys
 from functools import lru_cache
+from typing import overload
 
 import mss
 import numpy as np
@@ -41,6 +42,10 @@ def api_from_path(pathlike: ImagePathT, cache: bool) -> ImagePixelMatrixT:
     return from_path(pathlike)
 
 
+@overload
+def to_pixel_matrix(image: ImageT) -> ImagePixelMatrixT: ...
+@overload
+def to_pixel_matrix(image: None) -> None: ...
 def to_pixel_matrix(image: ImageT | None) -> ImagePixelMatrixT | None:
     if image is None:
         return None
@@ -103,7 +108,7 @@ def check_bbox_bigger_or_eq(
 
 
 def get_start_coords(
-    outer: ndarray | None,
+    outer: ImageT | None,
     bbox_or_coords: BboxT | XyCoordsT | None,
 ) -> XyCoordsT:
     if bbox_or_coords is not None:
@@ -147,14 +152,15 @@ def targets_normalize(
 ) -> list[tuple[ImagePixelMatrixT, BboxT | None, ImageT]]:
     """Transform any variant of input to :func:find_one_of to list[image-array, bbox, original target]"""
     if not targets:
-        ValueError("find_one_of no targets supplied.")
+        raise ValueError("find_one_of no targets supplied.")
+    shared_bbox: BboxT | None = None
     if isinstance(targets, tuple):
-        target_images, bbox = targets
-        return [(to_pixel_matrix(image), bbox, image) for image in target_images]
-    elif isinstance(targets, list) and isinstance(targets[0], tuple):
-        return [(to_pixel_matrix(image), bbox, image) for image, bbox in targets]
-    else:
-        return [(to_pixel_matrix(image), None, image) for image in targets]
+        targets, shared_bbox = targets
+    result = []
+    for item in targets:
+        image, bbox = item if isinstance(item, tuple) else (item, shared_bbox)
+        result.append((to_pixel_matrix(image), bbox, image))
+    return result
 
 
 def save_to_disk(image: ImagePixelMatrixT, full_name_no_ext: ImagePathT) -> None:

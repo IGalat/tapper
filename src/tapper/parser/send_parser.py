@@ -1,9 +1,8 @@
-import copy
 import re
 from dataclasses import dataclass
 from dataclasses import field
+from dataclasses import replace
 from functools import cache
-from typing import Any
 from typing import Callable
 from typing import Optional
 
@@ -71,14 +70,11 @@ def resolve_last_with_props(
     result = [base_ins]
     for prop in props:
         if sleep := sleep_prop(prop):
-            if (
-                isinstance(result[-1], KeyInstruction)
-                and result[-1].dir == constants.KeyDir.CLICK
-            ):
-                result[-1].dir = constants.KeyDir.DOWN
-                sym = result[-1].symbol
+            last = result[-1]
+            if isinstance(last, KeyInstruction) and last.dir == constants.KeyDir.CLICK:
+                result[-1] = replace(last, dir=constants.KeyDir.DOWN)
                 result.append(sleep)
-                result.append(KeyInstruction(sym, constants.KeyDir.UP))
+                result.append(KeyInstruction(last.symbol, constants.KeyDir.UP))
                 dir_allowed = False
             else:
                 result.append(sleep)
@@ -94,9 +90,7 @@ def resolve_last_with_props(
             if not isinstance(ins, KeyInstruction):
                 raise SendParseError
             else:
-                last = copy.deepcopy(ins)
-                last.dir = constants.KeyDir(dir)
-                result[-1] = last
+                result[-1] = replace(ins, dir=constants.KeyDir(dir))
                 if constants.KeyDir.DOWN != dir:
                     mult_allowed = False
         else:
@@ -158,10 +152,10 @@ class SendParser:
     aliases: dict[str, str] = field(default_factory=dict)
     """Alias to first non-alias mapping."""
 
-    regexes: dict[
-        re.Pattern[str], tuple[type[SendInstruction], Callable[[str], Any]]
-    ] = field(default_factory=dict)
-    """Regex and corresponding instruction and action to parse values for the instruction."""
+    regexes: dict[re.Pattern[str], Callable[[str], SendInstruction]] = field(
+        default_factory=dict
+    )
+    """Regex and the function that builds the instruction from the matched symbol."""
 
     def __hash__(self) -> int:
         return super().__hash__()
@@ -300,18 +294,10 @@ class SendParser:
         if key.symbol in keyboard.chars_en_upper:
             raise SendParseError
 
-        instruction_type = self.symbols[key.symbol]
-        if instruction_type == KeyInstruction:
-            base_ins = KeyInstruction(key.symbol)
-        elif instruction_type == WheelInstruction:
-            base_ins = WheelInstruction(key.symbol)
-        else:
+        if self.symbols[key.symbol] is not KeyInstruction:
             raise SendParseError
-
-        opening = copy.deepcopy(base_ins)
-        opening.dir = constants.KeyDir.DOWN
-        closing = copy.deepcopy(base_ins)
-        closing.dir = constants.KeyDir.UP
+        opening = KeyInstruction(key.symbol, constants.KeyDir.DOWN)
+        closing = KeyInstruction(key.symbol, constants.KeyDir.UP)
 
         if key.props:
             try:
@@ -360,9 +346,8 @@ class SendParser:
 
     @cache
     def parse_regex_symbol(self, symbol: str) -> list[SendInstruction]:
-        for regex, value in self.regexes.items():
-            instruction_type, fn = value
+        for regex, build in self.regexes.items():
             if regex.fullmatch(symbol):
-                return [instruction_type(fn(symbol))]
+                return [build(symbol)]
         else:
             raise SendParseError

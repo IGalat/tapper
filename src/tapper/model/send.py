@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from abc import ABC
 from dataclasses import dataclass
 from dataclasses import field
 
@@ -14,38 +13,36 @@ COMBO_CONTENT = "[ -(*-~\n\t]+"
 Here it's all printable ASCII characters."""
 
 
-class SendInstruction(ABC):
-    """Single instruction parsed from send command."""
-
-
-@dataclass
-class KeyInstruction(SendInstruction):
+@dataclass(frozen=True)
+class KeyInstruction:
     """Regular key, such as on keyboard or mouse button. Generic."""
 
     symbol: str
     dir: constants.KeyDir = field(default=constants.KeyDir.CLICK)
 
 
-@dataclass
-class WheelInstruction(SendInstruction):
+@dataclass(frozen=True)
+class WheelInstruction:
     """Single mouse wheel scroll."""
 
     wheel_symbol: str
 
 
-@dataclass
-class CursorMoveInstruction(SendInstruction):
-    """Move mouse cursor. Absolute."""
+@dataclass(frozen=True)
+class CursorMoveInstruction:
+    """Move mouse cursor. Absolute unless relative."""
 
     xy: tuple[int, int]
     relative: bool = field(default=False)
 
-    def __init__(self, xy_rel: tuple[int, int] | tuple[tuple[int, int], bool]) -> None:
-        self.xy = xy_rel if isinstance(xy_rel[0], int) else xy_rel[0]
-        self.relative = isinstance(xy_rel[1], bool) and xy_rel[1]
 
-
-@dataclass
-class SleepInstruction(SendInstruction):
+@dataclass(frozen=True)
+class SleepInstruction:
     time: float
     """Seconds."""
+
+
+type SendInstruction = (
+    KeyInstruction | WheelInstruction | CursorMoveInstruction | SleepInstruction
+)
+"""Single instruction parsed from send command."""

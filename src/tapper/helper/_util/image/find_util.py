@@ -21,7 +21,7 @@ def find_raw(
 def api_find_raw(
     target: ImageT,
     bbox: BboxT | None,
-    outer_maybe: ImagePixelMatrixT | None = None,
+    outer_maybe: ImageT | None = None,
 ) -> tuple[float, XyCoordsT]:
     target_image = base.target_to_image(target, bbox)
     x_start, y_start = base.get_start_coords(outer_maybe, bbox)
@@ -31,8 +31,8 @@ def api_find_raw(
 
 
 def find(
-    target: ImageT,
-    outer: ImageT,
+    target: ImagePixelMatrixT,
+    outer: ImagePixelMatrixT,
     precision: float,
 ) -> XyCoordsT | None:
     """Doesn't account for the starting coords of the search."""

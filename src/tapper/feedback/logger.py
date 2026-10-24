@@ -2,6 +2,7 @@ import atexit
 import logging.config
 import os
 from functools import wraps
+from logging.handlers import QueueHandler
 from typing import Any
 from typing import Callable
 from typing import TypeVar
@@ -82,6 +83,7 @@ def setup_logging(
 
     logging.config.dictConfig(config)
     queue_handler = logging.getHandlerByName("queue_handler")
+    queue_handler = cast(QueueHandler, queue_handler)  # just for typing
     if queue_handler is not None:
         queue_handler.listener.start()
         atexit.register(queue_handler.listener.stop)

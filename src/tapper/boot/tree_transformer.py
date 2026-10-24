@@ -57,10 +57,8 @@ class TreeTransformer:
     def transform(self, group: Group) -> SGroup:
         result = SGroup()
         result.original = group
-        result.send_interval = group.send_interval  # type ignorrr  # it's not None here
-        result.send_press_duration = (
-            group.send_press_duration
-        )  # type ignorrr  # it's not None here
+        result.send_interval = group.send_interval or 0
+        result.send_press_duration = group.send_press_duration or 0
         result.trigger_conditions = transform_trigger_conditions(
             self.possible_trigger_conditions, group.trigger_conditions
         )

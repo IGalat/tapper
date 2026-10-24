@@ -1,4 +1,5 @@
 from typing import Callable
+from typing import assert_never
 
 from tapper.controller.flow_control import config_thread_local_storage
 from tapper.controller.keyboard.kb_api import KeyboardController
@@ -82,7 +83,7 @@ class SendCommandProcessor:
             elif isinstance(instruction, SleepInstruction):
                 self.sleep_fn(instruction.time / speed)
             else:
-                raise SendError
+                assert_never(instruction)
 
     def shift_down(self) -> str | None:
         """Determines which shift is down, if any."""

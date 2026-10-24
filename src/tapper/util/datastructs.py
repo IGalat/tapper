@@ -7,7 +7,6 @@ from typing import TypeVar
 
 from tapper.model.types_ import SymbolsWithAliases
 
-SymbolCode = int | tuple[Any, ...]
 T = TypeVar("T")
 
 
@@ -36,8 +35,8 @@ def _flatten(xs: Sequence[Any]) -> Iterable[Any]:
 
 
 def symbols_to_codes(
-    code_symbol_map: dict[SymbolCode, str], symbols: SymbolsWithAliases
-) -> dict[str, list[SymbolCode]]:
+    code_symbol_map: dict[T, str], symbols: SymbolsWithAliases
+) -> dict[str, list[T]]:
     """Maps all symbols, including aliases, to codes.
 
     Assumes every symbol except aliases is in code_symbol_map.

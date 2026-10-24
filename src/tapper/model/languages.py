@@ -1,22 +1,23 @@
 from dataclasses import dataclass
-from dataclasses import field
 from functools import cache
 
 
-@dataclass
+@dataclass(frozen=True)
 class Lang:
     # locale id = 1024 * sub_language id  +  primary language id. en_US -> sub lang _ prim lang
     locale_id: int
     description: str
     letter_code: str
     charset: str  # must be same len as english chars_en in model.keyboard to work
-    aliases: list[str] | None = None
-    sub_lang_id: int = field(init=False)
-    primary_lang_id: int = field(init=False)
+    aliases: tuple[str] | None = None
 
-    def __post_init__(self) -> None:
-        self.sub_lang_id = self.locale_id % 1024
-        self.primary_lang_id = self.locale_id // 1024
+    @property
+    def get_sub_lang_id(self) -> int:
+        return self.locale_id % 1024
+
+    @property
+    def get_primary_lang_id(self) -> int:
+        return self.locale_id // 1024
 
 
 """
@@ -37,14 +38,14 @@ languages: list[Lang] = [
         "English - United States",
         "en-US",
         "`1234567890-=qwertyuiop[]\\asdfghjkl;'zxcvbnm,./~!@#$%^&*()_+QWERTYUIOP{}|ASDFGHJKL:\"ZXCVBNM<>?",
-        ["en"],
+        ("en",),
     ),
     Lang(
         1034,
         "Spanish - Spain (Traditional Sort)",
         "es-ES",
         "ñ1234567890-+qwertyuiop'¡ºasdfghjkl`´zxcvbnm,.çÑ!\"·$%&/()=_*QWERTYUIOP?¿ªASDFGHJKL^¨ZXCVBNM;:Ç",
-        ["es"],
+        ("es",),
     ),
     Lang(1035, "Finnish", "fi-FI", ""),
     Lang(1036, "French - France", "fr-FR", ""),
@@ -70,7 +71,7 @@ languages: list[Lang] = [
         "Russian",
         "ru-RU",
         'ё1234567890-=йцукенгшщзхъ\\фывапролджэячсмитьбю.Ё!"№;%:?*()_+ЙЦУКЕНГШЩЗХЪ/ФЫВАПРОЛДЖЭЯЧСМИТЬБЮ,',
-        ["ru"],
+        ("ru",),
     ),
     Lang(1050, "Croatian", "hr-HR", ""),
     Lang(1051, "Slovak", "sk-SK", ""),
@@ -85,7 +86,7 @@ languages: list[Lang] = [
         "Ukrainian",
         "uk-UA",
         "'1234567890-=йцукенгшщзхї\\фівапролджєячсмитьбю.₴!\"№;%:?*()_+ЙЦУКЕНГШЩЗХЇ/ФІВАПРОЛДЖЄЯЧСМИТЬБЮ,",
-        ["ua"],
+        ("ua",),
     ),
     Lang(1059, "Belarusian", "be-BY", ""),
     Lang(1060, "Slovenian", "sl-SI", ""),

@@ -12,7 +12,7 @@ def generic() -> dict[str, Callable[[Any], Any]]:
     return kwargs
 
 
-def keyboard(kb_c: KeyboardController) -> dict[str, Callable[[Any], Any]]:
+def keyboard(kb_c: KeyboardController | None) -> dict[str, Callable[[Any], Any]]:
     kwargs: dict[str, Callable[[Any], Any]] = {}
     if not kb_c:
         return kwargs
@@ -29,7 +29,7 @@ def keyboard(kb_c: KeyboardController) -> dict[str, Callable[[Any], Any]]:
     return kwargs
 
 
-def mouse(mouse_c: MouseController) -> dict[str, Callable[[Any], Any]]:
+def mouse(mouse_c: MouseController | None) -> dict[str, Callable[[Any], Any]]:
     kwargs: dict[str, Callable[[Any], Any]] = {}
     if not mouse_c:
         return kwargs
@@ -55,7 +55,7 @@ def mouse(mouse_c: MouseController) -> dict[str, Callable[[Any], Any]]:
     return kwargs
 
 
-def window(window_c: WindowController) -> dict[str, Callable[[Any], Any]]:
+def window(window_c: WindowController | None) -> dict[str, Callable[[Any], Any]]:
     kwargs: dict[str, Callable[[Any], Any]] = {}
     if not window_c:
         return kwargs

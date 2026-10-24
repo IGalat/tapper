@@ -84,6 +84,10 @@ class TestFind:
         xy = img.pixel_find(green, outer=absolutes)
         assert xy == (1, 0)
 
+    def test_outer_as_path(self) -> None:
+        xy = img.pixel_find(green, outer=img_test_util.get_image_path("absolutes.png"))
+        assert xy == (1, 0)
+
     def test_not_found(self) -> None:
         xy = img.pixel_find(gray, outer=absolutes)
         assert xy is None

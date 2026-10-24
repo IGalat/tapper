@@ -13,8 +13,8 @@ from tapper.model.tap_tree_shadow import STap
 class ActionConfig:
     """Config for a single action. See tap_tree for info on configs."""
 
-    send_interval: float
-    send_press_duration: float
+    send_interval: float | None
+    send_press_duration: float | None
     kill_id: UUID
 
     @classmethod

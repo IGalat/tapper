@@ -204,7 +204,7 @@ class TestCombosWithoutProps:
         assert parse("$(x340y980)") == [CursorMoveInstruction((340, 980))]
 
     def test_mouse_move_relative(self, parse: ParseFn) -> None:
-        assert parse("$(x123y456r)") == [CursorMoveInstruction(((123, 456), True))]
+        assert parse("$(x123y456r)") == [CursorMoveInstruction((123, 456), True)]
 
 
 class TestCombosWithOneProp:
@@ -299,7 +299,7 @@ class TestCombosWithManyProps:
     def test_mult_time(self, parse: ParseFn) -> None:
         assert parse("$(v+num5 2x 1s)") == [
             KI("v", down),
-            KI("num5", down),
+            KI("num5"),
             KI("num5", down),
             SleepInstruction(1),
             KI("num5", up),
