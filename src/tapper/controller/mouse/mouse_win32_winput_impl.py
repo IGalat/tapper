@@ -61,7 +61,10 @@ class Win32MouseDriver(MouseDriver):
     def move(
         self, x: int | None = None, y: int | None = None, relative: bool = False
     ) -> None:
-        winput.set_mouse_pos(*calc_move(self.get_pos, x, y, relative))
+        if relative:
+            winput.move_mouse(x or 0, y or 0)
+        else:
+            winput.set_mouse_pos(*calc_move(self.get_pos, x, y, False))
 
     def pressed(self, symbol: str) -> bool:
         return any(button_state(code) >> 15 == 1 for code in symbol_button_map[symbol])
