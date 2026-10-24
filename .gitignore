@@ -143,3 +143,6 @@ out/
 
 
 /tmp/
+/.claude/
+CLAUDE.md
+gitignored/
