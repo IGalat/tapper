@@ -12,6 +12,7 @@ from tapper.controller.sleep_processor import (
 from tapper.controller.window.window_api import WindowController as _WindowController
 from tapper.feedback import logger as _logger
 from tapper.model import tap_tree as _tap_tree
+from tapper.model import types_ as _types
 from tapper.util import datastructs as _datastructs
 
 _runtime: _initializer.Runtime
@@ -74,11 +75,18 @@ def init() -> _initializer.Runtime:
 
 
 @_logger.LogExceptions()
-def start() -> None:
+def start(*args: Tap | Group | dict[_types.TriggerStr, _types.TapAction]) -> None:
     """
-    Initializes all underlying tools, and starts listeners.
+    Adds `args` to `root`, initializes all underlying tools, and listens until terminated.
+    `start(a, b)` is the same as `root.add(a, b)` followed by `start()`.
     No changes by user in any elements of tapper are expected after this command.
     """
+    if args and _flow_control.initialized:
+        raise RuntimeError(
+            "start() got hotkeys after init(), which has already read the hotkey tree. "
+            "Add them with root.add(...) before init(), then call start() without arguments."
+        )
+    root.add(*args)
     runtime = _runtime if _flow_control.initialized else init()
     _initializer.start(runtime)
 

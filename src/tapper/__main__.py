@@ -2,8 +2,6 @@ import runpy
 import sys
 import time
 
-from tapper import log
-from tapper import root
 from tapper import send
 from tapper import start
 
@@ -26,15 +24,14 @@ def main() -> None:
         runpy.run_path(sys.argv[0], run_name="__main__")
         return
 
-    log.info(DEMO_INTRO)
-    root.add(
+    print(DEMO_INTRO)  # noqa: T201  # logging only starts inside start()
+    start(
         {
             "f8": "Hello from tapper!",
             "f9": lambda: send(time.strftime("%H:%M")),
             "f10": "$(x200y0r;.3s;x0y200r;.3s;x-200y0r;.3s;x0y-200r)",
         }
     )
-    start()
 
 
 if __name__ == "__main__":
