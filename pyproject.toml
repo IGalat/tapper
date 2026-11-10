@@ -125,6 +125,9 @@ ignore = [
 "tests/manual/**" = [
     "T20",  # printing is how the manual scripts report
 ]
+"examples/**" = [
+    "T20",  # examples print their intro: tapper's logging only starts inside start()
+]
 
 [tool.ruff.lint.isort]
 force-single-line = true
