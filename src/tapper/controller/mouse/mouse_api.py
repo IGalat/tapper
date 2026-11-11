@@ -14,6 +14,10 @@ mouse_buttons_w_aliases = {
 }
 
 
+def unalias(symbol: str) -> str:
+    return mouse.aliases.get(symbol, [symbol])[0]
+
+
 def is_near(current_x: int, current_y: int, x: int, y: int, precision: int) -> bool:
     return (current_x - x) ** 2 + (current_y - y) ** 2 <= precision**2
 
@@ -112,12 +116,12 @@ class MouseController(ResourceController):
 
     def press(self, symbol: str) -> None:
         """Presses down one key."""
-        self._emul_keeper.will_emulate((symbol, constants.KeyDirBool.DOWN))
+        self._emul_keeper.will_emulate((unalias(symbol), constants.KeyDirBool.DOWN))
         self._driver.press(symbol)
 
     def release(self, symbol: str) -> None:
         """Releases (presses up) one key. Not applicable to wheel."""
-        self._emul_keeper.will_emulate((symbol, constants.KeyDirBool.UP))
+        self._emul_keeper.will_emulate((unalias(symbol), constants.KeyDirBool.UP))
         self._driver.release(symbol)
 
     def move(

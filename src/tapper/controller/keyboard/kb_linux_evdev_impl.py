@@ -55,8 +55,8 @@ class LinuxKeyboardDriver(KeyboardDriver):
         )
 
     def pressed(self, symbol: str) -> bool:
-        code = symbol_code_map[symbol]
-        return any(code[0] in kb.active_keys() for kb in self.real_kbs)
+        codes = symbol_code_map[symbol]
+        return any(not set(codes).isdisjoint(kb.active_keys()) for kb in self.real_kbs)
 
     def toggled(self, symbol: str) -> bool:
         """Limited to modifier keys."""

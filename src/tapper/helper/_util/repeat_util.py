@@ -96,12 +96,16 @@ def to_pressed_condition(symbol: str) -> Callable[[], bool]:
         *mouse_model.button_aliases.keys(),
     ]:
         device = tapper.mouse
-    elif symbol in keyboard_model.get_keys(tapper.config.os):
+        keys = mouse_model.get_keys()[symbol]
+    elif symbol in (kb_keys := keyboard_model.get_keys(tapper.config.os)):
         device = tapper.kb
+        keys = kb_keys[symbol]
     else:
         raise ValueError(f"Repeat while pressed: '{symbol}' not recognised.")
+    # pressed_keys holds non-alias symbols only
     return lambda: (
-        device.pressed(symbol) or symbol in tapper._runtime.pressed.pressed_keys
+        device.pressed(symbol)
+        or any(key in tapper._runtime.pressed.pressed_keys for key in keys)
     )
 
 

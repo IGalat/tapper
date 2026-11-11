@@ -156,7 +156,7 @@ class TestRepeatWhilePressed:
         mock_pressed.return_value = False
         tapper._runtime.pressed.pressed_keys["right_control"] = 0.0
         counter = Counter()
-        repeat.while_pressed("right_control", counter.tick)()
+        repeat.while_pressed("rctrl", counter.tick)()
         stepper.wait_action()
         stepper.step(1)
         del tapper._runtime.pressed.pressed_keys["right_control"]

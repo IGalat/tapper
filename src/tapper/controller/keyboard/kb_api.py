@@ -3,8 +3,13 @@ from abc import abstractmethod
 
 from tapper.controller.resource_controller import ResourceController
 from tapper.model import constants
+from tapper.model import keyboard
 from tapper.model.languages import Lang
 from tapper.state import keeper
+
+
+def unalias(symbol: str) -> str:
+    return keyboard.aliases.get(symbol, [symbol])[0]
 
 
 class KeyboardDriver(ABC):
@@ -68,12 +73,12 @@ class KeyboardController(ResourceController):
 
     def press(self, symbol: str) -> None:
         """Presses down one key."""
-        self._emul_keeper.will_emulate((symbol, constants.KeyDirBool.DOWN))
+        self._emul_keeper.will_emulate((unalias(symbol), constants.KeyDirBool.DOWN))
         self._driver.press(symbol)
 
     def release(self, symbol: str) -> None:
         """Releases (presses up) one key."""
-        self._emul_keeper.will_emulate((symbol, constants.KeyDirBool.UP))
+        self._emul_keeper.will_emulate((unalias(symbol), constants.KeyDirBool.UP))
         self._driver.release(symbol)
 
     def set_lang(self, lang: str | int | Lang, system_wide: bool = False) -> None:
