@@ -2,10 +2,6 @@
 # requires-python = ">=3.12"
 # dependencies = ["tapper[img]"]
 # ///
-# Windows only.
-# 1. Hover the top-left corner of a button, press F2; hover its bottom-right corner, press F2.
-#    That saves ok_button.png next to this script.
-# 2. Press F4: tapper waits up to 10 seconds for the button to appear anywhere on screen, then clicks it.
 from tapper import log
 from tapper import mouse
 from tapper import start
@@ -21,6 +17,14 @@ def click_ok_when_visible() -> None:
     mouse.click(x + 5, y + 5)
 
 
+print("""Click a button when it appears (Windows only).
+
+    F2      Snips a button: press with the cursor on its top-left corner,
+            then on its bottom-right corner. Saves ok_button.png.
+    F4      Waits up to 10 seconds for the button to appear, then clicks it.
+
+    F3      Restarts.
+    alt+F3  Quits.""")
 start(
     {
         "f2": img.snip(prefix="ok_button", bbox_to_name=False),

@@ -2,16 +2,22 @@
 # requires-python = ">=3.12"
 # dependencies = ["tapper"]
 # ///
-# Windows only: the same key does different things depending on the active app.
 from tapper import Group
 from tapper import start
 
+print("""Per-app hotkeys (Windows only). The same key does different things in each app:
+
+    F1      In Chrome: opens a new tab. In Notepad: saves.
+    F2      In Chrome: reopens the last closed tab.
+
+    F3      Restarts.
+    alt+F3  Quits.""")
 start(
     Group(win_exec="chrome.exe").add(
         {
-            "f1": "$(ctrl+t)",  # new tab
-            "f2": "$(ctrl+shift+t)",  # reopen closed tab
+            "f1": "$(ctrl+t)",
+            "f2": "$(ctrl+shift+t)",
         }
     ),
-    Group(win="notepad").add({"f1": "$(ctrl+s)"}),  # save instead of opening help
+    Group(win="notepad").add({"f1": "$(ctrl+s)"}),
 )

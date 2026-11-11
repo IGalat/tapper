@@ -7,7 +7,7 @@ build-backend = "uv_build"
 name = "tapper"
 version = "2026.10.1"  # YYYY.M.MICRO
 description = "Modern Hotkey and Macro Tool"
-authors = [{ name = "IGalat", email = "author_email@example.com" }]
+authors = [{ name = "IGalat" }]
 license = { file = "LICENSE" }
 readme = "README.md"
 keywords = ["hotkey", "macro", "macros", "automation", "autohotkey", "autohotkey-alternative", "keyboard-remapping", "windows-automation"]

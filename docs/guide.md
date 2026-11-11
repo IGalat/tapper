@@ -135,6 +135,10 @@ send("$(q 5x;esc)", interval=0.1)
   ```python
   {"a": "$(b down)", "a up": "$(b up)"}
   ```
+- **Relative moves aren't exact on Windows.** `$(x100y0r)` is sent like physical mouse movement,
+  so Windows applies your pointer speed and "Enhance pointer precision" to it. That's what games
+  need (it turns the camera), but for exact distances on the desktop use absolute moves from
+  `mouse.get_pos()`.
 - **Stuck keys.** `$(b down)` without a later `$(b up)` leaves `b` pressed. If that happens,
   press and release the key physically.
 - **Games and some apps ignore very fast input.** Slow it down for a whole group with

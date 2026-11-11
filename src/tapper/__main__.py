@@ -2,19 +2,16 @@ import runpy
 import sys
 import time
 
+import tapper
+from tapper import Tap
 from tapper import send
 from tapper import start
 
-DEMO_INTRO = """tapper demo. Go to any text field, then:
 
-    F8      Types a greeting.
-    F9      Types the current time.
-    F10     Moves the mouse around.
-
-    F3      Restarts.
-    alt+F3  Quits.
-
-To run your own scripts: tapper my_scripts.py"""
+def move_in_square() -> None:
+    # Absolute moves: Windows applies pointer acceleration to relative ones, distorting the square.
+    x, y = tapper.mouse.get_pos()
+    send(f"$(x{x + 200}y{y};.3s;x{x + 200}y{y + 200};.3s;x{x}y{y + 200};.3s;x{x}y{y})")
 
 
 def main() -> None:
@@ -24,13 +21,31 @@ def main() -> None:
         runpy.run_path(sys.argv[0], run_name="__main__")
         return
 
-    print(DEMO_INTRO)  # noqa: T201  # logging only starts inside start()
+    print(  # noqa: T201  # logging only starts inside start()
+        """Welcome!
+This is tapper demo. Try these hotkeys:
+
+    F10     Moves the mouse in a square.
+    F11     Only in chrome - opens new tab. Works normally in other apps.
+
+    Go to any text field, such as notepad, then:
+
+    F8      Types a greeting.
+    F9      Types the current time.
+
+    F3      Restarts.
+    alt+F3  Quits.
+
+To run your own scripts: tapper my_scripts.py"""
+    )
+
     start(
         {
             "f8": "Hello from tapper!",
-            "f9": lambda: send(time.strftime("%H:%M")),
-            "f10": "$(x200y0r;.3s;x0y200r;.3s;x-200y0r;.3s;x0y-200r)",
-        }
+            "f9": lambda: send("Current time is " + time.strftime("%H:%M")),
+            "f10": move_in_square,
+        },
+        Tap("f11", "$(ctrl+t)", win_exec="chrome.exe"),
     )
 
 
