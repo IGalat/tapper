@@ -102,7 +102,7 @@ def transform_recording(records: list[SignalRecord], config: RecordConfig) -> st
     if records:
         reduce_time(records, config.max_compress_action_interval)
         reduce_mouse_moves(records, config.min_mouse_movement)
-    instructions = to_instructions(records)
+    instructions = to_instructions(records, config.shorten_to_aliases)
     if config.down_up_as_click:
         compress_down_ups(instructions)
     strs = to_strings(instructions)
@@ -158,7 +158,9 @@ def reduce_mouse_moves(records: list[SignalRecord], min_movement: int) -> None:
             kept = r.mouse_pos
 
 
-def to_instructions(records: list[SignalRecord]) -> list[SendInstruction]:
+def to_instructions(
+    records: list[SignalRecord], shorten_to_aliases: bool
+) -> list[SendInstruction]:
     result: list[SendInstruction] = []
     for record in records:
         if record.time:
@@ -166,7 +168,7 @@ def to_instructions(records: list[SignalRecord]) -> list[SendInstruction]:
         if record.mouse_pos:
             result.append(CursorMoveInstruction(record.mouse_pos))
         symbol = record.signal[0]
-        if symbol in preferred_aliases:
+        if shorten_to_aliases and symbol in preferred_aliases:
             symbol = preferred_aliases[symbol]
         instruction_type = initializer.get_symbols(tapper_config.os)[symbol]
         if instruction_type is KeyInstruction:

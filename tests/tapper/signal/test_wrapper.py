@@ -105,3 +105,16 @@ def test_suppress(wrap_fixture: WrapFixture) -> None:
     expected[8] = constants.ListenerResult.SUPPRESS
 
     assert signals_propagated == expected
+
+
+def test_triggered_action_sees_its_key_held(wrap_fixture: WrapFixture) -> None:
+    wrapper, listener, _, pressed = wrap_fixture
+    seen_held: list[bool] = []
+
+    def on_signal(signal: Signal) -> constants.ListenerResult:
+        seen_held.append("right_control" in pressed.get_state(time.perf_counter()))
+        return constants.ListenerResult.SUPPRESS
+
+    wrapper.on_signal = on_signal
+    listener.on_signal(down("right_control"))
+    assert seen_held == [True]

@@ -13,6 +13,8 @@ class Emul:
     """Keeps track of emulated actions."""
 
     to_emulate: set[tuple[Any, ...]] = field(default_factory=set)
+    enabled: bool = True
+    """Off where listeners don't need it (linux)."""
     _lock: threading.Lock = field(
         default_factory=threading.Lock, repr=False, compare=False
     )
@@ -21,6 +23,8 @@ class Emul:
         """Notify that will emulate a command.
         :param signal: Any symbol, props.
         """
+        if not self.enabled:
+            return
         with self._lock:
             self.to_emulate.add(signal)
 

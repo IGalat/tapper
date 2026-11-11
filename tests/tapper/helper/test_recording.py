@@ -138,6 +138,21 @@ class TestRecorderTransform:
         )
         assert result == "$(esc;lctrl;rmb)"
 
+    def test_no_shorten_to_aliases(self, fake_perf_counter) -> None:
+        record = wrap_in_start_stop(
+            [
+                SignalRecord(("escape", KeyDirBool.DOWN), 0, None),
+                SignalRecord(("escape", KeyDirBool.UP), 0, None),
+                SignalRecord(("right_mouse_button", KeyDirBool.DOWN), 0, None),
+                SignalRecord(("right_mouse_button", KeyDirBool.UP), 0, None),
+            ]
+        )
+        fake_perf_counter.set(100)
+        result = record_util.transform_recording(
+            record, RecordConfig(down_up_as_click=True, shorten_to_aliases=False)
+        )
+        assert result == "$(escape;right_mouse_button)"
+
 
 def push_key(signal: Signal, fake_clock: FakeClock) -> None:
     event.publish("keyboard", signal)

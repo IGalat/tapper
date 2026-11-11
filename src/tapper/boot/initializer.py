@@ -145,7 +145,7 @@ def init(
     control = transformer.transform(icontrol)
 
     runner = default_action_runner()
-    emul_keeper = keeper.Emul()
+    emul_keeper = keeper.Emul(enabled=os != constants.OS.linux)
     state_keeper = default_keeper_pressed()
 
     signal_processor = SignalProcessor(root, control, state_keeper, runner)

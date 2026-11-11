@@ -40,7 +40,14 @@ class ListenerWrapper:
         if self.emul_keeper and self.emul_keeper.is_emulated(signal):
             self.state_keeper.key_event(signal)
             return constants.ListenerResult.PROPAGATE
+
+        is_down = signal[1] == constants.KeyDirBool.DOWN
+        # DOWN stored before, so the triggered action sees its key DOWN;
+        # UP after, so UP triggers see how long it was held.
+        if is_down:
+            self.state_keeper.key_event(signal)
         result = self.on_signal(signal)
         event.publish(topic, signal)
-        self.state_keeper.key_event(signal)
+        if not is_down:
+            self.state_keeper.key_event(signal)
         return result

@@ -150,6 +150,20 @@ class TestRepeatWhilePressed:
         assert counter.count == 2
         assert repeat_util.running_repeatable is None
 
+    def test_suppressed_key_repeats_while_tapper_sees_it_held(
+        self, mock_pressed: Any, stepper: Stepper
+    ) -> None:
+        mock_pressed.return_value = False
+        tapper._runtime.pressed.pressed_keys["right_control"] = 0.0
+        counter = Counter()
+        repeat.while_pressed("right_control", counter.tick)()
+        stepper.wait_action()
+        stepper.step(1)
+        del tapper._runtime.pressed.pressed_keys["right_control"]
+        stepper.release()
+        join_repeat_worker()
+        assert counter.count == 2
+
     def test_nonexistent_symbol(self) -> None:
         with pytest.raises(ValueError):
             repeat.while_pressed("some_key", lambda: False)
