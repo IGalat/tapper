@@ -5,6 +5,13 @@ Versions follow [CalVer](https://calver.org) with format YYYY.0M.MICRO.
 Until status changes from "Beta" to "Stable", don't expect backwards compatibility.
 
 
+## 2026.11.2 - PyPI page fixes
+
+### Fixes:
+
+Links on the PyPI project page led nowhere; they now point to GitHub.
+
+
 ## 2026.11.1 - `tapper` demo, command, new docs
 
 ### Major changes:
@@ -16,8 +23,8 @@ Until status changes from "Beta" to "Stable", don't expect backwards compatibili
 `tapper` command, also available as `python -m tapper`.
 `tapper my_script.py` runs your script; without arguments it runs a demo with a few hotkeys to try.
 
-README rewritten. New [guide](docs/guide.md), [AutoHotkey comparison](docs/ahk-comparison.md)
-and ready-to-run [examples](examples).
+README rewritten. New [guide](https://github.com/IGalat/tapper/blob/master/docs/guide.md), [AutoHotkey comparison](https://github.com/IGalat/tapper/blob/master/docs/ahk-comparison.md)
+and ready-to-run [examples](https://github.com/IGalat/tapper/tree/master/examples).
 
 ### Fixes:
 

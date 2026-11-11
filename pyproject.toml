@@ -5,8 +5,8 @@ build-backend = "uv_build"
 
 [project]
 name = "tapper"
-version = "2026.11.1"  # YYYY.M.MICRO
-description = "Modern Hotkey and Macro Tool"
+version = "2026.11.2"  # YYYY.M.MICRO
+description = "Hotkeys, remaps and macros in python, Autohotkey-style"
 authors = [{ name = "IGalat" }]
 license = { file = "LICENSE" }
 readme = "README.md"

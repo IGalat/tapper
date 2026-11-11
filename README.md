@@ -19,14 +19,13 @@ start(
 )
 ```
 
-Try the built-in demo. On Windows, install [uv](https://docs.astral.sh/uv/) first (it brings its own Python),
-then open a new terminal:
+Try the built-in demo. On Windows, install [uv](https://docs.astral.sh/uv/) first (it brings its own Python):
 
 ```
 powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
 ```
 
-Then run the demo:
+Then open a new terminal and run the demo:
 
 ```
 uvx tapper
@@ -47,14 +46,14 @@ uvx tapper
   parallel actions.
 - **Multi-language keyboards:** check or switch the layout, and type text in other alphabets.
 
-See how it compares in [tapper vs AutoHotkey vs AutoKey](docs/ahk-comparison.md).
+See how it compares in [tapper vs AutoHotkey vs AutoKey](https://github.com/IGalat/tapper/blob/master/docs/ahk-comparison.md).
 
 ## Platforms
 
 | | Status |
 |---|---|
 | Windows | Full support |
-| Linux | Keyboard only, needs root ([details](docs/dev/os_specific.md#linux)) |
+| Linux | Keyboard only, needs root ([details](https://github.com/IGalat/tapper/blob/master/docs/dev/os_specific.md#linux)) |
 | macOS | Planned |
 
 ## Install and run
@@ -64,7 +63,7 @@ See how it compares in [tapper vs AutoHotkey vs AutoKey](docs/ahk-comparison.md)
 ```python
 # /// script
 # requires-python = ">=3.12"
-# dependencies = ["tapper[all]==2026.11.1"]
+# dependencies = ["tapper[all]==2026.11.2"]
 # ///
 from tapper import start
 
@@ -89,7 +88,7 @@ python my_hotkeys.py
 ```
 
 `tapper[all]` includes the tray icon and image search. Use `tapper[tray]` or `tapper[img]` for
-just one, or plain `tapper` for neither. On Linux, see the [installation notes](docs/dev/os_specific.md#installation).
+just one, or plain `tapper` for neither. On Linux, see the [installation notes](https://github.com/IGalat/tapper/blob/master/docs/dev/os_specific.md#installation).
 
 While a script runs, **F3** restarts it and **Alt+F3** quits. You can replace these, see the guide.
 
@@ -104,16 +103,16 @@ This one types text snippets on Shift+F9/F10/F11:
 uv run https://raw.githubusercontent.com/IGalat/tapper/master/examples/text_snippets.py
 ```
 
-More ready-to-run scripts are in [examples](examples).
+More ready-to-run scripts are in [examples](https://github.com/IGalat/tapper/tree/master/examples).
 
 
-### [Guide](docs/guide.md): `Tap`s and `Group`s, conditions, the `send` syntax, helpers and configuration.
+### [Guide](https://github.com/IGalat/tapper/blob/master/docs/guide.md): `Tap`s and `Group`s, conditions, the `send` syntax, helpers and configuration.
 
-[Changelog](CHANGELOG.md). tapper is in beta and versions follow CalVer; expect breaking changes
+[Changelog](https://github.com/IGalat/tapper/blob/master/CHANGELOG.md). tapper is in beta and versions follow CalVer; expect breaking changes
   between releases.
 
 Questions, bugs and requests: [GitHub issues](https://github.com/IGalat/tapper/issues).
 
 ## License
 
-[AGPL-3.0](LICENSE)
+[AGPL-3.0](https://github.com/IGalat/tapper/blob/master/LICENSE)

@@ -1,6 +1,6 @@
 # /// script
 # requires-python = ">=3.12"
-# dependencies = ["tapper==2026.11.1"]
+# dependencies = ["tapper==2026.11.2"]
 # ///
 from functools import partial
 
