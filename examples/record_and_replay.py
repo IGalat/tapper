@@ -1,6 +1,6 @@
 # /// script
 # requires-python = ">=3.12"
-# dependencies = ["tapper"]
+# dependencies = ["tapper==2026.11.1"]
 # ///
 from tapper import log
 from tapper import start

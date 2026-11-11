@@ -1,6 +1,6 @@
 # /// script
 # requires-python = ">=3.12"
-# dependencies = ["tapper"]
+# dependencies = ["tapper==2026.11.1"]
 # ///
 # tapper has no hotstrings (::btw::); bind snippets to keys instead.
 # Shift is fine as a modifier: send works around a held shift, but not a held ctrl or alt.

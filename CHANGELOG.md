@@ -5,6 +5,31 @@ Versions follow [CalVer](https://calver.org) with format YYYY.0M.MICRO.
 Until status changes from "Beta" to "Stable", don't expect backwards compatibility.
 
 
+## 2026.11.1 - `tapper` demo, command, new docs
+
+### Major changes:
+
+`start(...)` accepts hotkeys and groups, same as `root.add(...)`.
+
+### Minor changes:
+
+`tapper` command, also available as `python -m tapper`.
+`tapper my_script.py` runs your script; without arguments it runs a demo with a few hotkeys to try.
+
+README rewritten. New [guide](docs/guide.md), [AutoHotkey comparison](docs/ahk-comparison.md)
+and ready-to-run [examples](examples).
+
+### Fixes:
+
+`repeat.while_pressed` sometimes stopped immediately.
+
+Aliases such as `ctrl` or `lmb`:
+- `repeat.while_pressed` with an alias didn't see a suppressed key as held.
+- Pressing or releasing an alias from an action wasn't recognised as emulated.
+
+Linux: every emulated key press was written to a list that kept growing.
+
+
 ## 2026.10.1 - Sleep, logging, py3.12
 
 ### Breaking changes:

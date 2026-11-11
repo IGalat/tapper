@@ -64,7 +64,7 @@ See how it compares in [tapper vs AutoHotkey vs AutoKey](docs/ahk-comparison.md)
 ```python
 # /// script
 # requires-python = ">=3.12"
-# dependencies = ["tapper[all]"]
+# dependencies = ["tapper[all]==2026.11.1"]
 # ///
 from tapper import start
 
