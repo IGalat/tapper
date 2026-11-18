@@ -46,7 +46,8 @@ def find(
         0.95 is a difference visible to the eye, and random images can sometimes match up to 0.8.
         To calibrate, use get_find_raw function.
 
-    :return: Coordinates X and Y of top-left of the found image relative to the bounding box (if any).
+    :return: Coordinates X and Y of the center of the found image, in screen coordinates
+        (the bounding box's position is added back), or in `outer`'s coordinates if `outer` is given.
         If image not found, None is returned.
     """
     return _find_util.api_find(target, bbox, outer, precision=precision)
@@ -92,7 +93,8 @@ def wait_for(
     :param interval: Time between searches. Note that search can take significant time as well,
         and actual frequency may be lower than you expect because of this.
     :param precision: see `find` param.
-    :return: Coordinates X and Y of top-left of the found image relative to the bounding box (if any).
+    :return: Coordinates X and Y of the center of the found image, in screen coordinates
+        (the bounding box's position is added back).
     """
     return _find_util.wait_for(target, bbox, timeout, interval, precision)
 

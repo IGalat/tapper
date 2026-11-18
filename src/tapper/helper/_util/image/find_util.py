@@ -70,7 +70,8 @@ def find_one_of(
     for target, bbox, original in targets_normalized:
         outer_cut = base.outer_to_image(outer, bbox)
         if (xy := find(target, outer_cut, precision)) is not None:
-            return original, xy
+            x_start, y_start = base.get_start_coords(outer_or_path_maybe, bbox)
+            return original, (x_start + xy[0], y_start + xy[1])
     return None, None
 
 
@@ -98,7 +99,8 @@ def wait_for(
     while time.perf_counter() < finish_time:
         outer = base.outer_to_image(None, bbox)
         if found := find(target_image, outer, precision):
-            return found
+            x_start, y_start = base.get_start_coords(None, bbox)
+            return x_start + found[0], y_start + found[1]
         tapper.sleep(interval)
     return None
 

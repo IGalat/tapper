@@ -385,7 +385,7 @@ The file is named like `snip-(BBOX_953_531_997_686).png`, with the region's scre
 Searching for that file looks at exactly that region. `img.snip(prefix="ok_button",
 bbox_to_name=False)` saves `ok_button.png` instead, which is searched for on the whole screen.
 
-**Find** an image. `find` returns the top-left corner of the match, or `None`:
+**Find** an image. `find` returns the center of the match, or `None`:
 
 ```python
 if xy := img.find("snip-(BBOX_953_531_997_686).png"):
@@ -394,8 +394,8 @@ img.find("my_pic.png", bbox=(953, 531, 997, 686))  # search in this region
 img.find("my_pic.png", precision=0.8)  # allow more difference; default is strict
 ```
 
-Coordinates are relative to the region you searched, so with no region they're screen
-coordinates. Use `img.get_find_raw` to see how well an image matches when tuning `precision`.
+Coordinates are screen coordinates, whether or not you searched a region, so the result
+can go straight to `mouse.move`. Use `img.get_find_raw` to see how well an image matches when tuning `precision`.
 
 **Wait** for an image, or for one of several:
 

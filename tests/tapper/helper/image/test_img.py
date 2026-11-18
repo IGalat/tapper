@@ -176,6 +176,12 @@ class TestFindOneOf:
         assert numpy.array_equal(result, btn_yellow)
         assert xy == pytest.approx(btn_yellow_xy, abs=10)
 
+    def test_bbox_position_added_like_find(self) -> None:
+        white_px = img_test_util.from_matrix([[white]])
+        bbox = (2, 2, 3, 5)
+        _, xy = img.find_one_of([(white_px, bbox)], outer=absolutes)
+        assert xy == img.find(white_px, bbox, absolutes)
+
 
 @pytest.fixture
 def save_png(tmp_path: Path) -> Callable[[str, list[list[tuple[int, int, int]]]], str]:
@@ -223,6 +229,12 @@ class TestWaitFor:
         mock_get_sct.return_value = img_test_util.absolutes()
         xy = img.wait_for(img_test_util.btn_yellow(), timeout=0.001, interval=0.001)
         assert xy is None
+
+    def test_bbox_position_added_like_find(self, mock_get_sct: Any) -> None:
+        white_px = img_test_util.from_matrix([[white]])
+        mock_get_sct.return_value = white_px
+        xy = img.wait_for(white_px, bbox=(2, 2, 3, 5))
+        assert xy == (2, 2)
 
 
 class TestWaitForOneOf:
